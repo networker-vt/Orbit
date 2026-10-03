@@ -7,7 +7,7 @@ import {
   scoreJobMatch,
   type MatchScore,
 } from './match'
-import { hasOccupationIntent, listingMatchesOccupationIntent } from './occupationMatch'
+import { hasOccupationIntent, intentForMatch, listingVisibleForChoice } from './occupationMatch'
 import { getPrefs, type OrbitPrefs } from './prefs'
 import type { TravelOffer } from './travel'
 
@@ -40,12 +40,15 @@ export function rankPersonalizedMatch(input: {
   userId?: string
   locale?: 'de' | 'en'
   skipIds?: Set<string>
+  /** Same 18+ confirmation as Menschen treffen. Alcohol stays out while this is false. */
+  adult?: boolean
 }): PersonalizedItem[] {
   void input.profiles
   const prefs = input.prefs ?? getPrefs()
   const locale = input.locale ?? 'de'
   const de = locale === 'de'
-  const intent = prefs.side === 'employer' ? prefs.employer : prefs.seeker
+  const intent = intentForMatch(prefs)
+  const adult = input.adult === true
   if (!hasOccupationIntent(intent)) return []
   const queries = recentAssistQueries()
   const sectors = inferredSectors()
@@ -55,7 +58,7 @@ export function rankPersonalizedMatch(input: {
 
   for (const listing of input.listings) {
     if (listing.status !== 'active' || skip.has(listing.id)) continue
-    if (!listingMatchesOccupationIntent(listing, intent)) continue
+    if (!listingVisibleForChoice(listing, intent, adult)) continue
     const lane = deriveMarketType(listing)
     const isJob = lane === 'job' || lane === 'minijob'
     const score = isJob ? scoreJobMatch(listing, prefs) : scoreB2bMatch(listing, prefs, company)
@@ -97,7 +100,7 @@ export function rankPersonalizedMatch(input: {
       if (picked.length >= 24) break
     }
   }
-  return picked
+  return picked.filter((item) => item.kind === 'job' || item.kind === 'service')
 }
 
 export function personalizedKinds(items: PersonalizedItem[]): PersonalizedKind[] {

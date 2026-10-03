@@ -1,4 +1,5 @@
-import type { Industry, JobType, WorkMode } from '../data/industries'
+import { JOB_TYPES, type Industry, type JobType, type WorkMode } from '../data/industries'
+import { sanitizeLifeExamples, type LifeExample } from './lifeHome'
 import { deriveMarketType, isSeekerFeedListing } from './market'
 import type { Listing, MarketType, Profile } from '../types'
 
@@ -24,7 +25,13 @@ export interface SeekerPrefs {
   occupations: string[]
   occupationTerms: string[]
   occupationOther: string
+  /** Everyday examples. Empty until the person turns one on. Never derived from industries. */
+  lifeExamples: LifeExample[]
+  /** Free sentence: any need or offer, including Fitness, Auto, Arbeit. */
+  lifeSentence: string
   jobTypes: JobType[]
+  /** False until the person toggles an employment type. The old full default does not count. */
+  jobTypesChosen: boolean
   workModes: WorkMode[]
   salaryMin: number
   radiusKm: number
@@ -65,7 +72,10 @@ export function defaultPrefs(): OrbitPrefs {
       occupations: [],
       occupationTerms: [],
       occupationOther: '',
-      jobTypes: ['Vollzeit', 'Teilzeit', 'Minijob', 'Freelance'],
+      lifeExamples: [],
+      lifeSentence: '',
+      jobTypes: [],
+      jobTypesChosen: false,
       workModes: ['remote', 'hybrid', 'onsite'],
       salaryMin: 0,
       radiusKm: 50,
@@ -88,23 +98,55 @@ export function defaultPrefs(): OrbitPrefs {
   }
 }
 
+const LEGACY_PRESELECTED_JOB_TYPES: readonly JobType[] = ['Vollzeit', 'Teilzeit', 'Minijob', 'Freelance']
+
+function sameJobSet(a: readonly string[], b: readonly string[]) {
+  if (a.length !== b.length) return false
+  const set = new Set(a)
+  return b.every((item) => set.has(item))
+}
+
+export function seekerFromStored(raw: Partial<SeekerPrefs> | undefined): SeekerPrefs {
+  const base = defaultPrefs().seeker
+  const storedTypes = Array.isArray(raw?.jobTypes)
+    ? raw.jobTypes.filter((item): item is JobType => (JOB_TYPES as readonly string[]).includes(item))
+    : []
+  const chosen =
+    raw?.jobTypesChosen === true ||
+    (storedTypes.length > 0 && !sameJobSet(storedTypes, LEGACY_PRESELECTED_JOB_TYPES))
+  return {
+    ...base,
+    ...raw,
+    industries: Array.isArray(raw?.industries) ? raw.industries : [],
+    occupations: Array.isArray(raw?.occupations) ? raw.occupations : [],
+    occupationTerms: Array.isArray(raw?.occupationTerms) ? raw.occupationTerms : [],
+    occupationOther: typeof raw?.occupationOther === 'string' ? raw.occupationOther : '',
+    lifeExamples: sanitizeLifeExamples(raw?.lifeExamples),
+    lifeSentence: typeof raw?.lifeSentence === 'string' ? raw.lifeSentence : '',
+    cities: Array.isArray(raw?.cities) ? raw.cities : base.cities,
+    jobTypes: chosen ? storedTypes : [],
+    jobTypesChosen: chosen,
+  }
+}
+
+export function prefsFromStored(raw: string | null): OrbitPrefs {
+  if (!raw) return defaultPrefs()
+  const parsed = JSON.parse(raw) as OrbitPrefs
+  const base = defaultPrefs()
+  const side: PrefsSide =
+    parsed.side === 'both' || parsed.side === 'employer' || parsed.side === 'seeker' ? parsed.side : base.side
+  return {
+    ...base,
+    ...parsed,
+    side,
+    seeker: seekerFromStored(parsed.seeker),
+    employer: { ...base.employer, ...parsed.employer },
+  }
+}
+
 function load(): OrbitPrefs {
   try {
-    const raw = localStorage.getItem(KEY)
-    if (!raw) return defaultPrefs()
-    const parsed = JSON.parse(raw) as OrbitPrefs
-    const base = defaultPrefs()
-    const side: PrefsSide =
-      parsed.side === 'both' || parsed.side === 'employer' || parsed.side === 'seeker'
-        ? parsed.side
-        : base.side
-    return {
-      ...base,
-      ...parsed,
-      side,
-      seeker: { ...base.seeker, ...parsed.seeker },
-      employer: { ...base.employer, ...parsed.employer },
-    }
+    return prefsFromStored(localStorage.getItem(KEY))
   } catch {
     return defaultPrefs()
   }

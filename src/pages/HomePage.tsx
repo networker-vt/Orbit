@@ -4,12 +4,10 @@ import { Mic, Send } from 'lucide-react'
 import { HOME_PRIMARY_COUNT, splitAdaptiveHome } from '../lib/hubTiles'
 import { getWidgetTaps, subscribeWidgetTaps } from '../lib/widgetUsage'
 import { TripOptionCards } from '../components/assist/TripOptionCards'
-import { FuerDichCard } from '../components/home/FuerDichCard'
 import { OrbitRobot } from '../components/home/OrbitRobot'
 import { Tageskarte } from '../components/home/Tageskarte'
 import { Button } from '../components/ui/Button'
-import { Empty } from '../components/ui/Empty'
-import { useListings, useStoreVersion } from '../hooks/useStore'
+import { useStoreVersion } from '../hooks/useStore'
 import { useAuth } from '../lib/auth'
 import {
   buildAssistPlan,
@@ -18,10 +16,11 @@ import {
   type AssistPlan,
 } from '../lib/assist'
 import { getCompany, subscribeCompany } from '../lib/company'
-import { isCompanySide, getPrefs, savePrefs, subscribePrefs, type PrefsSide } from '../lib/prefs'
+import { isCompanySide, getPrefs, savePrefs, subscribePrefs } from '../lib/prefs'
+import { LIFE_EXAMPLES, alcoholChoiceBlocked, type LifeExample } from '../lib/lifeHome'
+import { hasConfirmedAdult } from '../lib/ageGate'
 import { subscribeBehavior } from '../lib/behavior'
 import { subscribeChannels } from '../lib/channels'
-import { rankFuerDich } from '../lib/fuerDich'
 import { NewsStrip } from '../components/home/NewsStrip'
 import { consumeAssistTurn } from '../lib/credits'
 import { isDemo, isFlagOn } from '../lib/flags'
@@ -32,17 +31,14 @@ import { useI18n } from '../lib/i18n'
 import { claimOrbiSessionBubble, orbiTipsAllowed } from '../lib/orbiMotion'
 import { canListen, listenOnce } from '../lib/speech'
 import { matchSpokenTripChoice } from '../lib/trip'
-import { pickTageskarte, tageskarteCopy } from '../lib/tageskarte'
+import { pickTageskarte } from '../lib/tageskarte'
 import { cn } from '../lib/utils'
 import {
   isKidsMode,
   kidsHideTravel,
   kidsHideWallet,
-  kidsMaySeeJobs,
   subscribeKids,
 } from '../lib/kids'
-
-type WarmChip = 'seek' | 'offer' | 'resume'
 
 export function HomePage() {
   useStoreVersion()
@@ -58,8 +54,6 @@ export function HomePage() {
   const [ask, setAsk] = useState('')
   const [busy, setBusy] = useState(false)
   const [listening, setListening] = useState(false)
-  const [warm, setWarm] = useState<WarmChip>('seek')
-  const [pendingSide, setPendingSide] = useState<PrefsSide | null>(null)
   const [resume, setResume] = useState(getResume)
   const [reminders, setReminders] = useState(dueReminders)
   const [assistNote, setAssistNote] = useState<string | null>(null)
@@ -70,9 +64,7 @@ export function HomePage() {
   const [tripVoicePick, setTripVoicePick] = useState<1 | 2 | 3 | null>(null)
   const [widgetTaps, setWidgetTaps] = useState(getWidgetTaps)
   const companyView = isCompanySide(prefs.side) && prefs.side !== 'both'
-  const { listings: raw } = useListings({})
   const daily = useMemo(() => pickTageskarte(new Date(), { kids }), [kids])
-  const dailyCopy = tageskarteCopy(daily.item, resolved)
   const hideWallet = kidsHideWallet()
 
   useEffect(() => {
@@ -114,12 +106,6 @@ export function HomePage() {
     }
   }, [])
 
-  const fuerDich = useMemo(() => {
-    const ranked = rankFuerDich(raw, prefs, resolved, 8).filter((item) => item.lane !== 'news')
-    if (!kids) return ranked
-    if (!kidsMaySeeJobs()) return []
-    return ranked.filter((item) => item.action !== 'look' && item.action !== 'book')
-  }, [raw, prefs, behaviorTick, resolved, kids])
   const newsItems = useMemo(() => rankHomeNews(prefs, resolved, 3), [prefs, behaviorTick, resolved])
   const widgets = useMemo(
     () => splitAdaptiveHome({ kids, hideTravel: kidsHideTravel(), hideWallet }, widgetTaps, t),
@@ -128,31 +114,13 @@ export function HomePage() {
 
   const first = companyView && company.firmName ? company.firmName : user?.name.split(' ')[0]
   const greeting = first ? `${t('home.hello')}, ${first}.` : `${t('home.hello')}.`
-  const stems: Record<WarmChip, string> = {
-    seek: t('home.stemSeek'),
-    offer: t('home.stemOffer'),
-    resume: resume ? `${t('home.stemResume')}${resume.title}` : t('home.stemThink'),
-  }
-  const placeholder =
-    warm === 'offer' ? t('home.phOffer') : warm === 'resume' ? t('home.phResume') : companyView ? t('assist.phCompany') : t('home.phSeek')
+  const placeholder = t('home.phSeek')
 
-  const pickWarm = (id: WarmChip) => {
-    setWarm(id)
-    setPendingSide(id === 'seek' ? 'seeker' : id === 'offer' ? 'employer' : null)
-    setAsk((prev) => {
-      const trimmed = prev.trim()
-      const wasStem = (Object.values(stems) as string[]).some(
-        (s) => !trimmed || trimmed === s.trim() || prev === s,
-      )
-      return wasStem ? stems[id] : prev
-    })
-    window.requestAnimationFrame(() => {
-      const el = askRef.current
-      if (!el) return
-      el.focus()
-      const len = el.value.length
-      el.setSelectionRange(len, len)
-    })
+  const toggleExample = (name: LifeExample) => {
+    const current = getPrefs()
+    const selected = current.seeker.lifeExamples
+    const lifeExamples = selected.includes(name) ? selected.filter((item) => item !== name) : [...selected, name]
+    savePrefs({ seeker: { ...current.seeker, lifeExamples } })
   }
 
   const fillPrompt = (prompt: string) => {
@@ -167,8 +135,19 @@ export function HomePage() {
   }
 
   const submitAsk = async (text: string) => {
-    const q = text.trim() || dailyCopy.prompt
-    if (!q || busy) return
+    const q = text.trim()
+    if (busy) return
+    if (!q) {
+      if (getPrefs().seeker.lifeExamples.length > 0) navigate('/match')
+      return
+    }
+    const current = getPrefs()
+    const seeker = { ...current.seeker, lifeSentence: q }
+    savePrefs({ seeker })
+    if (alcoholChoiceBlocked(seeker, hasConfirmedAdult())) {
+      navigate('/match')
+      return
+    }
     const spokenPick = plan?.tripOptions?.length ? matchSpokenTripChoice(q) : null
     if (spokenPick) {
       if (kidsHideTravel()) {
@@ -208,7 +187,6 @@ export function HomePage() {
       if (next) {
         setPlan(next)
         setOrbiReaction('success')
-        if (pendingSide) savePrefs({ side: pendingSide })
       } else {
         setOrbiReaction('error')
       }
@@ -232,12 +210,6 @@ export function HomePage() {
     setRobotTapped(true)
     window.setTimeout(() => setRobotTapped(false), 700)
   }
-
-  const chips: { id: WarmChip; title: string }[] = [
-    { id: 'seek', title: t('home.tileSeek') },
-    { id: 'offer', title: t('home.tileOffer') },
-    { id: 'resume', title: t('home.tileResume') },
-  ]
 
   return (
     <div className="mx-auto max-w-lg space-y-5 pb-scroll-chrome pt-6 md:pt-10">
@@ -291,21 +263,33 @@ export function HomePage() {
           </p>
         )}
 
-        <nav aria-label={t('home.chipsAria')} className="flex flex-wrap gap-2">
-          {chips
-            .filter((chip) => !(kids && chip.id === 'offer'))
-            .map((chip) => (
-            <Button
-              key={chip.id}
-              type="button"
-              size="sm"
-              variant={warm === chip.id ? 'tonal' : 'secondary'}
-              onClick={() => pickWarm(chip.id)}
-            >
-              {chip.title}
-            </Button>
-          ))}
-        </nav>
+        <div
+          role="group"
+          aria-label={t('home.examplesAria')}
+          data-life-examples="1"
+          className="flex flex-wrap gap-2"
+        >
+          {LIFE_EXAMPLES.map((name) => {
+            const on = prefs.seeker.lifeExamples.includes(name)
+            return (
+              <button
+                key={name}
+                type="button"
+                aria-pressed={on}
+                data-life-example={name}
+                onClick={() => toggleExample(name)}
+                className={cn(
+                  'min-h-10 rounded-full border px-3 py-1.5 text-sm',
+                  on
+                    ? 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/15 text-ink'
+                    : 'border-border bg-transparent text-muted',
+                )}
+              >
+                {name}
+              </button>
+            )
+          })}
+        </div>
 
         <form
           className="space-y-2"
@@ -321,6 +305,7 @@ export function HomePage() {
               value={ask}
               onChange={(e) => setAsk(e.target.value)}
               rows={2}
+              data-home-search="1"
               placeholder={placeholder}
               className="w-full resize-none rounded-2xl border border-border bg-surface-2 px-3 py-3 text-base text-ink placeholder:text-muted outline-none focus:border-[var(--theme-accent)]/50"
             />
@@ -397,21 +382,6 @@ export function HomePage() {
             {t('home.tileResume')}: {resume.title}
           </Link>
         )}
-
-        {fuerDich.length === 0 ? (
-          <Empty emoji="✨" title={t('home.dealsEmpty')} hint={t('home.dealsEmptyHint')} className="py-6" />
-        ) : (
-          <div className="-mx-1 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
-            <ul className="flex snap-x snap-mandatory gap-2">
-              {fuerDich.map((item) => (
-                <li key={item.id}>
-                  <FuerDichCard item={item} />
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
       </section>
     </div>
   )

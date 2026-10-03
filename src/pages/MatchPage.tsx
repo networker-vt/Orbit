@@ -6,7 +6,6 @@ import { chatHref } from '../lib/chatPath'
 import type { TravelOffer } from '../lib/travel'
 import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
-import { Empty } from '../components/ui/Empty'
 import { LaneBadge } from '../components/credits/LaneBadge'
 import { SpeakButton } from '../components/a11y/SpeakButton'
 import { useStoreVersion } from '../hooks/useStore'
@@ -21,9 +20,10 @@ import { listingSpeech } from '../lib/tts'
 import { cn, formatPrice } from '../lib/utils'
 import { getCompany, subscribeCompany } from '../lib/company'
 import { deriveMarketType, isSeekerFeedListing } from '../lib/market'
-import { hasOccupationIntent, listingMatchesOccupationIntent, profileMatchesOccupationIntent } from '../lib/occupationMatch'
+import { hasOccupationIntent, intentForMatch, listingVisibleForChoice, profileMatchesOccupationIntent } from '../lib/occupationMatch'
+import { alcoholChoiceBlocked, publicMatchLine } from '../lib/lifeHome'
+import { hasConfirmedAdult } from '../lib/ageGate'
 import {
-  completePrefs,
   filterCandidatesByEmployerPrefs,
   getPrefs,
   subscribePrefs,
@@ -114,7 +114,10 @@ export function MatchPage() {
       ? true
       : prefs.side === 'seeker' || (prefs.side === 'both' && deckMode === 'seeker')
 
+  const adult = hasConfirmedAdult()
+  const intent = intentForMatch(prefs)
   const deck = useMemo((): DeckCard[] => {
+    if (!hasOccupationIntent(intent)) return []
     if (personalized) {
       const skip = new Set<string>([
         ...swipedIds(['job', 'company', 'candidate']),
@@ -131,6 +134,7 @@ export function MatchPage() {
         userId: user?.id,
         locale: resolved,
         skipIds: skip,
+        adult,
       })
       return items
         .filter((item) => !(kids && (item.kind === 'travel' || item.kind === 'person')))
@@ -147,8 +151,7 @@ export function MatchPage() {
           if (!kidsMaySeeJobs()) return false
           return listingIsSafeForKids(l)
         })
-      if (!hasOccupationIntent(prefs.seeker)) return []
-      const matched = pool.filter((l) => listingMatchesOccupationIntent(l, prefs.seeker))
+      const matched = pool.filter((l) => listingVisibleForChoice(l, intent, adult))
       const ranked = rankForWorld(matched, prefs)
       return ranked.map((l) => {
         const lane = deriveMarketType(l)
@@ -160,7 +163,6 @@ export function MatchPage() {
     }
     const donePeople = swipedIds('candidate')
     const doneListings = swipedIds(['company', 'job'])
-    if (!hasOccupationIntent(prefs.employer)) return []
     const candidates = filterCandidatesByEmployerPrefs(
       store.listProfiles().filter((p) => p.role === 'freelancer' || p.role === 'courier'),
       prefs,
@@ -171,7 +173,7 @@ export function MatchPage() {
       store
         .listListings({})
         .filter((l) => l.ownerId !== user?.id && l.status === 'active' && !doneListings.has(l.id))
-        .filter((l) => listingMatchesOccupationIntent(l, prefs.employer)),
+        .filter((l) => listingVisibleForChoice(l, intent, adult)),
       prefs,
     )
     const peopleCards: DeckCard[] = candidates.map((p) => ({
@@ -185,7 +187,9 @@ export function MatchPage() {
       score: scoreB2bMatch(l, prefs, company),
     }))
     return [...listingCards, ...peopleCards].sort((a, b) => b.score.percent - a.score.percent)
-  }, [prefs, company, useSeekerDeck, toast, user?.id, kids, personalized, resolved])
+  }, [prefs, company, useSeekerDeck, toast, user?.id, kids, personalized, resolved, adult, intent])
+
+  const alcoholClosed = alcoholChoiceBlocked(intent, adult)
 
   const current = deck[0]
 
@@ -299,33 +303,25 @@ export function MatchPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current])
 
-  if (!prefs.completed) {
+  if (alcoholClosed) {
     return (
-      <div className="mx-auto max-w-md space-y-3 pb-scroll-chrome pt-8">
-        <Empty
-          emoji="🛰️"
-          title={t('match.needPrefs')}
-          hint={t('match.needPrefsHint')}
-          actionLabel={t('match.openPrefs')}
-          onAction={() => navigate('/prefs')}
-        />
-        <div className="flex flex-wrap justify-center gap-3 text-sm">
-          <button
-            type="button"
-            className="text-neutral-300 hover:text-ink hover:underline"
-            onClick={() => completePrefs(prefs.side)}
-          >
-            {t('match.anyway')}
-          </button>
-          <button
-            type="button"
-            className="text-muted hover:text-ink hover:underline"
-            onClick={() => navigate('/')}
-          >
-            {t('match.askOrbit')}
-          </button>
-        </div>
-      </div>
+      <QuietMatch
+        marker="alcohol"
+        sentence={t('match.alcoholClosed')}
+        action={t('match.alcoholAction')}
+        onAction={() => navigate('/auth')}
+      />
+    )
+  }
+
+  if (!hasOccupationIntent(intent) || !current) {
+    return (
+      <QuietMatch
+        marker={hasOccupationIntent(intent) ? 'none' : 'choice'}
+        sentence={hasOccupationIntent(intent) ? t('match.quietNone') : t('match.quietEmpty')}
+        action={t('match.quietAction')}
+        onAction={() => navigate('/')}
+      />
     )
   }
 
@@ -380,25 +376,7 @@ export function MatchPage() {
         </div>
       )}
 
-      {!current ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3">
-          <Empty
-            emoji="🛰️"
-            title={t('match.empty')}
-            hint={t('match.emptyHintHome')}
-            actionLabel={t('match.tweakPrefs')}
-            onAction={() => navigate('/prefs')}
-            className="w-full"
-          />
-          <button
-            type="button"
-            className="text-sm text-[var(--theme-accent)] hover:underline"
-            onClick={() => navigate('/')}
-          >
-            {t('match.askOrbit')} →
-          </button>
-        </div>
-      ) : current.kind === 'candidate' ? (
+      {current.kind === 'candidate' ? (
         <CandidateCard
           profile={current.profile}
           score={current.score}
@@ -524,8 +502,13 @@ function ScoreRing({ score }: { score: MatchScore }) {
   )
 }
 
-function Breakdown({ score, open }: { score: MatchScore; open: boolean }) {
+function Breakdown({ score, open, hidden = [] }: { score: MatchScore; open: boolean; hidden?: string[] }) {
   if (!open) return null
+  const skip = new Set(hidden.map((item) => item.trim().toLowerCase()).filter(Boolean))
+  const reasons = score.reasons.filter((reason) => {
+    if (/^(Stadt|Ort):/i.test(reason)) return false
+    return !skip.has(reason.trim().toLowerCase())
+  })
   const rows = score.labels
   return (
     <div className="mt-3 space-y-1 rounded-xl border border-border/80 bg-black/30 p-3 text-xs">
@@ -536,10 +519,34 @@ function Breakdown({ score, open }: { score: MatchScore; open: boolean }) {
         </div>
       ))}
       <ul className="mt-2 list-disc space-y-0.5 pl-4 text-neutral-300">
-        {score.reasons.map((r) => (
+        {reasons.map((r) => (
           <li key={r}>{r}</li>
         ))}
       </ul>
+    </div>
+  )
+}
+
+function QuietMatch({
+  sentence,
+  action,
+  onAction,
+  marker,
+}: {
+  sentence: string
+  action: string
+  onAction: () => void
+  marker: string
+}) {
+  return (
+    <div
+      className="mx-auto flex min-h-[50dvh] max-w-md flex-col items-center justify-center gap-4 px-4 pb-scroll-chrome text-center"
+      data-match-empty={marker}
+    >
+      <p className="max-w-sm text-sm leading-relaxed text-muted">{sentence}</p>
+      <Button type="button" onClick={onAction}>
+        {action}
+      </Button>
     </div>
   )
 }
@@ -572,10 +579,9 @@ function JobCard({
             {L.source && <Badge tone="violet">{L.source}</Badge>}
           </div>
           <h2 className="text-xl font-bold leading-snug text-ink">{listing.title}</h2>
-          <p className="mt-1 text-sm text-muted">
-            {listing.city}
-            {listing.ownerName ? ` · ${listing.ownerName}` : ''}
-          </p>
+          {publicMatchLine(listing.ownerName) && (
+            <p className="mt-1 text-sm text-muted">{publicMatchLine(listing.ownerName)}</p>
+          )}
         </div>
         <ScoreRing score={score} />
       </div>
@@ -607,7 +613,6 @@ function JobCard({
           compact
           text={listingSpeech({
             title: listing.title,
-            city: listing.city,
             ownerName: listing.ownerName,
             description: listing.description,
             rate:
@@ -618,7 +623,7 @@ function JobCard({
           })}
         />
       </div>
-      <Breakdown score={score} open={explain} />
+      <Breakdown score={score} open={explain} hidden={[listing.city, listing.venue ?? '']} />
       <div className="pointer-events-none absolute -right-8 -top-8 text-7xl opacity-20">
         {listing.imageEmoji || '💼'}
       </div>
@@ -645,7 +650,7 @@ function CandidateCard({
           <Badge tone="teal">{profile.role}</Badge>
           <h2 className="mt-2 text-xl font-bold text-ink">{profile.name}</h2>
           <p className="text-sm text-muted">
-            {profile.city} · ★ {profile.rating.toFixed(1)} ({profile.reviewCount})
+            ★ {profile.rating.toFixed(1)} ({profile.reviewCount})
           </p>
         </div>
         <ScoreRing score={score} />
@@ -665,7 +670,7 @@ function CandidateCard({
       >
         {explain ? t('match.hideScore') : t('match.explain')}
       </button>
-      <Breakdown score={score} open={explain} />
+      <Breakdown score={score} open={explain} hidden={[profile.city]} />
     </article>
   )
 }
