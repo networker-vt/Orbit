@@ -20,6 +20,10 @@ export interface SeekerPrefs {
   countries: string[]
   languages: string[]
   industries: Industry[]
+  /** Occupation catalog ids. Empty means no job preference yet. */
+  occupations: string[]
+  occupationTerms: string[]
+  occupationOther: string
   jobTypes: JobType[]
   workModes: WorkMode[]
   salaryMin: number
@@ -35,6 +39,9 @@ export interface EmployerPrefs {
   companySize: string
   mustHaveSkills: string[]
   industries: Industry[]
+  occupations: string[]
+  occupationTerms: string[]
+  occupationOther: string
   /** B2B match radius (km) for on-site partners / assets. */
   radiusKm: number
 }
@@ -55,6 +62,9 @@ export function defaultPrefs(): OrbitPrefs {
       countries: ['Deutschland', 'Remote / Global'],
       languages: ['Deutsch', 'Englisch'],
       industries: [],
+      occupations: [],
+      occupationTerms: [],
+      occupationOther: '',
       jobTypes: ['Vollzeit', 'Teilzeit', 'Minijob', 'Freelance'],
       workModes: ['remote', 'hybrid', 'onsite'],
       salaryMin: 0,
@@ -69,6 +79,9 @@ export function defaultPrefs(): OrbitPrefs {
       companySize: '11–50',
       mustHaveSkills: [],
       industries: [],
+      occupations: [],
+      occupationTerms: [],
+      occupationOther: '',
       radiusKm: 80,
     },
     updatedAt: new Date().toISOString(),

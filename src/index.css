@@ -443,16 +443,34 @@ textarea:focus-visible,
   .stagger-in > *:nth-child(7) { animation-delay: 0.2s; }
   .stagger-in > *:nth-child(8) { animation-delay: 0.23s; }
 
-  /* Orbi Kind — idle bob only. Other poses are still frames. Tap eases 0.98 back to 1. */
+  /* Orbi Kind — transform and opacity only. No pupil overlay. */
   .orbi-kind-img {
     transform-origin: 50% 100%;
   }
   .orbi-slot[data-orbi-motion="idle"] .orbi-kind-img {
     animation: orbi-breathe 2.1s ease-in-out infinite;
   }
+  .orbi-slot[data-orbi-motion="tanzen"] .orbi-kind-img {
+    animation: orbi-dance 0.7s ease-in-out infinite;
+  }
+  .orbi-slot[data-orbi-reaction="error"] .orbi-kind-img {
+    animation: orbi-error 0.45s ease-in-out 2;
+  }
+  .orbi-slot[data-orbi-paused="1"] .orbi-kind-img {
+    animation-play-state: paused;
+  }
   @keyframes orbi-breathe {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
+    0%, 100% { transform: translateY(0); opacity: 1; }
+    50% { transform: translateY(-6px); opacity: 0.92; }
+  }
+  @keyframes orbi-dance {
+    0%, 100% { transform: rotate(-2deg) scale(1); opacity: 1; }
+    50% { transform: rotate(2deg) scale(1.03); opacity: 0.94; }
+  }
+  @keyframes orbi-error {
+    0%, 100% { transform: translateX(0); opacity: 1; }
+    25% { transform: translateX(-3px); opacity: 0.72; }
+    75% { transform: translateX(3px); opacity: 0.72; }
   }
   .orbi-tap {
     transition: transform 0.14s ease;

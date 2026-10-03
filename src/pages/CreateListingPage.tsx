@@ -5,14 +5,14 @@ import { Input, Select, Textarea } from '../components/ui/Input'
 import { MarketRateHint } from '../components/listings/MarketRateHint'
 import {
   CITIES,
-  CRAFTS,
   EXPENSES_OPTIONS,
   MARKET_RATE,
   OVERNIGHT_OPTIONS,
   TRAVEL_OPTIONS,
   VERTICAL_META,
 } from '../data/constants'
-import { filledIndustries } from '../lib/categories'
+import { INDUSTRIES } from '../data/industries'
+import { OccupationField } from '../components/prefs/OccupationField'
 import { DEMO_USER_ID, seedProfiles } from '../data/seed'
 import { useAuth } from '../lib/auth'
 import { getCompany } from '../lib/company'
@@ -270,7 +270,7 @@ function SimpleCreateListing() {
             </Select>
             <Select label={t('create.industry')} value={industry} onChange={(e) => setIndustry(e.target.value)}>
               <option value="">{t('create.industryAny')}</option>
-              {filledIndustries().map((ind) => (
+              {INDUSTRIES.map((ind) => (
                 <option key={ind} value={ind}>
                   {ind}
                 </option>
@@ -314,7 +314,8 @@ function FullCreateListing() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [city, setCity] = useState(profile?.city ?? 'Berlin')
-  const [craft, setCraft] = useState<string>(CRAFTS[0])
+  const [craft, setCraft] = useState('')
+  const [occupationIds, setOccupationIds] = useState<string[]>([])
   const [priceFrom, setPriceFrom] = useState('')
   const [priceUnit, setPriceUnit] = useState('Tag')
   const [dateFrom, setDateFrom] = useState('')
@@ -452,8 +453,8 @@ function FullCreateListing() {
           placeholder={
             isJob
               ? kind === 'offer'
-                ? 'z.B. Job: Licht-Ops Berlin — 480 €/Tag'
-                : 'z.B. Verfügbar: Rigger NRW ab 350 €/Tag'
+                ? 'z.B. Pflegefachkraft Köln oder React Remote'
+                : 'z.B. Verfügbar: Buchhaltung remote'
               : `z.B. ${meta.label} …`
           }
         />
@@ -472,13 +473,15 @@ function FullCreateListing() {
               </option>
             ))}
           </Select>
-          <Select label="Gewerk / Rolle" value={craft} onChange={(e) => setCraft(e.target.value)}>
-            {CRAFTS.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </Select>
+          <OccupationField
+            mode="single"
+            selectedIds={occupationIds}
+            other={occupationIds.length ? '' : craft}
+            onChange={(next) => {
+              setOccupationIds(next.occupations)
+              setCraft(next.labels[0] || next.occupationOther)
+            }}
+          />
         </div>
 
         {vertical === 'transporter' && (

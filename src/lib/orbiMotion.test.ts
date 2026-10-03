@@ -1,13 +1,17 @@
 import { describe, expect, it } from 'vitest'
 import { tStatic } from './i18n'
 import {
-  ORBI_IDLE_MS,
+  ORBI_DANCE_MAX_MS,
+  ORBI_DANCE_MIN_MS,
   ORBI_STAGES,
+  claimOrbiSessionBubble,
   cueOrbiNavRun,
   isOrbiMotion,
   isOrbiStage,
+  nextOrbiDanceDelay,
   orbiAriaLabel,
   orbiNavRunRemaining,
+  orbiTipsAllowed,
   poseAfterIdle,
   poseForBusy,
   poseForNav,
@@ -17,8 +21,11 @@ import {
 
 describe('Orbi Kind motions', () => {
   it('locks the provisional defaults', () => {
-    expect(ORBI_IDLE_MS).toBeGreaterThanOrEqual(5000)
-    expect(ORBI_IDLE_MS).toBeLessThanOrEqual(6000)
+    expect(nextOrbiDanceDelay(() => 0)).toBe(ORBI_DANCE_MIN_MS)
+    expect(nextOrbiDanceDelay(() => 0.999999)).toBe(ORBI_DANCE_MAX_MS)
+    expect(nextOrbiDanceDelay(() => 0)).toBeGreaterThanOrEqual(8000)
+    expect(nextOrbiDanceDelay(() => 0)).toBeLessThanOrEqual(16000)
+    expect(nextOrbiDanceDelay(() => 0)).not.toBe(5500)
     expect(poseForTap()).toBe('winken')
     expect(poseAfterIdle()).toBe('tanzen')
     expect(poseForBusy()).toBe('arbeiten')
@@ -58,6 +65,20 @@ describe('Orbi Kind motions', () => {
       expect(label).toContain(tStatic('home.orbiKind', locale))
       expect(label).toContain(tStatic('home.orbiTap', locale))
     }
+  })
+
+  it('shows at most one session bubble and honors a tips-off flag', () => {
+    const bag = new Map<string, string>()
+    const storage = {
+      getItem: (key: string) => bag.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        bag.set(key, value)
+      },
+    }
+    expect(claimOrbiSessionBubble(storage)).toBe(true)
+    expect(claimOrbiSessionBubble(storage)).toBe(false)
+    expect(orbiTipsAllowed(() => null)).toBe(true)
+    expect(orbiTipsAllowed((key) => (key === 'orbit_orbi_tips' ? '0' : null))).toBe(false)
   })
 
   it('names Kind as the shipped stage and keeps Teen and Adult as stubs', () => {

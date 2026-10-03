@@ -4,12 +4,12 @@ import { getCompany } from './company'
 import { deriveMarketType } from './market'
 import {
   scoreB2bMatch,
-  scoreCandidateMatch,
   scoreJobMatch,
   type MatchScore,
 } from './match'
+import { hasOccupationIntent, listingMatchesOccupationIntent } from './occupationMatch'
 import { getPrefs, type OrbitPrefs } from './prefs'
-import { listTravelOffers, type TravelOffer } from './travel'
+import type { TravelOffer } from './travel'
 
 export type PersonalizedKind = 'job' | 'service' | 'travel' | 'person'
 
@@ -29,43 +29,9 @@ function queryHits(text: string, queries: string[]) {
   })
 }
 
-function travelScore(offer: TravelOffer, queries: string[], cities: string[], locale: 'de' | 'en'): MatchScore {
-  const de = locale === 'de'
-  const reasons: string[] = []
-  const text = `${offer.title} ${offer.to} ${offer.from || ''} ${offer.tags.join(' ')}`
-  let skills = 14
-  const hit = queryHits(text, queries)
-  if (hit) {
-    skills = 28
-    reasons.push(de ? `Suche „${hit.slice(0, 32)}“` : `Search “${hit.slice(0, 32)}”`)
-  }
-  let land = 10
-  if (cities.some((c) => offer.to.toLowerCase() === c.toLowerCase() || (offer.from || '').toLowerCase() === c.toLowerCase())) {
-    land = 20
-    reasons.push(de ? `Ort ${offer.to}` : `City ${offer.to}`)
-  }
-  const sprache = 10
-  const gehalt = offer.priceEur <= 80 ? 16 : 10
-  const typ = 12
-  if (!reasons.length) reasons.push(de ? 'Abflug aus Prefs & Verhalten' : 'Travel from prefs & behavior')
-  const percent = Math.max(20, Math.min(99, skills + land + sprache + gehalt + typ))
-  return {
-    percent,
-    breakdown: { skills, land, sprache, gehalt, typ },
-    reasons: reasons.slice(0, 5),
-    labels: [
-      ['Fit', 'skills'],
-      ['Ort', 'land'],
-      ['Sprache', 'sprache'],
-      ['Preis', 'gehalt'],
-      ['Typ', 'typ'],
-    ],
-  }
-}
-
 /**
- * Algorithmic Match deck — jobs, services, travel, people.
- * Ranked from prefs + recent Assist/search/swipe stubs. Not jobs-only.
+ * Match deck from a real occupation preference.
+ * Empty or unknown prefs return nothing. Travel and sample people stay out.
  */
 export function rankPersonalizedMatch(input: {
   listings: Listing[]
@@ -75,20 +41,21 @@ export function rankPersonalizedMatch(input: {
   locale?: 'de' | 'en'
   skipIds?: Set<string>
 }): PersonalizedItem[] {
+  void input.profiles
   const prefs = input.prefs ?? getPrefs()
   const locale = input.locale ?? 'de'
   const de = locale === 'de'
+  const intent = prefs.side === 'employer' ? prefs.employer : prefs.seeker
+  if (!hasOccupationIntent(intent)) return []
   const queries = recentAssistQueries()
   const sectors = inferredSectors()
-  const cities = prefs.seeker.cities || []
   const skip = input.skipIds ?? new Set<string>()
   const company = getCompany()
-  const travelish = queries.some((q) => /flug|hotel|reise|bahn|mietwagen|abflug|flight|train|stay|trip/i.test(q))
-  const peopleish = queries.some((q) => /crew|leute|kandidat|freelancer|hiring|personal|team/i.test(q))
   const scored: Array<PersonalizedItem & { rank: number }> = []
 
   for (const listing of input.listings) {
     if (listing.status !== 'active' || skip.has(listing.id)) continue
+    if (!listingMatchesOccupationIntent(listing, intent)) continue
     const lane = deriveMarketType(listing)
     const isJob = lane === 'job' || lane === 'minijob'
     const score = isJob ? scoreJobMatch(listing, prefs) : scoreB2bMatch(listing, prefs, company)
@@ -109,41 +76,6 @@ export function rankPersonalizedMatch(input: {
       listing,
       score,
       reason,
-      rank,
-    })
-  }
-
-  const offers = listTravelOffers()
-  for (const offer of offers) {
-    if (skip.has(offer.id)) continue
-    const score = travelScore(offer, queries, cities, locale)
-    let rank = score.percent + (travelish ? 16 : 4)
-    const hit = queryHits(`${offer.title} ${offer.to}`, queries)
-    if (hit) rank += 20
-    scored.push({
-      kind: 'travel',
-      id: offer.id,
-      offer,
-      score,
-      reason: score.reasons[0] || (de ? 'Abflug' : 'Travel'),
-      rank,
-    })
-  }
-
-  const people = input.profiles.filter(
-    (p) => (p.role === 'freelancer' || p.role === 'courier' || p.role === 'company') && p.id !== input.userId && !skip.has(p.id),
-  )
-  for (const profile of people) {
-    const score = scoreCandidateMatch(profile, prefs, company)
-    let rank = score.percent + (peopleish || prefs.side === 'employer' ? 12 : 2)
-    const hit = queryHits(`${profile.name} ${profile.bio} ${profile.crafts.join(' ')} ${profile.city}`, queries)
-    if (hit) rank += 18
-    scored.push({
-      kind: 'person',
-      id: profile.id,
-      profile,
-      score,
-      reason: score.reasons[0] || (de ? 'Person / Crew' : 'Person / crew'),
       rank,
     })
   }

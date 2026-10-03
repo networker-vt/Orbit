@@ -4,7 +4,8 @@ import { Heart, Gift, Wallet } from 'lucide-react'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Input, Select, Textarea } from '../components/ui/Input'
-import { CITIES, CRAFTS, ROLE_LABELS } from '../data/constants'
+import { CITIES, ROLE_LABELS } from '../data/constants'
+import { OccupationField } from '../components/prefs/OccupationField'
 import { useAuth } from '../lib/auth'
 import { store, resetStore } from '../lib/store'
 import { giftWalletHref } from '../lib/gift'
@@ -19,7 +20,8 @@ export function ProfilePage() {
   const navigate = useNavigate()
   const [bio, setBio] = useState(profile?.bio ?? '')
   const [city, setCity] = useState(profile?.city ?? 'Berlin')
-  const [craft, setCraft] = useState<string>(profile?.crafts[0] ?? CRAFTS[0])
+  const [craft, setCraft] = useState<string>(profile?.crafts[0] ?? '')
+  const [occupationIds, setOccupationIds] = useState<string[]>([])
   const [travelRadiusKm, setTravelRadiusKm] = useState(
     profile?.travelRadiusKm?.toString() ?? '200',
   )
@@ -49,7 +51,7 @@ export function ProfilePage() {
       ...profile,
       bio,
       city,
-      crafts: [craft],
+      crafts: craft.trim() ? [craft.trim()] : [],
       travelRadiusKm: travelRadiusKm ? Number(travelRadiusKm) : undefined,
       certifications: certs
         .split(',')
@@ -122,13 +124,16 @@ export function ProfilePage() {
             </option>
           ))}
         </Select>
-        <Select label="Haupt-Gewerk" value={craft} onChange={(e) => setCraft(e.target.value)}>
-          {CRAFTS.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </Select>
+        <OccupationField
+          mode="single"
+          selectedIds={occupationIds}
+          other={occupationIds.length ? '' : craft}
+          onChange={(next) => {
+            setOccupationIds(next.occupations)
+            setCraft(next.labels[0] || next.occupationOther)
+          }}
+        />
+        {craft && <p className="text-xs text-muted">Gewählt: {craft}</p>}
         <Input
           label="Reise-Radius (km)"
           type="number"
@@ -140,7 +145,7 @@ export function ProfilePage() {
           label="Zertifikate (Komma)"
           value={certs}
           onChange={(e) => setCerts(e.target.value)}
-          placeholder="IPAF, PSAgA, GrandMA3…"
+          placeholder="z. B. Ausbildung, Führerschein, Sprachzertifikat"
         />
         <div className="flex flex-wrap gap-4 text-sm">
           <label className="inline-flex min-h-11 items-center gap-2">

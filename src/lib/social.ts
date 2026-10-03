@@ -1,4 +1,3 @@
-import { seedProfiles } from '../data/seed'
 import { store } from './store'
 import { uid } from './utils'
 
@@ -178,10 +177,9 @@ export function toggleFollow(profileId: string) {
   return getSocial()
 }
 
+/** No sample people. A real meeting list does not exist yet. */
 export function discoverPeople() {
-  return seedProfiles
-    .filter((p) => p.role === 'freelancer' || p.role === 'company')
-    .slice(0, 8)
+  return []
 }
 
 export function startSocialDm(input: {

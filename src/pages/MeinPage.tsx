@@ -49,8 +49,9 @@ import {
 import { getPrefs, savePrefs, subscribePrefs } from '../lib/prefs'
 import { getCredits, subscribeCredits } from '../lib/credits'
 import { isFlagOn } from '../lib/flags'
-import { filledIndustries } from '../lib/categories'
-import { INDUSTRIES, JOB_TYPES } from '../data/industries'
+import { INDUSTRIES, JOB_TYPES, type Industry } from '../data/industries'
+import { OccupationField } from '../components/prefs/OccupationField'
+import { PeopleMeetSection } from '../components/mein/PeopleMeetSection'
 import { cn } from '../lib/utils'
 import { useAuth } from '../lib/auth'
 
@@ -118,12 +119,6 @@ export function MeinPage() {
     fav: f,
     entry: resolveCatalogEntry(f.kind, f.id),
   }))
-
-  const toggleIndustry = (ind: (typeof INDUSTRIES)[number]) => {
-    const cur = prefs.seeker.industries
-    const next = cur.includes(ind) ? cur.filter((x) => x !== ind) : [...cur, ind]
-    savePrefs({ seeker: { ...prefs.seeker, industries: next } })
-  }
 
   const toggleJobType = (jt: (typeof JOB_TYPES)[number]) => {
     const cur = prefs.seeker.jobTypes
@@ -270,24 +265,23 @@ export function MeinPage() {
               ? t('mein.sideOffer')
               : t('role.both')}
         </p>
-        <h3 className="text-sm font-semibold">Branchen</h3>
-        <div className="flex flex-wrap gap-2">
-          {filledIndustries().map((ind) => (
-            <button
-              key={ind}
-              type="button"
-              onClick={() => toggleIndustry(ind)}
-              className={cn(
-                'min-h-10 rounded-full border px-3 py-1.5 text-xs font-medium',
-                prefs.seeker.industries.includes(ind)
-                  ? 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/15 text-ink'
-                  : 'border-border bg-black/20 text-neutral-300',
-              )}
-            >
-              {ind}
-            </button>
-          ))}
-        </div>
+        <OccupationField
+          selectedIds={prefs.seeker.occupations}
+          other={prefs.seeker.occupationOther}
+          onChange={(next) =>
+            savePrefs({
+              seeker: {
+                ...prefs.seeker,
+                occupations: next.occupations,
+                occupationTerms: next.occupationTerms,
+                occupationOther: next.occupationOther,
+                industries: next.industries.filter((item): item is Industry =>
+                  (INDUSTRIES as readonly string[]).includes(item),
+                ),
+              },
+            })
+          }
+        />
         <h3 className="text-sm font-semibold">Job-Typen</h3>
         <div className="flex flex-wrap gap-2">
           {JOB_TYPES.map((jt) => (
@@ -308,8 +302,27 @@ export function MeinPage() {
         </div>
       </section>
 
+      <PeopleMeetSection />
+
       <section className="space-y-3 rounded-2xl border border-border bg-surface-2 p-4" id="employer">
         <h2 className="text-lg font-semibold">{t('mein.employer')}</h2>
+        <OccupationField
+          selectedIds={prefs.employer.occupations}
+          other={prefs.employer.occupationOther}
+          onChange={(next) =>
+            savePrefs({
+              employer: {
+                ...prefs.employer,
+                occupations: next.occupations,
+                occupationTerms: next.occupationTerms,
+                occupationOther: next.occupationOther,
+                industries: next.industries.filter((item): item is Industry =>
+                  (INDUSTRIES as readonly string[]).includes(item),
+                ),
+              },
+            })
+          }
+        />
         <label className="block text-sm">
           Rollen (Komma)
           <Input

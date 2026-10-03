@@ -1,4 +1,6 @@
-import { CITIES, CRAFTS } from '../../data/constants'
+import { useState } from 'react'
+import { CITIES } from '../../data/constants'
+import { OccupationField } from '../prefs/OccupationField'
 import type { ListingFilters, ListingKind, Vertical } from '../../types'
 import { Input, Select } from '../ui/Input'
 import { cn } from '../../lib/utils'
@@ -16,6 +18,7 @@ export function FilterBar({
   showRate?: boolean
   sticky?: boolean
 }) {
+  const [occupationIds, setOccupationIds] = useState<string[]>([])
   return (
     <div
       className={cn(
@@ -41,17 +44,20 @@ export function FilterBar({
           </option>
         ))}
       </Select>
-      <Select
-        value={value.craft ?? ''}
-        onChange={(e) => onChange({ ...value, craft: e.target.value || undefined })}
-      >
-        <option value="">Alle Gewerke</option>
-        {CRAFTS.map((c) => (
-          <option key={c} value={c}>
-            {c}
-          </option>
-        ))}
-      </Select>
+      <div className="sm:col-span-2 lg:col-span-2">
+        <OccupationField
+          mode="single"
+          selectedIds={occupationIds}
+          other={occupationIds.length ? '' : value.craft ?? ''}
+          onChange={(next) => {
+            setOccupationIds(next.occupations)
+            onChange({
+              ...value,
+              craft: next.labels[0] || next.occupationOther || undefined,
+            })
+          }}
+        />
+      </div>
       <Select
         value={value.kind ?? 'all'}
         onChange={(e) =>

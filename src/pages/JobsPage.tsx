@@ -174,7 +174,7 @@ export function JobsPage() {
             <Empty
               emoji="🎯"
               title="Noch kein Match in diesem Filter"
-              hint="Tagessatz, Stadt oder Gewerk lockern — oder Verfügbarkeit posten und Agenturen finden dich."
+              hint="Ort, Beruf oder Gehalt anpassen — oder selbst ein Angebot schreiben."
               actionLabel="Filter zurücksetzen"
               onAction={() => setFilters({ vertical: 'job', kind: 'offer' })}
             />
