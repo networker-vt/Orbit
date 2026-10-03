@@ -21,6 +21,7 @@ import { listingSpeech } from '../lib/tts'
 import { cn, formatPrice } from '../lib/utils'
 import { getCompany, subscribeCompany } from '../lib/company'
 import { deriveMarketType, isSeekerFeedListing } from '../lib/market'
+import { hasOccupationIntent, listingMatchesOccupationIntent, profileMatchesOccupationIntent } from '../lib/occupationMatch'
 import {
   completePrefs,
   filterCandidatesByEmployerPrefs,
@@ -146,14 +147,10 @@ export function MatchPage() {
           if (!kidsMaySeeJobs()) return false
           return listingIsSafeForKids(l)
         })
-      const ranked = rankForWorld(pool, prefs)
-      const jobs = ranked.length
-        ? ranked
-        : rankForWorld(pool, {
-            ...prefs,
-            seeker: { ...prefs.seeker, industries: [], cities: [], mustHaveSkills: [], salaryMin: 0 },
-          })
-      return jobs.map((l) => {
+      if (!hasOccupationIntent(prefs.seeker)) return []
+      const matched = pool.filter((l) => listingMatchesOccupationIntent(l, prefs.seeker))
+      const ranked = rankForWorld(matched, prefs)
+      return ranked.map((l) => {
         const lane = deriveMarketType(l)
         if (lane === 'service') {
           return { kind: 'company' as const, listing: l, score: scoreB2bMatch(l, prefs, company) }
@@ -163,12 +160,18 @@ export function MatchPage() {
     }
     const donePeople = swipedIds('candidate')
     const doneListings = swipedIds(['company', 'job'])
+    if (!hasOccupationIntent(prefs.employer)) return []
     const candidates = filterCandidatesByEmployerPrefs(
       store.listProfiles().filter((p) => p.role === 'freelancer' || p.role === 'courier'),
       prefs,
-    ).filter((p) => !donePeople.has(p.id) && p.id !== user?.id)
+    )
+      .filter((p) => profileMatchesOccupationIntent(p, prefs.employer))
+      .filter((p) => !donePeople.has(p.id) && p.id !== user?.id)
     const listings = rankForCompanyWorld(
-      store.listListings({}).filter((l) => l.ownerId !== user?.id && l.status === 'active' && !doneListings.has(l.id)),
+      store
+        .listListings({})
+        .filter((l) => l.ownerId !== user?.id && l.status === 'active' && !doneListings.has(l.id))
+        .filter((l) => listingMatchesOccupationIntent(l, prefs.employer)),
       prefs,
     )
     const peopleCards: DeckCard[] = candidates.map((p) => ({
@@ -181,17 +184,7 @@ export function MatchPage() {
       listing: l,
       score: scoreB2bMatch(l, prefs, company),
     }))
-    const mixed = [...listingCards, ...peopleCards].sort((a, b) => b.score.percent - a.score.percent)
-    if (mixed.length) return mixed
-    const loosePeople = store
-      .listProfiles()
-      .filter((p) => (p.role === 'freelancer' || p.role === 'courier') && !donePeople.has(p.id) && p.id !== user?.id)
-      .map((p) => ({
-        kind: 'candidate' as const,
-        profile: p,
-        score: scoreCandidateMatch(p, prefs, company),
-      }))
-    return loosePeople
+    return [...listingCards, ...peopleCards].sort((a, b) => b.score.percent - a.score.percent)
   }, [prefs, company, useSeekerDeck, toast, user?.id, kids, personalized, resolved])
 
   const current = deck[0]

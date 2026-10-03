@@ -9,13 +9,41 @@ export const ORBI_STAGES = ['kind', 'teen', 'adult'] as const
 export type OrbiStage = (typeof ORBI_STAGES)[number]
 
 /**
- * Map-1 Calm motion (Technik C: CSS pose swap).
- * Idle holds, then one dance. Reduced motion stays on the still idle frame.
+ * Idle holds, then one dance. The wait is random, not a fixed 5.5s.
+ * Reduced motion stays on the still idle frame.
+ * Motion itself is transform and opacity only — no pupil overlay.
  */
-export const ORBI_IDLE_MS = 5500
+export const ORBI_DANCE_MIN_MS = 8000
+export const ORBI_DANCE_MAX_MS = 16000
 export const ORBI_DANCE_MS = 2200
 export const ORBI_WAVE_MS = 1800
 export const ORBI_RUN_MS = 900
+export const ORBI_ERROR_MS = 900
+
+/** One self-shown line per browser session. */
+export const ORBI_BUBBLE_SESSION_KEY = 'orbit_orbi_bubble_v1'
+
+/** Honor an off switch when one is stored. There is no separate tips control in the UI. */
+export const ORBI_TIPS_KEY = 'orbit_orbi_tips'
+
+export function nextOrbiDanceDelay(random: () => number = Math.random): number {
+  const span = ORBI_DANCE_MAX_MS - ORBI_DANCE_MIN_MS
+  const unit = Math.min(0.999999, Math.max(0, random()))
+  return ORBI_DANCE_MIN_MS + Math.floor(unit * (span + 1))
+}
+
+export function orbiTipsAllowed(read: (key: string) => string | null): boolean {
+  return read(ORBI_TIPS_KEY) !== '0'
+}
+
+export function claimOrbiSessionBubble(storage: {
+  getItem: (key: string) => string | null
+  setItem: (key: string, value: string) => void
+}): boolean {
+  if (storage.getItem(ORBI_BUBBLE_SESSION_KEY) === '1') return false
+  storage.setItem(ORBI_BUBBLE_SESSION_KEY, '1')
+  return true
+}
 
 export function isOrbiStage(value: string | null | undefined): value is OrbiStage {
   return !!value && (ORBI_STAGES as readonly string[]).includes(value)

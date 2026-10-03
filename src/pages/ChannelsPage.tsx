@@ -36,7 +36,7 @@ const COMMUNITY = [
   {
     id: 'social',
     title: 'Social',
-    hint: 'Leute treffen, leichte Posts',
+    hint: 'Leichte Posts zum Marktplatz',
     icon: MessageCircle,
     to: '/social',
   },

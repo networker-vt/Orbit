@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Heart, MessageCircle, MessageSquare, Share2, Users } from 'lucide-react'
+import { Heart, MessageCircle, MessageSquare, Share2 } from 'lucide-react'
 import { chatHref } from '../lib/chatPath'
 import { Button } from '../components/ui/Button'
 import { Empty } from '../components/ui/Empty'
@@ -17,11 +17,8 @@ import { Badge } from '../components/ui/Badge'
 import {
   addComment,
   addPost,
-  discoverPeople,
   getSocial,
-  startSocialDm,
   subscribeSocial,
-  toggleFollow,
   toggleLike,
 } from '../lib/social'
 import { store } from '../lib/store'
@@ -49,7 +46,6 @@ export function SocialPage() {
 
   const actor = user ?? { id: DEMO_USER_ID, name: 'Alex Müller' }
   const listings = store.listListings({}).slice(0, 8)
-  const people = discoverPeople()
 
   const ensureUser = () => {
     if (!user) loginDemo()
@@ -174,60 +170,6 @@ export function SocialPage() {
         </Button>
       </section>
       )}
-
-      <section className="space-y-2">
-        <h2 className="flex items-center gap-2 text-sm font-semibold">
-          <Users size={16} /> {t('social.discover')}
-        </h2>
-        <ul className="space-y-2">
-          {people.map((p) => {
-            const following = social.following.includes(p.id)
-            return (
-              <li
-                key={p.id}
-                className="flex items-center gap-3 rounded-2xl border border-border bg-surface-2/60 px-3 py-2"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-ink">{p.name}</p>
-                  <p className="truncate text-xs text-muted">
-                    {p.companyName || p.city} · {p.role}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => toggleFollow(p.id)}
-                  className={cn(
-                    'min-h-9 rounded-full border px-3 text-xs',
-                    following
-                      ? 'border-[var(--theme-accent)] text-[var(--theme-accent)]'
-                      : 'border-border',
-                  )}
-                >
-                  {following ? t('social.connected') : t('social.connect')}
-                </button>
-                {!kids && (
-                <button
-                  type="button"
-                  className="text-xs text-muted hover:text-ink"
-                  onClick={() => {
-                    const me = ensureUser()
-                    const thread = startSocialDm({
-                      meId: me.id,
-                      meName: me.name,
-                      otherId: p.id,
-                      otherName: p.name,
-                    })
-                    navigate(chatHref(thread.id))
-                  }}
-                >
-                  {t('social.chat')}
-                </button>
-                )}
-              </li>
-            )
-          })}
-        </ul>
-      </section>
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold">{t('social.feed')}</h2>

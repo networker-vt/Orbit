@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Check, Sparkles } from 'lucide-react'
-import { filledIndustries } from '../lib/categories'
 import {
   COMPANY_SIZES,
   COUNTRIES,
+  INDUSTRIES,
   ORBIT_TAGLINE_DE,
   type Industry,
 } from '../data/industries'
+import { OccupationField } from '../components/prefs/OccupationField'
 import { OrbitRobot } from '../components/home/OrbitRobot'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
@@ -203,25 +204,21 @@ export function PrefsPage() {
 
       {step === 2 && side === 'seeker' && (
         <section className="space-y-4">
-          <div>
-            <h2 className="mb-2 text-sm font-semibold">Branche</h2>
-            <div className="flex flex-wrap gap-2">
-              {filledIndustries().map((ind) => (
-                <Chip
-                  key={ind}
-                  active={seeker.industries.includes(ind)}
-                  onClick={() =>
-                    setSeeker({
-                      ...seeker,
-                      industries: toggle(seeker.industries, ind as Industry),
-                    })
-                  }
-                >
-                  {ind}
-                </Chip>
-              ))}
-            </div>
-          </div>
+          <OccupationField
+            selectedIds={seeker.occupations}
+            other={seeker.occupationOther}
+            onChange={(next) =>
+              setSeeker({
+                ...seeker,
+                occupations: next.occupations,
+                occupationTerms: next.occupationTerms,
+                occupationOther: next.occupationOther,
+                industries: next.industries.filter((item): item is Industry =>
+                  (INDUSTRIES as readonly string[]).includes(item),
+                ),
+              })
+            }
+          />
           <label className="block text-sm font-semibold">
             Budget / Gehalt min. (€ / Monat, optional)
             <Input
@@ -248,25 +245,21 @@ export function PrefsPage() {
               onChange={(e) => setFirmName(e.target.value)}
             />
           </label>
-          <div>
-            <h2 className="mb-2 text-sm font-semibold">Branchen</h2>
-            <div className="flex flex-wrap gap-2">
-              {filledIndustries().map((ind) => (
-                <Chip
-                  key={ind}
-                  active={employer.industries.includes(ind)}
-                  onClick={() =>
-                    setEmployer({
-                      ...employer,
-                      industries: toggle(employer.industries, ind as Industry),
-                    })
-                  }
-                >
-                  {ind}
-                </Chip>
-              ))}
-            </div>
-          </div>
+          <OccupationField
+            selectedIds={employer.occupations}
+            other={employer.occupationOther}
+            onChange={(next) =>
+              setEmployer({
+                ...employer,
+                occupations: next.occupations,
+                occupationTerms: next.occupationTerms,
+                occupationOther: next.occupationOther,
+                industries: next.industries.filter((item): item is Industry =>
+                  (INDUSTRIES as readonly string[]).includes(item),
+                ),
+              })
+            }
+          />
           <label className="block text-sm font-semibold">
             Rollen (Komma-getrennt)
             <Input

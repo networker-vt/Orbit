@@ -29,7 +29,7 @@ import { getResume, subscribeResume } from '../lib/resume'
 import { dueReminders, subscribeReminders, tapReminder } from '../lib/reminders'
 import { rankHomeNews } from '../lib/homeSuggestions'
 import { useI18n } from '../lib/i18n'
-import { pickRobotAsk, robotAskCopy, type RobotAsk } from '../lib/robotAsk'
+import { claimOrbiSessionBubble, orbiTipsAllowed } from '../lib/orbiMotion'
 import { canListen, listenOnce } from '../lib/speech'
 import { matchSpokenTripChoice } from '../lib/trip'
 import { pickTageskarte, tageskarteCopy } from '../lib/tageskarte'
@@ -64,7 +64,8 @@ export function HomePage() {
   const [reminders, setReminders] = useState(dueReminders)
   const [assistNote, setAssistNote] = useState<string | null>(null)
   const [robotTapped, setRobotTapped] = useState(false)
-  const [robotAsk, setRobotAsk] = useState<RobotAsk | null>(null)
+  const [orbiBubble, setOrbiBubble] = useState(false)
+  const [orbiReaction, setOrbiReaction] = useState<'success' | 'error' | null>(null)
   const [kids, setKids] = useState(isKidsMode)
   const [tripVoicePick, setTripVoicePick] = useState<1 | 2 | 3 | null>(null)
   const [widgetTaps, setWidgetTaps] = useState(getWidgetTaps)
@@ -72,8 +73,22 @@ export function HomePage() {
   const { listings: raw } = useListings({})
   const daily = useMemo(() => pickTageskarte(new Date(), { kids }), [kids])
   const dailyCopy = tageskarteCopy(daily.item, resolved)
-  const robotCopy = robotAsk ? robotAskCopy(robotAsk, resolved) : null
   const hideWallet = kidsHideWallet()
+
+  useEffect(() => {
+    try {
+      if (!orbiTipsAllowed((key) => localStorage.getItem(key))) return
+      if (claimOrbiSessionBubble(sessionStorage)) setOrbiBubble(true)
+    } catch {
+      /* private mode */
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!orbiReaction) return
+    const timer = window.setTimeout(() => setOrbiReaction(null), 1200)
+    return () => window.clearTimeout(timer)
+  }, [orbiReaction])
 
   useEffect(() => {
     const u1 = subscribePrefs(() => setPrefs(getPrefs()))
@@ -167,14 +182,17 @@ export function HomePage() {
     if (!isFlagOn('credits')) {
       if (gate !== 'ok') {
         setAssistNote(t('home.assistLimit'))
+        setOrbiReaction('error')
         return
       }
       setAssistNote(null)
     } else if (gate === 'limit') {
       setAssistNote(t('home.assistLimit'))
+      setOrbiReaction('error')
       return
     } else if (gate === 'need_credits') {
       setAssistNote(t('home.assistNeedCredits'))
+      setOrbiReaction('error')
       return
     } else if (gate === 'paid') {
       setAssistNote(t('home.assistPaid'))
@@ -189,7 +207,10 @@ export function HomePage() {
       const next = await buildAssistPlan(q, resolved, ac.signal)
       if (next) {
         setPlan(next)
+        setOrbiReaction('success')
         if (pendingSide) savePrefs({ side: pendingSide })
+      } else {
+        setOrbiReaction('error')
       }
     } finally {
       setBusy(false)
@@ -208,8 +229,6 @@ export function HomePage() {
   }
 
   const onRobotTap = () => {
-    const next = pickRobotAsk(new Date(), { kids }).item
-    setRobotAsk(next)
     setRobotTapped(true)
     window.setTimeout(() => setRobotTapped(false), 700)
   }
@@ -230,7 +249,24 @@ export function HomePage() {
             label={t('home.robotAria')}
             stage="kind"
             busy={busy}
+            reaction={orbiReaction}
           />
+          {orbiBubble && (
+            <p
+              className="mt-2 max-w-xs rounded-2xl border border-border bg-surface-2 px-3 py-2 text-sm text-ink"
+              role="status"
+              data-orbi-bubble="1"
+            >
+              {t('home.orbiOnce')}
+              <button
+                type="button"
+                className="ml-2 text-xs text-muted hover:text-ink"
+                onClick={() => setOrbiBubble(false)}
+              >
+                {t('home.robotDismiss')}
+              </button>
+            </p>
+          )}
         </div>
         <div>
           <p className="text-xs font-medium uppercase tracking-wider text-muted">
@@ -239,24 +275,6 @@ export function HomePage() {
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-ink md:text-[2rem]">{greeting}</h1>
           <p className="mt-1 max-w-sm text-sm text-muted">{t('home.need')}</p>
         </div>
-
-        {robotAsk && robotCopy && (
-          <div
-            className="rounded-2xl border border-border/80 bg-surface-2/60 px-3 py-3"
-            role="status"
-            data-robot-ask={robotAsk.kind}
-          >
-            <p className="text-sm text-ink">{robotCopy.question}</p>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Button type="button" size="sm" variant="secondary" onClick={() => navigate(robotAsk.to)}>
-                {robotCopy.yes}
-              </Button>
-              <Button type="button" size="sm" variant="ghost" onClick={() => setRobotAsk(null)}>
-                {t('home.robotDismiss')}
-              </Button>
-            </div>
-          </div>
-        )}
 
         {reminders[0] && (
           <p className="text-sm">

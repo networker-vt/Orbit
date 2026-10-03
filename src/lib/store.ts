@@ -188,7 +188,12 @@ export const store = {
       items = items.filter((l) => l.city === filters.city)
     }
     if (filters.craft) {
-      items = items.filter((l) => l.crafts.includes(filters.craft!))
+      const needle = filters.craft.toLowerCase()
+      items = items.filter((l) => {
+        if (l.crafts.includes(filters.craft!)) return true
+        const hay = [l.title, l.industry, ...(l.tags || []), ...(l.crafts || [])].join(' ').toLowerCase()
+        return hay.includes(needle)
+      })
     }
     if (filters.priceMax != null) {
       items = items.filter(
