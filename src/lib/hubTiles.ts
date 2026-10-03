@@ -4,7 +4,7 @@
  * Each tile has a visible emoji (or optional thematic image).
  */
 import type { HubTile, TileTone } from '../components/ui/TileGrid'
-import { isFlagOn } from './flags'
+import { isFlagOn, type FeatureFlag } from './flags'
 import { isKidsMode, kidsHideTravel, kidsHideWallet, kidsMaySeeJobs } from './kids'
 import { getWidgetTaps, type WidgetArea } from './widgetUsage'
 
@@ -33,6 +33,9 @@ export type HubTileId =
   | 'refer'
   | 'match'
   | 'jobs'
+  | 'photoJobs'
+  | 'interview'
+  | 'integrations'
 
 export type HubTileDef = {
   id: HubTileId
@@ -43,6 +46,10 @@ export type HubTileDef = {
   tone: TileTone
   surface: HubSurface
   demo?: boolean
+  /** When this flag is off, the tile stays visible as a demonstration. */
+  flag?: FeatureFlag
+  /** Public demo URL when the live route is not the demo itself. */
+  demoTo?: string
   hide?: (ctx: HubCtx) => boolean
 }
 
@@ -63,9 +70,11 @@ export function hubCtx(): HubCtx {
 /** Home „Mehr entdecken“ — destinations only. No Mein / Social / Wallet. */
 export const HOME_DISCOVER_DEFS: HubTileDef[] = [
   { id: 'abflug', to: '/abflug', labelKey: 'travel.nav', emoji: '✈️', tone: 'sky', surface: 'discover', hide: (c) => c.hideTravel },
-  { id: 'campus', to: '/campus', labelKey: 'campus.nav', emoji: '🎓', tone: 'indigo', surface: 'discover', hide: () => !isFlagOn('campus') },
-  { id: 'entdecker', to: '/entdecker', labelKey: 'tile.entdecker', emoji: '🔎', tone: 'lime', surface: 'discover', demo: true, hide: () => !isFlagOn('entdecker') },
-  { id: 'kabine', to: '/kabine', labelKey: 'look.nav', emoji: '🪞', tone: 'rose', surface: 'discover', hide: () => !isFlagOn('kabine') },
+  { id: 'campus', to: '/campus', labelKey: 'campus.nav', emoji: '🎓', tone: 'indigo', surface: 'discover', flag: 'campus' },
+  { id: 'entdecker', to: '/entdecker', labelKey: 'tile.entdecker', emoji: '🔎', tone: 'lime', surface: 'discover', demo: true, flag: 'entdecker' },
+  { id: 'kabine', to: '/kabine', labelKey: 'look.nav', emoji: '🪞', tone: 'rose', surface: 'discover', flag: 'kabine', hide: (c) => c.kids },
+  { id: 'photoJobs', to: '/foto', labelKey: 'photo.title', emoji: '📷', tone: 'lime', surface: 'discover', flag: 'photoJobs' },
+  { id: 'interview', to: '/interview', labelKey: 'interview.title', emoji: '🎥', tone: 'violet', surface: 'discover', flag: 'interview' },
   { id: 'firma', to: '/firma', labelKey: 'firma.nav', emoji: '🏢', tone: 'slate', surface: 'discover', hide: (c) => c.kids },
   { id: 'crew', to: '/crew', labelKey: 'nav.crew', emoji: '🤝', tone: 'amber', surface: 'discover', hide: (c) => c.kids },
   { id: 'mehr', to: '/mehr', labelKey: 'nav.mehr', emoji: '✨', tone: 'orange', surface: 'discover' },
@@ -82,17 +91,18 @@ export const MEHR_DISCOVER_DEFS: HubTileDef[] = [
  * Discover destinations (Campus, Entdecker, Kabine, Firma, Crew, Abflug) stay off this grid.
  */
 export const MEIN_ACCOUNT_DEFS: HubTileDef[] = [
-  { id: 'wallet', to: '/wallet', labelKey: 'nav.wallet', emoji: '👛', tone: 'teal', surface: 'account', hide: (c) => c.hideWallet || !isFlagOn('credits') },
+  { id: 'wallet', to: '/wallet', labelKey: 'nav.wallet', emoji: '👛', tone: 'teal', surface: 'account', flag: 'credits', hide: (c) => c.hideWallet },
   { id: 'profile', to: '/profile', labelKey: 'nav.mein', emoji: '👤', tone: 'slate', surface: 'account' },
-  { id: 'verify', to: '/mein#verify', labelKey: 'verify.title', emoji: '🛡️', tone: 'lime', surface: 'account', hide: () => !isFlagOn('verifyId') },
+  { id: 'verify', to: '/mein#verify', demoTo: '/demo/verify', labelKey: 'verify.title', emoji: '🛡️', tone: 'lime', surface: 'account', flag: 'verifyId' },
   { id: 'prefs', to: '/prefs', labelKey: 'match.tweakPrefs', emoji: '⚙️', tone: 'amber', surface: 'account' },
   { id: 'create', to: '/listings/new', labelKey: 'nav.create', emoji: '➕', tone: 'slate', surface: 'account', hide: (c) => c.kids },
   { id: 'offer', to: '/listings/new?kind=offer', labelKey: 'mein.offer', emoji: '📣', tone: 'orange', surface: 'account', hide: (c) => c.kids },
-  { id: 'channels', to: '/channels', labelKey: 'channels.nav', emoji: '📡', tone: 'violet', surface: 'account', hide: () => !isFlagOn('channels') },
-  { id: 'ideas', to: '/ideen', labelKey: 'mehr.ideas', emoji: '💡', tone: 'orange', surface: 'account', hide: () => !isFlagOn('ideas') },
+  { id: 'channels', to: '/channels', labelKey: 'channels.nav', emoji: '📡', tone: 'violet', surface: 'account', flag: 'channels' },
+  { id: 'ideas', to: '/ideen', labelKey: 'mehr.ideas', emoji: '💡', tone: 'orange', surface: 'account', flag: 'ideas' },
+  { id: 'integrations', to: '/integrationen', labelKey: 'integrations.nav', emoji: '🔌', tone: 'slate', surface: 'account', flag: 'integrations' },
   { id: 'language', to: '/mein#sprache', labelKey: 'mein.language', emoji: '🌐', tone: 'amber', surface: 'account' },
   { id: 'dashboard', to: '/dashboard', labelKey: 'mein.dashboard', emoji: '📊', tone: 'sky', surface: 'account' },
-  { id: 'kids', to: '/kids', labelKey: 'kids.title', emoji: '🧒', tone: 'orange', surface: 'account', hide: () => !isFlagOn('kids') },
+  { id: 'kids', to: '/kids', labelKey: 'kids.title', emoji: '🧒', tone: 'orange', surface: 'account', flag: 'kids' },
   { id: 'refer', to: '/empfehlen', labelKey: 'mehr.refer', emoji: '🎁', tone: 'sky', surface: 'account', hide: (c) => c.hideWallet },
 ]
 
@@ -111,15 +121,16 @@ export function resolveHubTiles(
 ): HubTile[] {
   return visibleDefs(defs, ctx).map((d) => {
     const shareRefer = d.id === 'refer' && !isFlagOn('credits')
+    const live = !d.flag || isFlagOn(d.flag)
     return {
       id: d.id,
-      to: d.to,
+      to: !live && d.demoTo ? d.demoTo : d.to,
       label: labelOverrides?.[d.id] ?? (shareRefer ? t('mehr.referPlain') : t(d.labelKey)),
       emoji: shareRefer ? '↗' : d.emoji,
       icon: shareRefer ? ('share' as const) : undefined,
       image: d.image,
       tone: d.tone,
-      demo: d.demo,
+      demo: Boolean(d.demo) || (!live && Boolean(d.flag)),
     }
   })
 }
@@ -134,10 +145,10 @@ export function homeDiscoverTiles(t: (key: string) => string, ctx: HubCtx = hubC
  */
 export const HOME_ADAPTIVE_DEFS: HubTileDef[] = [
   { id: 'abflug', to: '/abflug', labelKey: 'travel.nav', emoji: '✈️', tone: 'sky', surface: 'discover', hide: (c) => c.hideTravel },
-  { id: 'kabine', to: '/kabine', labelKey: 'look.nav', emoji: '🪞', tone: 'rose', surface: 'discover', hide: () => !isFlagOn('kabine') },
+  { id: 'kabine', to: '/kabine', labelKey: 'look.nav', emoji: '🪞', tone: 'rose', surface: 'discover', flag: 'kabine', hide: (c) => c.kids },
   { id: 'match', to: '/match', labelKey: 'nav.match', emoji: '🎯', tone: 'teal', surface: 'discover' },
-  { id: 'campus', to: '/campus', labelKey: 'campus.nav', emoji: '🎓', tone: 'indigo', surface: 'discover', hide: () => !isFlagOn('campus') },
-  { id: 'entdecker', to: '/entdecker', labelKey: 'tile.entdecker', emoji: '🔎', tone: 'lime', surface: 'discover', demo: true, hide: () => !isFlagOn('entdecker') },
+  { id: 'campus', to: '/campus', labelKey: 'campus.nav', emoji: '🎓', tone: 'indigo', surface: 'discover', flag: 'campus' },
+  { id: 'entdecker', to: '/entdecker', labelKey: 'tile.entdecker', emoji: '🔎', tone: 'lime', surface: 'discover', demo: true, flag: 'entdecker' },
   { id: 'firma', to: '/firma', labelKey: 'firma.nav', emoji: '🏢', tone: 'slate', surface: 'discover', hide: (c) => c.kids },
   { id: 'crew', to: '/crew', labelKey: 'nav.crew', emoji: '🤝', tone: 'amber', surface: 'discover', hide: (c) => c.kids },
   { id: 'marktplatz', to: '/marktplatz', labelKey: 'mehr.market', emoji: '🛒', tone: 'teal', surface: 'discover' },

@@ -29,7 +29,7 @@ export function ImpressumPage() {
       <p>
         <strong>{LEGAL.operatorName}</strong>
         <br />
-        {LEGAL.brand} — Marktplatz für alles (privat betrieben)
+        {LEGAL.brand} — Marktplatz für jeden Job und jeden Auftrag (privat betrieben)
         <br />
         {LEGAL.street}
         <br />

@@ -35,6 +35,7 @@ function documentTitleFor(pathname: string, t: (key: string) => string) {
   if (pathname.startsWith('/entdecker')) return `${t('tile.entdecker')} · Orbit`
   if (pathname.startsWith('/campus') || pathname.startsWith('/lernen')) return `${t('campus.title')} · Orbit`
   if (pathname.startsWith('/kids')) return `${t('kids.title')} · Orbit`
+  if (pathname.startsWith('/demo')) return `${t('demo.kicker')} · Orbit`
   if (pathname.startsWith('/mehr')) return `${t('mehr.title')} · Orbit`
   if (pathname.startsWith('/impressum')) return `${t('footer.impressum')} · Orbit`
   if (pathname.startsWith('/datenschutz') || pathname.startsWith('/privacy'))

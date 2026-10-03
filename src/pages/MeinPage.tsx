@@ -49,8 +49,8 @@ import {
 import { getPrefs, savePrefs, subscribePrefs } from '../lib/prefs'
 import { getCredits, subscribeCredits } from '../lib/credits'
 import { isFlagOn } from '../lib/flags'
-import { filledIndustries } from '../lib/categories'
 import { INDUSTRIES, JOB_TYPES } from '../data/industries'
+import { JobSelect } from '../components/profile/JobSelect'
 import { cn } from '../lib/utils'
 import { useAuth } from '../lib/auth'
 
@@ -63,7 +63,7 @@ const DOC_KINDS: { id: HubDocKind; key: 'mein.qual' | 'mein.cert' | 'mein.train'
 export function MeinPage() {
   const { t } = useI18n()
   const { items } = useFavorites()
-  const { user } = useAuth()
+  const { user, profile, updateProfile } = useAuth()
   const navigate = useNavigate()
   const { hash } = useLocation()
   const [cal, setCal] = useState<LocalCalItem[]>(() => listLocalCalendar())
@@ -270,9 +270,21 @@ export function MeinPage() {
               ? t('mein.sideOffer')
               : t('role.both')}
         </p>
+        <JobSelect
+          label={t('job.label')}
+          value={profile?.crafts[0] || prefs.seeker.occupation || ''}
+          onChange={(occupation) => {
+            savePrefs({ seeker: { ...prefs.seeker, occupation } })
+            if (profile) {
+              const next = { ...profile, crafts: occupation ? [occupation] : [] }
+              updateProfile({ crafts: next.crafts })
+              store.upsertProfile(next)
+            }
+          }}
+        />
         <h3 className="text-sm font-semibold">Branchen</h3>
         <div className="flex flex-wrap gap-2">
-          {filledIndustries().map((ind) => (
+          {INDUSTRIES.map((ind) => (
             <button
               key={ind}
               type="button"

@@ -19,6 +19,8 @@ import { ImpressumPage } from './pages/legal/ImpressumPage'
 import { RankingPage } from './pages/legal/RankingPage'
 import { SupportPage } from './pages/legal/SupportPage'
 import { isFlagOn, type FeatureFlag } from './lib/flags'
+import { isDemoFeature } from './lib/featureDemos'
+import { FeatureDemoPage } from './pages/FeatureDemoPage'
 import {
   InnovationPage,
   KatalogPage,
@@ -144,7 +146,8 @@ function AppReady() {
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="mehr" element={<MehrPage />} />
               <Route path="campus" element={<FlagRoute flag="campus"><CampusPage /></FlagRoute>} />
-              <Route path="lernen" element={<Navigate to={isFlagOn('campus') ? '/campus' : '/'} replace />} />
+              <Route path="lernen" element={<Navigate to="/campus" replace />} />
+              <Route path="demo/:featureId" element={<DemoRoute />} />
               <Route path="kids" element={<FlagRoute flag="kids"><KidsPage /></FlagRoute>} />
               <Route path="channels" element={<FlagRoute flag="channels"><ChannelsPage /></FlagRoute>} />
               <Route path="look" element={<FlagRoute flag="kabine"><LookPage /></FlagRoute>} />
@@ -187,8 +190,14 @@ function AppReady() {
 }
 
 function FlagRoute({ flag, children }: { flag: FeatureFlag; children: ReactNode }) {
-  if (!isFlagOn(flag)) return <Navigate to="/" replace />
+  if (!isFlagOn(flag)) {
+    return isDemoFeature(flag) ? <FeatureDemoPage feature={flag} /> : <Navigate to="/" replace />
+  }
   return children
+}
+
+function DemoRoute() {
+  return <FeatureDemoPage />
 }
 
 function BootScreen() {

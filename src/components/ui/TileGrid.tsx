@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Share2 } from 'lucide-react'
+import { useI18n } from '../../lib/i18n'
 import { cn } from '../../lib/utils'
 
 export type TileTone = 'teal' | 'amber' | 'violet' | 'sky' | 'rose' | 'lime' | 'indigo' | 'slate' | 'orange'
@@ -39,6 +40,7 @@ export function TileGrid({
   columns?: 2 | 3
   label?: string
 }) {
+  const { t } = useI18n()
   return (
     <ul
       data-tile-grid={tiles.length}
@@ -69,7 +71,7 @@ export function TileGrid({
               <span className="text-sm font-semibold leading-tight text-ink">{tile.label}</span>
               {tile.demo && (
                 <span className="shrink-0 rounded-full border border-current/30 px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide">
-                  Demo
+                  {t('home.demoBadge')}
                 </span>
               )}
             </span>

@@ -22,7 +22,7 @@ export function BrandMark({
         <span className="leading-tight">
           <span className="block font-bold tracking-tight text-ink">{ORBIT_BRAND}</span>
           <span className="hidden text-xs uppercase tracking-wider text-cyan sm:block">
-            Matching statt Spam
+            Für jeden Job
           </span>
         </span>
       </span>

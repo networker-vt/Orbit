@@ -26,9 +26,15 @@ describe('Orbit 2.8.1 hub split', () => {
     const tiles = homeDiscoverTiles((k) => tStatic(k, 'de'), adult)
     const paths = tiles.map((t) => t.to)
     expect(paths).toContain('/abflug')
-    expect(paths).not.toContain('/campus')
-    expect(paths).not.toContain('/entdecker')
-    expect(paths).not.toContain('/kabine')
+    expect(paths).toContain('/campus')
+    expect(paths).toContain('/entdecker')
+    expect(paths).toContain('/kabine')
+    expect(paths).toContain('/foto')
+    expect(paths).toContain('/interview')
+    expect(tiles.find((t) => t.id === 'campus')?.demo).toBe(true)
+    expect(tiles.find((t) => t.id === 'kabine')?.demo).toBe(true)
+    expect(tiles.find((t) => t.id === 'photoJobs')?.demo).toBe(true)
+    expect(tiles.find((t) => t.id === 'interview')?.demo).toBe(true)
     expect(paths).toContain('/firma')
     expect(paths).toContain('/crew')
     expect(homeDiscoverHasAccountLinks(tiles)).toBe(false)
@@ -44,11 +50,29 @@ describe('Orbit 2.8.1 hub split', () => {
   it('Mein hub is account-only and sorted money → identity → create → connect → tools', () => {
     const tiles = meinAccountTiles((k) => tStatic(k, 'de'), adult)
     const ids = tiles.map((t) => t.id)
-    expect(ids).toEqual(['profile', 'prefs', 'create', 'offer', 'language', 'dashboard', 'refer'])
+    expect(ids).toEqual([
+      'wallet',
+      'profile',
+      'verify',
+      'prefs',
+      'create',
+      'offer',
+      'channels',
+      'ideas',
+      'integrations',
+      'language',
+      'dashboard',
+      'kids',
+      'refer',
+    ])
     expect(meinHasDiscoverLinks(tiles)).toBe(false)
-    expect(tiles.some((t) => t.to === '/ideen')).toBe(false)
-    expect(tiles.some((t) => t.to === '/channels')).toBe(false)
-    expect(tiles.some((t) => t.to === '/wallet')).toBe(false)
+    expect(tiles.find((t) => t.id === 'wallet')?.demo).toBe(true)
+    expect(tiles.find((t) => t.id === 'wallet')?.to).toBe('/wallet')
+    expect(tiles.find((t) => t.id === 'verify')?.to).toBe('/demo/verify')
+    expect(tiles.find((t) => t.id === 'kids')?.demo).toBe(true)
+    expect(tiles.find((t) => t.id === 'channels')?.to).toBe('/channels')
+    expect(tiles.find((t) => t.id === 'ideas')?.to).toBe('/ideen')
+    expect(tiles.find((t) => t.id === 'integrations')?.to).toBe('/integrationen')
     expect(tiles.some((t) => t.to === '/listings/new')).toBe(true)
     expect(tiles.find((t) => t.id === 'create')?.demo).toBeFalsy()
     expect(tiles.find((t) => t.id === 'offer')?.demo).toBeFalsy()
@@ -64,15 +88,19 @@ describe('Orbit 2.8.1 hub split', () => {
       false,
     )
     const home = homeDiscoverTiles((k) => tStatic(k, 'de'), kids)
-    expect(home.some((t) => t.id === 'abflug' || t.id === 'firma' || t.id === 'crew')).toBe(false)
-    expect(home.some((t) => t.id === 'campus' || t.id === 'entdecker' || t.id === 'kabine')).toBe(false)
+    expect(home.some((t) => t.id === 'abflug' || t.id === 'firma' || t.id === 'crew' || t.id === 'kabine')).toBe(
+      false,
+    )
+    expect(home.find((t) => t.id === 'campus')?.demo).toBe(true)
+    expect(home.find((t) => t.id === 'entdecker')?.demo).toBe(true)
   })
 
   it('Home discover shows at most three quiet links and folds the rest', () => {
     const split = splitAdaptiveHome(adult, {}, (k) => tStatic(k, 'de'))
     expect(HOME_PRIMARY_COUNT).toBe(3)
     expect(split.primary).toHaveLength(3)
-    expect(split.primary.map((t) => t.id)).toEqual(['abflug', 'match', 'firma'])
+    expect(split.primary.map((t) => t.id)).toEqual(['abflug', 'kabine', 'match'])
+    expect(split.primary.find((t) => t.id === 'kabine')?.demo).toBe(true)
     expect(homeDiscoverHasAccountLinks(split.primary)).toBe(false)
     expect(split.folded.some((t) => t.id === 'jobs')).toBe(true)
     const kidsSplit = splitAdaptiveHome(kids, {}, (k) => tStatic(k, 'de'))

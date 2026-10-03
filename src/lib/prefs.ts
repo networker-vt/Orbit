@@ -26,6 +26,8 @@ export interface SeekerPrefs {
   radiusKm: number
   cities: string[]
   mustHaveSkills: string[]
+  /** The person's own job. Any occupation, not an event-only trade. */
+  occupation: string
 }
 
 export interface EmployerPrefs {
@@ -61,6 +63,7 @@ export function defaultPrefs(): OrbitPrefs {
       radiusKm: 50,
       cities: [],
       mustHaveSkills: [],
+      occupation: '',
     },
     employer: {
       countries: ['Deutschland', 'Remote / Global'],

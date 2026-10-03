@@ -237,6 +237,7 @@ export function HomePage() {
             Orbit{isDemo ? ` · ${t('home.demoBadge')}` : ''}
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-ink md:text-[2rem]">{greeting}</h1>
+          <p className="mt-1 max-w-sm text-sm text-ink-soft">{t('home.pitch')}</p>
           <p className="mt-1 max-w-sm text-sm text-muted">{t('home.need')}</p>
         </div>
 

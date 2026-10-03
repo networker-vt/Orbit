@@ -1,16 +1,18 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Check, Sparkles } from 'lucide-react'
-import { filledIndustries } from '../lib/categories'
 import {
   COMPANY_SIZES,
   COUNTRIES,
+  INDUSTRIES,
   ORBIT_TAGLINE_DE,
   type Industry,
 } from '../data/industries'
+import { JobSelect } from '../components/profile/JobSelect'
 import { OrbitRobot } from '../components/home/OrbitRobot'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
+import { useI18n } from '../lib/i18n'
 import { CITIES } from '../data/constants'
 import {
   completePrefs,
@@ -53,6 +55,7 @@ function toggle<T extends string>(arr: T[], v: T): T[] {
 }
 
 export function PrefsPage() {
+  const { t } = useI18n()
   const navigate = useNavigate()
   const initial = useMemo(() => getPrefs(), [])
   const [side, setSide] = useState<PrefsSide>(initial.side)
@@ -203,10 +206,15 @@ export function PrefsPage() {
 
       {step === 2 && side === 'seeker' && (
         <section className="space-y-4">
+          <JobSelect
+            label={t('job.label')}
+            value={seeker.occupation}
+            onChange={(occupation) => setSeeker({ ...seeker, occupation })}
+          />
           <div>
             <h2 className="mb-2 text-sm font-semibold">Branche</h2>
             <div className="flex flex-wrap gap-2">
-              {filledIndustries().map((ind) => (
+              {INDUSTRIES.map((ind) => (
                 <Chip
                   key={ind}
                   active={seeker.industries.includes(ind)}
@@ -248,10 +256,23 @@ export function PrefsPage() {
               onChange={(e) => setFirmName(e.target.value)}
             />
           </label>
+          <JobSelect
+            label={t('job.label')}
+            value={employer.rolesHiring[0] ?? ''}
+            onChange={(occupation) => {
+              const rest = employer.rolesHiring.slice(1)
+              setEmployer({
+                ...employer,
+                rolesHiring: occupation
+                  ? [occupation, ...rest.filter((role) => role !== occupation)]
+                  : rest,
+              })
+            }}
+          />
           <div>
             <h2 className="mb-2 text-sm font-semibold">Branchen</h2>
             <div className="flex flex-wrap gap-2">
-              {filledIndustries().map((ind) => (
+              {INDUSTRIES.map((ind) => (
                 <Chip
                   key={ind}
                   active={employer.industries.includes(ind)}

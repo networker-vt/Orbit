@@ -75,8 +75,9 @@ export function DatenschutzPage() {
       <p>
         Im Firmenverzeichnis stehen Name, Ort und ein Link zur Website oder zu Dry-Hire. Quelle:
         öffentlich zugängliche Firmenangaben und dry-hire.com. Telefonnummern und E-Mail-Adressen
-        der Firmen speichern wir in der App nicht. Zweck: ein Verzeichnis, um Veranstaltungstechnik
-        zu finden. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einem
+        der Firmen speichern wir in der App nicht. Zweck: ein öffentliches Firmenverzeichnis im
+        Marktplatz für jeden Job und jeden Auftrag. Viele Einträge stammen aus der
+        Veranstaltungstechnik, Orbit ist darauf nicht beschränkt. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einem
         Verzeichnis öffentlich bekannter Geschäftsdaten). Empfänger: Besucherinnen und Besucher der
         App. Speicherdauer: bis die nächste Version den Eintrag entfernt oder ein Löschwunsch
         eingeht. Löschung und Berichtigung: E-Mail an{' '}

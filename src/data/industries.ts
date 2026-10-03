@@ -121,5 +121,5 @@ export const AGGREGATOR_SOURCES = [
 
 export type AggregatorId = (typeof AGGREGATOR_SOURCES)[number]['id']
 
-export const ORBIT_TAGLINE_DE = 'Dein Orbit für Arbeit — Matching statt Spam.'
+export const ORBIT_TAGLINE_DE = 'Marktplatz für jeden Job und jeden Auftrag.'
 export const ORBIT_BRAND = 'Orbit'
