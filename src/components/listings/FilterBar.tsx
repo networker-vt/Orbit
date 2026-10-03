@@ -1,4 +1,6 @@
-import { CITIES, CRAFTS } from '../../data/constants'
+import { CITIES } from '../../data/constants'
+import { JobSelect } from '../profile/JobSelect'
+import { useI18n } from '../../lib/i18n'
 import type { ListingFilters, ListingKind, Vertical } from '../../types'
 import { Input, Select } from '../ui/Input'
 import { cn } from '../../lib/utils'
@@ -16,6 +18,7 @@ export function FilterBar({
   showRate?: boolean
   sticky?: boolean
 }) {
+  const { t } = useI18n()
   return (
     <div
       className={cn(
@@ -41,17 +44,13 @@ export function FilterBar({
           </option>
         ))}
       </Select>
-      <Select
+      <JobSelect
         value={value.craft ?? ''}
-        onChange={(e) => onChange({ ...value, craft: e.target.value || undefined })}
-      >
-        <option value="">Alle Gewerke</option>
-        {CRAFTS.map((c) => (
-          <option key={c} value={c}>
-            {c}
-          </option>
-        ))}
-      </Select>
+        allowCustom={false}
+        showHint={false}
+        emptyLabel={t('job.all')}
+        onChange={(craft) => onChange({ ...value, craft: craft || undefined })}
+      />
       <Select
         value={value.kind ?? 'all'}
         onChange={(e) =>

@@ -3,9 +3,9 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Input, Select, Textarea } from '../components/ui/Input'
 import { MarketRateHint } from '../components/listings/MarketRateHint'
+import { JobSelect } from '../components/profile/JobSelect'
 import {
   CITIES,
-  CRAFTS,
   EXPENSES_OPTIONS,
   MARKET_RATE,
   OVERNIGHT_OPTIONS,
@@ -314,7 +314,7 @@ function FullCreateListing() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [city, setCity] = useState(profile?.city ?? 'Berlin')
-  const [craft, setCraft] = useState<string>(CRAFTS[0])
+  const [craft, setCraft] = useState('')
   const [priceFrom, setPriceFrom] = useState('')
   const [priceUnit, setPriceUnit] = useState('Tag')
   const [dateFrom, setDateFrom] = useState('')
@@ -472,13 +472,7 @@ function FullCreateListing() {
               </option>
             ))}
           </Select>
-          <Select label="Gewerk / Rolle" value={craft} onChange={(e) => setCraft(e.target.value)}>
-            {CRAFTS.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </Select>
+          <JobSelect label="Beruf / Rolle" value={craft} onChange={setCraft} showHint={false} />
         </div>
 
         {vertical === 'transporter' && (

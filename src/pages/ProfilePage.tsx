@@ -4,7 +4,9 @@ import { Heart, Gift, Wallet } from 'lucide-react'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Input, Select, Textarea } from '../components/ui/Input'
-import { CITIES, CRAFTS, ROLE_LABELS } from '../data/constants'
+import { CITIES, ROLE_LABELS } from '../data/constants'
+import { JobSelect } from '../components/profile/JobSelect'
+import { getPrefs, savePrefs } from '../lib/prefs'
 import { useAuth } from '../lib/auth'
 import { store, resetStore } from '../lib/store'
 import { giftWalletHref } from '../lib/gift'
@@ -15,11 +17,12 @@ import { verificationLabel } from '../lib/utils'
 import type { Role } from '../types'
 
 export function ProfilePage() {
+  const { t } = useI18n()
   const { profile, user, updateProfile, logout, loginDemo } = useAuth()
   const navigate = useNavigate()
   const [bio, setBio] = useState(profile?.bio ?? '')
   const [city, setCity] = useState(profile?.city ?? 'Berlin')
-  const [craft, setCraft] = useState<string>(profile?.crafts[0] ?? CRAFTS[0])
+  const [craft, setCraft] = useState<string>(profile?.crafts[0] || getPrefs().seeker.occupation || '')
   const [travelRadiusKm, setTravelRadiusKm] = useState(
     profile?.travelRadiusKm?.toString() ?? '200',
   )
@@ -60,6 +63,7 @@ export function ProfilePage() {
     }
     updateProfile(next)
     store.upsertProfile(next)
+    savePrefs({ seeker: { ...getPrefs().seeker, occupation: craft } })
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -122,13 +126,7 @@ export function ProfilePage() {
             </option>
           ))}
         </Select>
-        <Select label="Haupt-Gewerk" value={craft} onChange={(e) => setCraft(e.target.value)}>
-          {CRAFTS.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </Select>
+        <JobSelect label={t('job.label')} value={craft} onChange={setCraft} />
         <Input
           label="Reise-Radius (km)"
           type="number"
