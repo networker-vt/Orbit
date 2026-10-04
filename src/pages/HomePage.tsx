@@ -18,6 +18,7 @@ import {
 import { getCompany, subscribeCompany } from '../lib/company'
 import { isCompanySide, getPrefs, savePrefs, subscribePrefs } from '../lib/prefs'
 import { LIFE_EXAMPLES, alcoholChoiceBlocked, type LifeExample } from '../lib/lifeHome'
+import { sentenceOpensParkmerke } from '../lib/parkmerkeIntent'
 import { hasConfirmedAdult } from '../lib/ageGate'
 import { subscribeBehavior } from '../lib/behavior'
 import { subscribeChannels } from '../lib/channels'
@@ -139,6 +140,10 @@ export function HomePage() {
     if (busy) return
     if (!q) {
       if (getPrefs().seeker.lifeExamples.length > 0) navigate('/match')
+      return
+    }
+    if (sentenceOpensParkmerke(q)) {
+      navigate('/parkmerke')
       return
     }
     const current = getPrefs()

@@ -76,6 +76,7 @@ const TicketPage = lazy(() => import('./pages/TicketPage').then((m) => ({ defaul
 const CampusPage = lazy(() => import('./pages/CampusPage').then((m) => ({ default: m.CampusPage })))
 const KidsPage = lazy(() => import('./pages/KidsPage').then((m) => ({ default: m.KidsPage })))
 const EntdeckerPage = lazy(() => import('./pages/EntdeckerPage').then((m) => ({ default: m.EntdeckerPage })))
+const ParkmerkePage = lazy(() => import('./pages/ParkmerkePage').then((m) => ({ default: m.ParkmerkePage })))
 
 function MessagesToSocial() {
   const { threadId } = useParams()
@@ -143,6 +144,7 @@ function AppReady() {
               <Route path="auth" element={<AuthPage />} />
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="mehr" element={<MehrPage />} />
+              <Route path="parkmerke" element={<ParkmerkePage />} />
               <Route path="campus" element={<FlagRoute flag="campus"><CampusPage /></FlagRoute>} />
               <Route path="lernen" element={<Navigate to={isFlagOn('campus') ? '/campus' : '/'} replace />} />
               <Route path="kids" element={<FlagRoute flag="kids"><KidsPage /></FlagRoute>} />
