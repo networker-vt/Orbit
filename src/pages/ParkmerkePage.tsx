@@ -31,12 +31,11 @@ import { cn } from '../lib/utils'
 const COPY = {
   title: 'Parkmerke',
   lead: 'Merkt sich auf diesem Gerät, wo das Auto steht und wann die Zeit endet.',
-  honest: 'Nur das eigene Foto, der eigene Standort und die eigene Zeit. Andere Autos oder Orte werden nicht gezeigt.',
-  local: 'Nur auf diesem Gerät gespeichert.',
-  offline: 'Offline. Der gespeicherte Platz bleibt auf diesem Gerät.',
+  local: 'Foto, Pin und Zeit bleiben auf diesem Gerät.',
+  offline: 'Offline. Foto, Pin und Zeit bleiben auf diesem Gerät.',
   empty: 'Noch kein Platz auf diesem Gerät.',
   photo: 'Foto',
-  photoHint: 'Ein Foto vom eigenen Auto oder vom Platz. Es bleibt auf diesem Gerät.',
+  photoHint: 'Bitte kein fremdes Kennzeichen ins Bild nehmen.',
   camera: 'Kamera',
   gallery: 'Galerie',
   where: 'Standort',
@@ -57,9 +56,10 @@ const COPY = {
   ended: 'Die Parkzeit ist vorbei.',
   soon: 'Die Parkzeit endet bald.',
   ends: 'Ende',
-  mapMiss: 'Die Kartenbilder sind ohne Netz nur da, wenn sie schon auf diesem Gerät liegen.',
-  mapFail: 'Die Kartenbilder sind gerade nicht erreichbar. Der Pin bleibt auf diesem Gerät.',
-  mapCredit: 'Kartenbilder © OpenStreetMap',
+  mapNotice: 'Die Kartenbilder kommen von OpenStreetMap. An ihnen ist die Kartenstelle erkennbar.',
+  mapMiss: 'Ohne Netz sind die Kartenbilder nur da, wenn sie schon geladen wurden.',
+  mapFail: 'Die Kartenbilder sind gerade nicht erreichbar.',
+  mapCredit: '© OpenStreetMap-Mitwirkende',
   needPhoto: 'Bitte ein Foto wählen.',
   needPin: 'Bitte den eigenen Standort als Pin setzen.',
   needTime: 'Bitte eine Parkzeit oder ein Ende wählen.',
@@ -111,6 +111,15 @@ function useOnline() {
   return online
 }
 
+function noticeIsVisible(node: HTMLElement | null): boolean {
+  if (!node?.isConnected) return false
+  const text = node.textContent ?? ''
+  if (!text.includes(COPY.mapNotice)) return false
+  const style = window.getComputedStyle(node)
+  if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false
+  return true
+}
+
 function SpotMap({
   lat,
   lng,
@@ -122,9 +131,17 @@ function SpotMap({
   persist: boolean
   online: boolean
 }) {
+  const noticeRef = useRef<HTMLParagraphElement>(null)
+  const [mayLoad, setMayLoad] = useState(false)
   const [shots, setShots] = useState<{ key: string; url: string; left: number; top: number }[]>([])
   const [miss, setMiss] = useState(false)
+
   useEffect(() => {
+    if (noticeIsVisible(noticeRef.current)) setMayLoad(true)
+  }, [lat, lng, online, persist])
+
+  useEffect(() => {
+    if (!mayLoad || !noticeIsVisible(noticeRef.current)) return
     const ctrl = new AbortController()
     let gone = false
     const urls: string[] = []
@@ -133,7 +150,7 @@ function SpotMap({
     void (async () => {
       const loaded: { key: string; url: string; left: number; top: number }[] = []
       for (const tile of tiles) {
-        if (ctrl.signal.aborted || gone) break
+        if (ctrl.signal.aborted || gone || !noticeIsVisible(noticeRef.current)) break
         const blob = await loadMapTile(tile.z, tile.x, tile.y, online, ctrl.signal, persist)
         if (!blob || gone) continue
         const url = URL.createObjectURL(blob)
@@ -157,10 +174,21 @@ function SpotMap({
       ctrl.abort()
       for (const url of urls) URL.revokeObjectURL(url)
     }
-  }, [lat, lng, persist, online])
+  }, [mayLoad, lat, lng, persist, online])
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1" data-park-map-block="1">
+      <p ref={noticeRef} data-park-map-notice="1" className="text-sm text-ink">
+        {COPY.mapNotice}
+      </p>
+      <a
+        href="https://www.openstreetmap.org/copyright"
+        className="text-xs text-muted underline"
+        rel="noreferrer"
+        data-park-map-credit="1"
+      >
+        {COPY.mapCredit}
+      </a>
       <div
         data-park-map="1"
         className="relative h-56 overflow-hidden rounded-2xl border border-border bg-surface-2"
@@ -182,20 +210,26 @@ function SpotMap({
           aria-label="Eigener Standort"
           className="pointer-events-none absolute left-1/2 top-1/2 z-10 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-rose-600 shadow"
         />
-        {miss && (
+        {mayLoad && miss && (
           <p className="absolute inset-x-3 bottom-3 text-xs text-muted" data-park-map-miss="1">
             {online ? COPY.mapFail : COPY.mapMiss}
           </p>
         )}
       </div>
-      {shots.length > 0 && (
-        <a
-          href="https://www.openstreetmap.org/copyright"
-          className="text-xs text-muted underline"
-          rel="noreferrer"
-        >
-          {COPY.mapCredit}
-        </a>
+    </div>
+  )
+}
+
+function DeviceMemoryNote({ online }: { online: boolean }) {
+  return (
+    <div className="space-y-1">
+      <p className="text-sm text-muted" data-park-storage="local">
+        {COPY.local}
+      </p>
+      {!online && (
+        <p className="text-sm text-ink" data-park-offline="1" role="status">
+          {COPY.offline}
+        </p>
       )}
     </div>
   )
@@ -412,15 +446,6 @@ export function ParkmerkePage() {
       <header className="space-y-2">
         <h1 className="text-2xl font-bold tracking-tight">{COPY.title}</h1>
         <p className="text-sm text-ink">{COPY.lead}</p>
-        <p className="text-sm text-muted">{COPY.honest}</p>
-        <p className="text-sm text-muted" data-park-storage="local">
-          {COPY.local}
-        </p>
-        {!online && (
-          <p className="text-sm text-ink" data-park-offline="1" role="status">
-            {COPY.offline}
-          </p>
-        )}
         <p className="text-xs text-muted">{COPY.notify}</p>
       </header>
 
@@ -432,33 +457,39 @@ export function ParkmerkePage() {
 
       {showSaved && spot && (
         <section className="space-y-3" data-park-saved="1" aria-label="Gespeicherter Platz">
-          {savedUrl && (
-            <img src={savedUrl} alt={COPY.photoAlt} className="max-h-64 w-full rounded-2xl object-cover" data-park-photo="1" />
-          )}
+          <div className="space-y-3" data-park-memory="1">
+            {savedUrl && (
+              <img src={savedUrl} alt={COPY.photoAlt} className="max-h-64 w-full rounded-2xl object-cover" data-park-photo="1" />
+            )}
+            <p className="text-xs text-muted" data-park-photo-hint="1">
+              {COPY.photoHint}
+            </p>
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wider text-muted">{COPY.remaining}</p>
+              <p className="text-3xl font-bold tracking-tight" data-park-remaining={formatRemaining(remainingMs(spot.endsAt, now))}>
+                {formatRemaining(remainingMs(spot.endsAt, now))}
+              </p>
+              <p className="text-sm text-muted">
+                {COPY.ends}: {formatEnd(spot.endsAt)}
+              </p>
+            </div>
+            <WarningLine phase={phase} />
+            <DeviceMemoryNote online={online} />
+            <div className="flex flex-wrap gap-2">
+              {!composing && (
+                <Button type="button" variant="secondary" data-park-new="1" onClick={() => setComposing(true)}>
+                  {COPY.replace}
+                </Button>
+              )}
+              <Button type="button" variant="danger" data-park-delete="1" onClick={() => void onDelete()}>
+                {COPY.delete}
+              </Button>
+            </div>
+          </div>
           <SpotMap lat={spot.lat} lng={spot.lng} persist online={online} />
           <p className="text-sm text-muted" data-park-coords={formatPin(spot.lat, spot.lng)}>
             {formatPin(spot.lat, spot.lng)}
           </p>
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-muted">{COPY.remaining}</p>
-            <p className="text-3xl font-bold tracking-tight" data-park-remaining={formatRemaining(remainingMs(spot.endsAt, now))}>
-              {formatRemaining(remainingMs(spot.endsAt, now))}
-            </p>
-            <p className="text-sm text-muted">
-              {COPY.ends}: {formatEnd(spot.endsAt)}
-            </p>
-          </div>
-          <WarningLine phase={phase} />
-          <div className="flex flex-wrap gap-2">
-            {!composing && (
-              <Button type="button" variant="secondary" data-park-new="1" onClick={() => setComposing(true)}>
-                {COPY.replace}
-              </Button>
-            )}
-            <Button type="button" variant="danger" data-park-delete="1" onClick={() => void onDelete()}>
-              {COPY.delete}
-            </Button>
-          </div>
         </section>
       )}
 
@@ -509,7 +540,9 @@ export function ParkmerkePage() {
         >
           <fieldset className="space-y-2">
             <legend className="text-sm font-semibold">{COPY.photo}</legend>
-            <p className="text-xs text-muted">{COPY.photoHint}</p>
+            <p className="text-xs text-muted" data-park-photo-hint="1">
+              {COPY.photoHint}
+            </p>
             {draftUrl && (
               <img src={draftUrl} alt={COPY.photoAlt} className="max-h-48 w-full rounded-2xl object-cover" data-park-draft="1" />
             )}
@@ -536,19 +569,6 @@ export function ParkmerkePage() {
                 />
               </label>
             </div>
-          </fieldset>
-
-          <fieldset className="space-y-2">
-            <legend className="text-sm font-semibold">{COPY.where}</legend>
-            <Button type="button" variant="secondary" data-park-locate="1" onClick={() => void onLocate()} disabled={locating}>
-              {locating ? COPY.locating : COPY.locate}
-            </Button>
-            {pin && (
-              <p className="text-sm text-muted" data-park-draft-coords={formatPin(pin.lat, pin.lng)}>
-                {formatPin(pin.lat, pin.lng)}
-              </p>
-            )}
-            {pin && !spot && <SpotMap lat={pin.lat} lng={pin.lng} persist={false} online={online} />}
           </fieldset>
 
           <fieldset className="space-y-2">
@@ -588,6 +608,20 @@ export function ParkmerkePage() {
                 className="mt-1 w-full rounded-xl border border-border bg-surface-2 px-3 py-2 text-base text-ink"
               />
             </label>
+            <DeviceMemoryNote online={online} />
+          </fieldset>
+
+          <fieldset className="space-y-2">
+            <legend className="text-sm font-semibold">{COPY.where}</legend>
+            <Button type="button" variant="secondary" data-park-locate="1" onClick={() => void onLocate()} disabled={locating}>
+              {locating ? COPY.locating : COPY.locate}
+            </Button>
+            {pin && (
+              <p className="text-sm text-muted" data-park-draft-coords={formatPin(pin.lat, pin.lng)}>
+                {formatPin(pin.lat, pin.lng)}
+              </p>
+            )}
+            {pin && !spot && <SpotMap lat={pin.lat} lng={pin.lng} persist={false} online={online} />}
           </fieldset>
 
           <Button type="submit" data-park-save="1">

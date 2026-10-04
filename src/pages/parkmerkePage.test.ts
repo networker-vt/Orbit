@@ -94,13 +94,23 @@ describe('Parkmerke screen', () => {
     Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => online })
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
-      recorded.push({ url, method: init?.method ?? 'GET', body: init?.body ?? null })
+      const notice = document.querySelector('[data-park-map-notice]')
+      const style = notice ? window.getComputedStyle(notice) : null
+      const noticeVisible = Boolean(
+        notice?.isConnected &&
+          notice.textContent?.includes('Die Kartenbilder kommen von OpenStreetMap. An ihnen ist die Kartenstelle erkennbar.') &&
+          style &&
+          style.display !== 'none' &&
+          style.visibility !== 'hidden' &&
+          style.opacity !== '0',
+      )
+      recorded.push({ url, method: init?.method ?? 'GET', body: init?.body ?? null, noticeVisible })
       return new Response(new Blob(['png'], { type: 'image/png' }))
     })
     await resetParkmerkeStore()
   })
 
-  const recorded: { url: string; method: string; body: unknown }[] = []
+  const recorded: { url: string; method: string; body: unknown; noticeVisible: boolean }[] = []
 
   beforeEach(() => {
     recorded.length = 0
@@ -119,14 +129,26 @@ describe('Parkmerke screen', () => {
     expect(host.querySelector('[data-park-ready="1"]')).toBeTruthy()
     expect(host.querySelector('[data-orbi-kind]')).toBeNull()
     expect(host.querySelector('[data-park-offline="1"]')?.textContent).toContain('Offline')
-    expect(host.querySelector('[data-park-storage="local"]')?.textContent).toContain('diesem Gerät')
-    expect(host.textContent).not.toMatch(/reservier|gebucht|buchen|bezahl|kennzeichen|preis/i)
+    expect(host.querySelector('[data-park-storage="local"]')?.textContent).toBe(
+      'Foto, Pin und Zeit bleiben auf diesem Gerät.',
+    )
+    expect(host.textContent).toContain('Bitte kein fremdes Kennzeichen ins Bild nehmen.')
+    expect(host.textContent).not.toMatch(/Andere Autos|werden nicht gezeigt|Nur auf diesem Gerät gespeichert/i)
+    expect(host.textContent).not.toMatch(/reservier|gebucht|buchen|bezahl|preis/i)
+    expect(host.querySelector('[data-park-map-block]')).toBeNull()
 
     const input = host.querySelector('[data-park-gallery]') as HTMLInputElement
     await act(async () => {
       choosePhoto(input, 'blue-car')
     })
     await click(host, '[data-park-locate]')
+    const block = host.querySelector('[data-park-map-block]')
+    expect(block?.textContent).toContain(
+      'Die Kartenbilder kommen von OpenStreetMap. An ihnen ist die Kartenstelle erkennbar.',
+    )
+    expect(block?.querySelector('[data-park-map-credit]')?.textContent).toBe('© OpenStreetMap-Mitwirkende')
+    expect(block?.textContent).not.toContain('bleiben auf diesem Gerät')
+    expect(block?.contains(host.querySelector('[data-park-storage="local"]'))).toBe(false)
     await click(host, '[data-park-preset="60"]')
     await click(host, '[data-park-save]')
 
@@ -134,6 +156,10 @@ describe('Parkmerke screen', () => {
     expect(host.querySelector('[data-park-photo="1"]')).toBeTruthy()
     expect(host.querySelector('[data-park-remaining]')?.getAttribute('data-park-remaining')).toMatch(/^(1:00:00|59:5)/)
     expect(host.querySelector('[data-park-coords]')?.getAttribute('data-park-coords')).toBe('52.52000, 13.40500')
+    const savedMap = host.querySelector('[data-park-map-block]')
+    expect(savedMap?.querySelector('[data-park-map-credit]')?.textContent).toBe('© OpenStreetMap-Mitwirkende')
+    expect(savedMap?.contains(host.querySelector('[data-park-storage="local"]'))).toBe(false)
+    expect(host.querySelector('[data-park-memory]')?.contains(host.querySelector('[data-park-storage="local"]'))).toBe(true)
     const stored = await loadParkingSpot()
     expect(await stored?.photo.text()).toBe('blue-car')
     expect(geo.watchPosition).not.toHaveBeenCalled()
@@ -243,11 +269,23 @@ describe('Parkmerke screen', () => {
       choosePhoto(input, 'tile-car')
     })
     await click(host, '[data-park-locate]')
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 50))
-    })
+    for (let i = 0; i < 20 && recorded.length === 0; i += 1) {
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 20))
+      })
+    }
+    const notice = host.querySelector('[data-park-map-notice]')
+    expect(notice?.textContent).toBe('Die Kartenbilder kommen von OpenStreetMap. An ihnen ist die Kartenstelle erkennbar.')
+    const noticeStyle = window.getComputedStyle(notice as Element)
+    expect(noticeStyle.display).not.toBe('none')
+    expect(noticeStyle.visibility).not.toBe('hidden')
+    expect(host.querySelector('[data-park-map-credit]')?.textContent).toBe('© OpenStreetMap-Mitwirkende')
+    expect(host.querySelector('[data-park-map-block]')?.contains(host.querySelector('[data-park-storage="local"]'))).toBe(
+      false,
+    )
     expect(recorded.length).toBeGreaterThan(0)
     for (const call of recorded) {
+      expect(call.noticeVisible).toBe(true)
       expect(call.method).toBe('GET')
       expect(call.body).toBeNull()
       expect(isOsmTileGet(call.url)).toBe(true)
@@ -260,5 +298,28 @@ describe('Parkmerke screen', () => {
     const before = recorded.length
     await new Promise((resolve) => setTimeout(resolve, 30))
     expect(recorded.length).toBe(before)
+  })
+
+  it('does not request a map image while the OpenStreetMap notice is hidden', async () => {
+    online = true
+    mockGeo(52.52, 13.405)
+    const realStyle = window.getComputedStyle.bind(window)
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element: Element) => {
+      if (element instanceof HTMLElement && element.getAttribute('data-park-map-notice') === '1') {
+        return { display: 'none', visibility: 'visible', opacity: '1' } as CSSStyleDeclaration
+      }
+      return realStyle(element)
+    })
+    const host = await mount()
+    const input = host.querySelector('[data-park-gallery]') as HTMLInputElement
+    await act(async () => {
+      choosePhoto(input, 'hidden-notice')
+    })
+    await click(host, '[data-park-locate]')
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 80))
+    })
+    expect(host.querySelector('[data-park-map-notice]')?.textContent).toContain('OpenStreetMap')
+    expect(recorded).toEqual([])
   })
 })
