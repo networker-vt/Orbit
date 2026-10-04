@@ -123,7 +123,7 @@ export function MeinPage() {
   const toggleJobType = (jt: (typeof JOB_TYPES)[number]) => {
     const cur = prefs.seeker.jobTypes
     const next = cur.includes(jt) ? cur.filter((x) => x !== jt) : [...cur, jt]
-    savePrefs({ seeker: { ...prefs.seeker, jobTypes: next } })
+    savePrefs({ seeker: { ...prefs.seeker, jobTypes: next, jobTypesChosen: true } })
   }
 
   const onDoc = async (file: File | undefined) => {

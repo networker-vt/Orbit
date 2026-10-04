@@ -1,27 +1,30 @@
 import type { Listing, Profile } from '../types'
+import {
+  hasRealLifeChoice,
+  lifeExampleHit,
+  lifeHay,
+  listingIsAlcohol,
+  pretendsFulfilled,
+  sentenceHit,
+  type LifeChoice,
+} from './lifeHome'
 
 /** What Prefs stored. Match does not import the occupation catalog. */
-export interface OccupationIntent {
+export interface OccupationIntent extends LifeChoice {
   occupations?: string[]
   occupationTerms?: string[]
   occupationOther?: string
   industries?: string[]
+  lifeExamples?: string[]
+  lifeSentence?: string
 }
 
 export function hasOccupationIntent(intent: OccupationIntent | null | undefined): boolean {
-  if (!intent) return false
-  if ((intent.occupations?.length ?? 0) > 0) return true
-  if ((intent.occupationTerms?.length ?? 0) > 0) return true
-  if ((intent.occupationOther ?? '').trim().length > 1) return true
-  if ((intent.industries?.length ?? 0) > 0) return true
-  return false
+  return hasRealLifeChoice(intent)
 }
 
 export function occupationHaystack(parts: Array<string | undefined | null>): string {
-  return parts
-    .filter((part): part is string => Boolean(part))
-    .join(' ')
-    .toLowerCase()
+  return lifeHay(parts)
 }
 
 function termHit(hay: string, intent: OccupationIntent): boolean {
@@ -45,24 +48,52 @@ export function listingMatchesOccupationIntent(listing: Listing, intent: Occupat
     listing.title,
     listing.description,
     listing.industry,
-    listing.city,
     ...(listing.tags ?? []),
     ...(listing.crafts ?? []),
   ])
+  if (lifeExampleHit(hay, intent.lifeExamples)) return true
+  if (sentenceHit(hay, intent.lifeSentence)) return true
   if (termHit(hay, intent)) return true
-  return industryHit(listing.industry, intent.industries)
+  if ((intent.occupations?.length ?? 0) > 0) return industryHit(listing.industry, intent.industries)
+  return false
+}
+
+export function listingVisibleForChoice(listing: Listing, intent: OccupationIntent, adult: boolean): boolean {
+  if (pretendsFulfilled(listing)) return false
+  if (!adult && listingIsAlcohol(listing)) return false
+  return listingMatchesOccupationIntent(listing, intent)
 }
 
 export function profileMatchesOccupationIntent(profile: Profile, intent: OccupationIntent): boolean {
   if (!hasOccupationIntent(intent)) return false
+  if ((intent.lifeExamples?.length ?? 0) > 0 || (intent.lifeSentence ?? '').trim().length > 1) {
+    if ((intent.occupations?.length ?? 0) === 0 && (intent.occupationTerms?.length ?? 0) === 0 && !(intent.occupationOther ?? '').trim()) {
+      return false
+    }
+  }
   const hay = occupationHaystack([
     profile.name,
     profile.bio,
     profile.role,
     profile.companyName,
-    profile.city,
     ...(profile.crafts ?? []),
     ...(profile.certifications ?? []),
   ])
   return termHit(hay, intent)
+}
+
+export function intentForMatch(prefs: {
+  side: string
+  seeker: OccupationIntent
+  employer: OccupationIntent
+}): OccupationIntent {
+  const side = prefs.side === 'employer' ? prefs.employer : prefs.seeker
+  return {
+    occupations: side.occupations,
+    occupationTerms: side.occupationTerms,
+    occupationOther: side.occupationOther,
+    industries: side.industries,
+    lifeExamples: prefs.seeker.lifeExamples,
+    lifeSentence: prefs.seeker.lifeSentence,
+  }
 }
