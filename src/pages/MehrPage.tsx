@@ -31,6 +31,19 @@ export function MehrPage() {
 
       <TileGrid tiles={tiles} label={t('mehr.tiles')} />
 
+      <section className="space-y-1" aria-label="Parkmerke">
+        <Link
+          to="/parkmerke"
+          data-parkmerke-entry="1"
+          className="inline-flex min-h-11 items-center text-sm font-medium text-ink hover:underline"
+        >
+          Parkmerke
+        </Link>
+        <p className="max-w-sm text-sm text-muted">
+          Merkt sich auf diesem Gerät, wo das Auto steht und wann die Zeit endet.
+        </p>
+      </section>
+
       <nav className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted" aria-label={t('mehr.legal')}>
         <Link to="/impressum" className="hover:text-ink">
           {t('footer.impressum')}
