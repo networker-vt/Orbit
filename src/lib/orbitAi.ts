@@ -10,6 +10,11 @@ import {
   type SafetyBlockReason,
 } from './orbitAiSafety'
 import { helpText, parseLocalToolCall, type OrbitAiToolCall } from './orbitAiTools'
+import {
+  buildWebSearchOffer,
+  shouldOfferWebSearch,
+  type OrbitAiWebSearchOffer,
+} from './orbitAiWebSearch'
 
 export type OrbitAiOutcomeKind = 'blocked' | 'reply' | 'navigate' | 'plan'
 
@@ -20,6 +25,18 @@ export interface OrbitAiOutcome {
   plan?: AssistPlan | null
   source: 'local' | 'llm' | 'assist'
   blockedReason?: SafetyBlockReason
+  webSearch?: OrbitAiWebSearchOffer
+}
+
+function withWebSearchFallback(
+  outcome: OrbitAiOutcome,
+  userText: string,
+  locale: 'de' | 'en',
+): OrbitAiOutcome {
+  if (!shouldOfferWebSearch(outcome, userText, locale)) return outcome
+  const webSearch = buildWebSearchOffer(userText, locale)
+  if (!webSearch) return outcome
+  return { ...outcome, webSearch }
 }
 
 function llmConfigured() {
@@ -162,7 +179,11 @@ export async function runOrbitAi(input: {
         locale,
         input.signal,
       )
-      return { kind: 'plan', reply, plan, source: 'assist', navigateTo }
+      return withWebSearchFallback(
+        { kind: 'plan', reply, plan, source: 'assist', navigateTo },
+        text,
+        locale,
+      )
     }
 
     if (navigateTo) {
@@ -179,7 +200,7 @@ export async function runOrbitAi(input: {
       return { kind: 'blocked', reply, source: 'llm', blockedReason: llmSafety.reason }
     }
     appendOrbitAiMessage('assistant', llm)
-    return { kind: 'reply', reply: llm, source: 'llm' }
+    return withWebSearchFallback({ kind: 'reply', reply: llm, source: 'llm' }, text, locale)
   }
 
   const plan = await buildAssistPlan(text, locale, input.signal)
@@ -192,5 +213,9 @@ export async function runOrbitAi(input: {
         ? plan.summary
         : 'I did not catch that. Try “Help” or “Open Match”.'
   appendOrbitAiMessage('assistant', reply)
-  return { kind: plan ? 'plan' : 'reply', reply, plan, source: 'assist' }
+  return withWebSearchFallback(
+    { kind: plan ? 'plan' : 'reply', reply, plan, source: 'assist' },
+    text,
+    locale,
+  )
 }

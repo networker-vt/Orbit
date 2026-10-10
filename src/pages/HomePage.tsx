@@ -24,6 +24,8 @@ import { NewsStrip } from '../components/home/NewsStrip'
 import { isDemo } from '../lib/flags'
 import { runOrbitAi } from '../lib/orbitAi'
 import { OrbitAiReply } from '../components/home/OrbitAiReply'
+import { OrbitAiWebSearch } from '../components/home/OrbitAiWebSearch'
+import type { OrbitAiWebSearchOffer } from '../lib/orbitAiWebSearch'
 import { getResume, subscribeResume } from '../lib/resume'
 import { dueReminders, subscribeReminders, tapReminder } from '../lib/reminders'
 import { rankHomeNews } from '../lib/homeSuggestions'
@@ -59,6 +61,7 @@ export function HomePage() {
   const [assistNote, setAssistNote] = useState<string | null>(null)
   const [aiReply, setAiReply] = useState<string | null>(null)
   const [aiBlocked, setAiBlocked] = useState(false)
+  const [aiWebSearch, setAiWebSearch] = useState<OrbitAiWebSearchOffer | null>(null)
   const [orbiBubble, setOrbiBubble] = useState(false)
   const [kids, setKids] = useState(isKidsMode)
   const [tripVoicePick, setTripVoicePick] = useState<1 | 2 | 3 | null>(null)
@@ -149,6 +152,7 @@ export function HomePage() {
     setBusy(true)
     setAssistNote(null)
     setAiBlocked(false)
+    setAiWebSearch(null)
     try {
       const outcome = await runOrbitAi({
         text: q,
@@ -160,6 +164,7 @@ export function HomePage() {
       if (outcome.kind === 'blocked') {
         setAiReply(outcome.reply)
         setAiBlocked(true)
+        setAiWebSearch(null)
         setAsk('')
         return
       }
@@ -171,6 +176,7 @@ export function HomePage() {
         return
       }
       setAiReply(outcome.reply)
+      setAiWebSearch(outcome.webSearch ?? null)
       if (outcome.plan) setPlan(outcome.plan)
       if (outcome.navigateTo) navigate(outcome.navigateTo)
     } finally {
@@ -274,6 +280,7 @@ export function HomePage() {
             />
           </label>
           {aiReply && <OrbitAiReply text={aiReply} blocked={aiBlocked} />}
+          {aiWebSearch && !aiBlocked && <OrbitAiWebSearch offer={aiWebSearch} />}
           {assistNote && <p className="text-xs text-amber-200">{assistNote}</p>}
           <div className="flex items-center gap-2">
             {canListen() && (

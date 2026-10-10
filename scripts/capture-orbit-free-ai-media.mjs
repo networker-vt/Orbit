@@ -80,6 +80,16 @@ try {
   await sleep(400)
   await page.screenshot({ path: path.join(outDir, '03-safety-blocked.png'), fullPage: true })
 
+  await page.goto(base, { waitUntil: 'networkidle' })
+  const gkField = page.locator('[data-home-search="1"]')
+  await gkField.click()
+  await gkField.fill('')
+  await gkField.pressSequentially('Was ist Photosynthese?', { delay: 15 })
+  await page.locator('form button[type="submit"]').click()
+  await page.waitForSelector('[data-orbit-ai-web-search="1"]', { timeout: 20_000 })
+  await sleep(500)
+  await page.screenshot({ path: path.join(outDir, '04-web-search-fallback.png'), fullPage: true })
+
   await browser.close()
   console.log('Wrote media to', outDir)
 } finally {
