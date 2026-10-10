@@ -80,6 +80,8 @@ describe('first screen for a new visitor', () => {
     expect(host.querySelectorAll('[data-orbi-bubble]')).toHaveLength(1)
     expect(host.querySelectorAll('[data-home-primary]')).toHaveLength(1)
     expect(host.querySelector('[data-news-ticker]')).toBeTruthy()
+    expect(host.querySelector('[data-home-pins]')).toBeTruthy()
+    expect(host.querySelector('[data-home-pins]')?.getAttribute('data-home-pins')).toBe('0')
     const discover = host.querySelector('[data-home-discover]')
     expect(discover).toBeTruthy()
     expect(discover?.querySelector('[data-tile-icon-size="lg"]')).toBeTruthy()

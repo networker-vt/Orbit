@@ -24,6 +24,7 @@ import { sentenceOpensParkmerke } from '../lib/parkmerkeIntent'
 import { hasConfirmedAdult } from '../lib/ageGate'
 import { subscribeBehavior } from '../lib/behavior'
 import { subscribeChannels } from '../lib/channels'
+import { HomePins } from '../components/home/HomePins'
 import { NewsStrip } from '../components/home/NewsStrip'
 import { consumeAssistTurn } from '../lib/credits'
 import { isDemo, isFlagOn } from '../lib/flags'
@@ -336,6 +337,9 @@ export function HomePage() {
       </div>
 
       <NewsStrip items={newsItems} />
+
+      {/* Shared slot: Mein Orbit writes via `orbit_home_pins_v1` / src/lib/homePins.ts */}
+      <HomePins />
 
       <section className="space-y-3 pt-2" aria-labelledby="mehr-entdecken">
         <h2 id="mehr-entdecken" className="text-xs font-medium uppercase tracking-wider text-muted">
