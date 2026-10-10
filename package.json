@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "build:ios": "CAPACITOR=1 tsc -b && CAPACITOR=1 vite build",
     "cap:sync": "npm run build:ios && npx cap sync ios",
+    "cap:sync:android": "npm run build:ios && npx cap sync android",
     "lint": "oxlint",
     "test": "vitest run && node --test scripts/emit-pages-legal.test.mjs scripts/ios-testflight.test.mjs scripts/parkmerke-boundary.test.mjs && node scripts/check-public-bundle.mjs",
     "preview": "vite preview",
@@ -15,6 +16,7 @@
     "build:zip": "npm run build && node scripts/check-public-bundle.mjs && cp dist/index.html dist/404.html && bash scripts/emit-pages-legal.sh dist && cd dist && zip -r ../orbit-web.zip ."
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.3",
     "@capacitor/app": "^8.1.1",
     "@capacitor/core": "^8.5.2",
     "@capacitor/keyboard": "^8.0.5",

@@ -14,7 +14,9 @@ import {
   clearBiometricUnlock,
   randomUnlockToken,
   storeBiometricUnlockToken,
+  type BiometricPromptLabels,
 } from './biometricUnlock'
+import { registerWebAuthnUnlock, unlockWithWebAuthn } from './webAuthnUnlock'
 import { buildOtpAuthUri, generateTotpSecret, verifyTotpCode } from './totpAuth'
 
 export interface UserSecurityRecord {
@@ -23,8 +25,11 @@ export interface UserSecurityRecord {
   totpEnabled?: boolean
   backupCodeHashes?: string[]
   biometricEnabled?: boolean
-  /** Matches secure enclave token when biometrics enabled. */
+  /** Matches secure enclave token when native biometrics enabled. */
   biometricUnlockToken?: string
+  /** Web/PWA platform authenticator (passkey on this origin). */
+  webAuthnEnabled?: boolean
+  webAuthnCredentialIds?: string[]
 }
 
 const STORE_KEY = 'orbit_account_security_v1'
@@ -84,6 +89,23 @@ export function isTotpEnabled(userId: string): boolean {
 
 export function isBiometricUnlockEnabled(userId: string): boolean {
   return Boolean(recordFor(userId).biometricEnabled)
+}
+
+export function isWebAuthnUnlockEnabled(userId: string): boolean {
+  const r = recordFor(userId)
+  return Boolean(r.webAuthnEnabled && r.webAuthnCredentialIds?.length)
+}
+
+export function isDeviceUnlockEnabled(userId: string): boolean {
+  return isBiometricUnlockEnabled(userId) || isWebAuthnUnlockEnabled(userId)
+}
+
+export type DeviceUnlockMode = 'native' | 'webauthn' | 'none'
+
+export function deviceUnlockMode(userId: string): DeviceUnlockMode {
+  if (isBiometricUnlockEnabled(userId)) return 'native'
+  if (isWebAuthnUnlockEnabled(userId)) return 'webauthn'
+  return 'none'
 }
 
 export async function setUserPassword(userId: string, password: string): Promise<{ ok: boolean; reason?: string }> {
@@ -164,22 +186,80 @@ function generateBackupCodesPlain(): string[] {
   return codes
 }
 
-export async function enableBiometricUnlock(userId: string): Promise<{ ok: boolean; reason?: string }> {
+export async function enableBiometricUnlock(
+  userId: string,
+  labels: BiometricPromptLabels,
+): Promise<{ ok: boolean; reason?: string }> {
   const token = randomUnlockToken()
-  const stored = await storeBiometricUnlockToken(userId, token)
+  const stored = await storeBiometricUnlockToken(userId, token, labels)
   if (!stored) return { ok: false, reason: 'native' }
-  commitUser(userId, { biometricEnabled: true, biometricUnlockToken: token })
+  commitUser(userId, {
+    biometricEnabled: true,
+    biometricUnlockToken: token,
+    webAuthnEnabled: false,
+    webAuthnCredentialIds: undefined,
+  })
   return { ok: true }
 }
 
-export async function disableBiometricUnlock(userId: string) {
+export async function enableWebAuthnUnlock(
+  userId: string,
+  email: string,
+  displayName: string,
+): Promise<{ ok: boolean; reason?: string }> {
+  const res = await registerWebAuthnUnlock(userId, email, displayName)
+  if (!res.ok || !res.credentialId) return { ok: false, reason: 'webauthn' }
   await clearBiometricUnlock(userId)
-  commitUser(userId, { biometricEnabled: false, biometricUnlockToken: undefined })
+  commitUser(userId, {
+    webAuthnEnabled: true,
+    webAuthnCredentialIds: [res.credentialId],
+    biometricEnabled: false,
+    biometricUnlockToken: undefined,
+  })
+  return { ok: true }
+}
+
+export async function disableDeviceUnlock(userId: string) {
+  await clearBiometricUnlock(userId)
+  commitUser(userId, {
+    biometricEnabled: false,
+    biometricUnlockToken: undefined,
+    webAuthnEnabled: false,
+    webAuthnCredentialIds: undefined,
+  })
+}
+
+/** @deprecated use disableDeviceUnlock */
+export async function disableBiometricUnlock(userId: string) {
+  await disableDeviceUnlock(userId)
 }
 
 export function verifyBiometricUnlockToken(userId: string, token: string): boolean {
   const r = recordFor(userId)
   return Boolean(r.biometricEnabled && r.biometricUnlockToken && r.biometricUnlockToken === token)
+}
+
+export async function unlockWithDeviceCredential(
+  userId: string,
+  labels: BiometricPromptLabels,
+): Promise<boolean> {
+  const mode = deviceUnlockMode(userId)
+  if (mode === 'native') {
+    const { unlockWithBiometric } = await import('./biometricUnlock')
+    const res = await unlockWithBiometric(labels)
+    if (!res.ok || !res.token) return false
+    if (!verifyBiometricUnlockToken(userId, res.token)) return false
+    markAppUnlocked(userId)
+    return true
+  }
+  if (mode === 'webauthn') {
+    const ids = recordFor(userId).webAuthnCredentialIds ?? []
+    const ok = await unlockWithWebAuthn(ids)
+    if (!ok) return false
+    markAppUnlocked(userId)
+    return true
+  }
+  return false
 }
 
 interface UnlockSession {

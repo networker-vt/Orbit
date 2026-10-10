@@ -1,17 +1,25 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { Fingerprint, ScanFace } from 'lucide-react'
+import { Fingerprint } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import {
+  defaultBiometricPromptLabels,
+  probeBiometricAvailability,
+  type BiometricKind,
+} from '../../lib/biometricUnlock'
+import {
+  deviceUnlockButtonKey,
+} from '../../lib/deviceUnlockCopy'
+import {
+  deviceUnlockMode,
   hasLocalPassword,
   isAppUnlocked,
-  isBiometricUnlockEnabled,
+  isDeviceUnlockEnabled,
   markAppUnlocked,
   subscribeAccountSecurity,
-  verifyBiometricUnlockToken,
+  unlockWithDeviceCredential,
   verifyUserPassword,
 } from '../../lib/accountSecurity'
-import { probeBiometricAvailability, unlockWithBiometric } from '../../lib/biometricUnlock'
 import { useAuth } from '../../lib/auth'
 import { useI18n } from '../../lib/i18n'
 
@@ -32,12 +40,13 @@ function UnlockScreen({ userId }: { userId: string }) {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-  const [bioKind, setBioKind] = useState<'face' | 'fingerprint' | 'none'>('none')
-  const bioOn = isBiometricUnlockEnabled(userId)
+  const [bioKind, setBioKind] = useState<BiometricKind>('none')
+  const deviceOn = isDeviceUnlockEnabled(userId)
+  const mode = deviceUnlockMode(userId)
 
   useEffect(() => {
     void probeBiometricAvailability().then((r) => {
-      if (r.available && (r.kind === 'face' || r.kind === 'fingerprint')) setBioKind(r.kind)
+      if (r.available) setBioKind(r.kind)
     })
   }, [])
 
@@ -61,34 +70,32 @@ function UnlockScreen({ userId }: { userId: string }) {
     }
   }
 
-  const tryBiometric = async () => {
+  const tryDeviceUnlock = async () => {
     setBusy(true)
     setError(null)
     try {
-      const res = await unlockWithBiometric(t('security.biometricReason'))
-      if (!res.ok || !res.token) {
+      const ok = await unlockWithDeviceCredential(userId, defaultBiometricPromptLabels(t))
+      if (!ok) {
         setError(t('security.biometricFailed'))
         return
       }
-      if (!verifyBiometricUnlockToken(userId, res.token)) {
-        setError(t('security.biometricFailed'))
-        return
-      }
-      unlockOk()
+      setError(null)
     } finally {
       setBusy(false)
     }
   }
+
+  const unlockLabelKey = deviceUnlockButtonKey(bioKind, mode)
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-surface px-4">
       <div className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-surface-2 p-6">
         <h1 className="text-xl font-bold">{t('security.unlockTitle')}</h1>
         <p className="text-sm text-muted">{t('security.unlockLead')}</p>
-        {bioOn && bioKind !== 'none' && (
-          <Button type="button" className="w-full" variant="secondary" disabled={busy} onClick={() => void tryBiometric()}>
-            {bioKind === 'face' ? <ScanFace size={18} className="mr-2 inline" /> : <Fingerprint size={18} className="mr-2 inline" />}
-            {bioKind === 'face' ? t('security.unlockFace') : t('security.unlockFinger')}
+        {deviceOn && (
+          <Button type="button" className="w-full" variant="secondary" disabled={busy} onClick={() => void tryDeviceUnlock()}>
+            <Fingerprint size={18} className="mr-2 inline" aria-hidden />
+            {t(unlockLabelKey)}
           </Button>
         )}
         <form onSubmit={(e) => void submitPassword(e)} className="space-y-3">

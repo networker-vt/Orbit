@@ -1,6 +1,7 @@
 import QRCode from 'qrcode'
 import { useEffect, useState } from 'react'
-import { KeyRound, ShieldCheck, ScanFace } from 'lucide-react'
+import { Capacitor } from '@capacitor/core'
+import { Fingerprint, KeyRound, ShieldCheck } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { useAuth } from '../../lib/auth'
@@ -9,18 +10,22 @@ import {
   beginTotpSetup,
   changeUserPassword,
   confirmTotpSetup,
-  disableBiometricUnlock,
+  disableDeviceUnlock,
   disableTotp,
+  deviceUnlockMode,
   enableBiometricUnlock,
+  enableWebAuthnUnlock,
   getUserSecurity,
   hasLocalPassword,
-  isBiometricUnlockEnabled,
+  isDeviceUnlockEnabled,
   isTotpEnabled,
   setUserPassword,
   subscribeAccountSecurity,
   verifyUserPassword,
 } from '../../lib/accountSecurity'
-import { probeBiometricAvailability } from '../../lib/biometricUnlock'
+import { defaultBiometricPromptLabels, probeBiometricAvailability, type BiometricKind } from '../../lib/biometricUnlock'
+import { deviceUnlockHintKey } from '../../lib/deviceUnlockCopy'
+import { isWebAuthnPlatformAvailable } from '../../lib/webAuthnUnlock'
 
 export function SecuritySettingsPanel() {
   const { t } = useI18n()
@@ -38,7 +43,8 @@ export function SecuritySettingsPanel() {
   const [totpCode, setTotpCode] = useState('')
   const [backupCodes, setBackupCodes] = useState<string[] | null>(null)
   const [bioAvailable, setBioAvailable] = useState(false)
-  const [bioKind, setBioKind] = useState<'face' | 'fingerprint' | 'unknown'>('unknown')
+  const [webAuthnAvailable, setWebAuthnAvailable] = useState(false)
+  const [bioKind, setBioKind] = useState<BiometricKind>('none')
 
   const userId = user?.id ?? ''
   const email = user?.email ?? ''
@@ -48,8 +54,9 @@ export function SecuritySettingsPanel() {
   useEffect(() => {
     void probeBiometricAvailability().then((r) => {
       setBioAvailable(r.available)
-      if (r.kind === 'face' || r.kind === 'fingerprint') setBioKind(r.kind)
+      if (r.available) setBioKind(r.kind)
     })
+    void isWebAuthnPlatformAvailable().then(setWebAuthnAvailable)
   }, [])
 
   useEffect(() => {
@@ -70,8 +77,11 @@ export function SecuritySettingsPanel() {
 
   const hasPwd = hasLocalPassword(userId)
   const totpOn = isTotpEnabled(userId)
-  const bioOn = isBiometricUnlockEnabled(userId)
+  const deviceOn = isDeviceUnlockEnabled(userId)
+  const unlockMode = deviceUnlockMode(userId)
   const sec = getUserSecurity(userId)
+  const canEnableDevice = bioAvailable || webAuthnAvailable
+  const hintKey = deviceUnlockHintKey(bioAvailable, webAuthnAvailable, bioKind)
 
   const savePassword = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -125,11 +135,11 @@ export function SecuritySettingsPanel() {
     setMsg(t('security.totpEnabled'))
   }
 
-  const toggleBio = async () => {
+  const toggleDeviceUnlock = async () => {
     setErr(null)
     setMsg(null)
-    if (bioOn) {
-      await disableBiometricUnlock(userId)
+    if (deviceOn) {
+      await disableDeviceUnlock(userId)
       setMsg(t('security.biometricOff'))
       return
     }
@@ -137,7 +147,7 @@ export function SecuritySettingsPanel() {
       setErr(t('security.biometricNeedsPassword'))
       return
     }
-    if (!bioAvailable) {
+    if (!canEnableDevice) {
       setErr(t('security.biometricUnavailable'))
       return
     }
@@ -145,13 +155,24 @@ export function SecuritySettingsPanel() {
       setErr(t('security.passwordWrong'))
       return
     }
-    const res = await enableBiometricUnlock(userId)
-    if (!res.ok) {
-      setErr(t('security.biometricEnableFailed'))
+    if (Capacitor.isNativePlatform() && bioAvailable) {
+      const res = await enableBiometricUnlock(userId, defaultBiometricPromptLabels(t))
+      if (!res.ok) {
+        setErr(t('security.biometricEnableFailed'))
+        return
+      }
+    } else if (webAuthnAvailable) {
+      const res = await enableWebAuthnUnlock(userId, email, user.name)
+      if (!res.ok) {
+        setErr(t('security.webAuthnEnableFailed'))
+        return
+      }
+    } else {
+      setErr(t('security.biometricUnavailable'))
       return
     }
     setPwdCurrent('')
-    setMsg(t('security.biometricOn'))
+    setMsg(Capacitor.isNativePlatform() && bioAvailable ? t('security.biometricOn') : t('security.webAuthnOn'))
   }
 
   return (
@@ -264,19 +285,16 @@ export function SecuritySettingsPanel() {
 
       <div className="space-y-2 rounded-xl border border-border/70 bg-black/20 p-3">
         <h3 className="flex items-center gap-2 text-sm font-semibold">
-          <ScanFace size={16} /> {t('security.biometricTitle')}
+          <Fingerprint size={16} /> {t('security.biometricTitle')}
         </h3>
-        <p className="text-xs text-muted">
-          {bioAvailable
-            ? bioKind === 'face'
-              ? t('security.biometricFaceHint')
-              : t('security.biometricFingerHint')
-            : t('security.biometricWebHint')}
-        </p>
-        {bioOn && !sec.biometricUnlockToken && (
+        <p className="text-xs text-muted">{t(hintKey)}</p>
+        {deviceOn && unlockMode === 'native' && !sec.biometricUnlockToken && (
           <p className="text-xs text-amber-200">{t('security.biometricResetHint')}</p>
         )}
-        {!bioOn && hasPwd && bioAvailable && (
+        {deviceOn && unlockMode === 'webauthn' && (
+          <p className="text-xs text-muted">{t('security.webAuthnBoundHint')}</p>
+        )}
+        {!deviceOn && hasPwd && canEnableDevice && (
           <Input
             label={t('security.currentPassword')}
             type="password"
@@ -285,8 +303,14 @@ export function SecuritySettingsPanel() {
             onChange={(e) => setPwdCurrent(e.target.value)}
           />
         )}
-        <Button type="button" size="sm" variant={bioOn ? 'ghost' : 'secondary'} disabled={!bioAvailable && !bioOn} onClick={() => void toggleBio()}>
-          {bioOn ? t('security.biometricDisable') : t('security.biometricEnable')}
+        <Button
+          type="button"
+          size="sm"
+          variant={deviceOn ? 'ghost' : 'secondary'}
+          disabled={!canEnableDevice && !deviceOn}
+          onClick={() => void toggleDeviceUnlock()}
+        >
+          {deviceOn ? t('security.biometricDisable') : t('security.biometricEnable')}
         </Button>
       </div>
 
