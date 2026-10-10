@@ -64,6 +64,10 @@ import {
   socialPostIsMarket,
   type MatchRubric,
 } from '../lib/matchRubrics'
+import { searchJobProviders, type JobSearchHit } from '../lib/providers/jobProviders'
+import { searchGoodsProviders, type GoodsSearchHit } from '../lib/providers/goodsProviders'
+import { MatchGoodsResults, MatchJobResults } from '../components/match/MatchProviderResults'
+import { Input } from '../components/ui/Input'
 import { getSocial, startSocialDm, subscribeSocial, type SocialPost } from '../lib/social'
 import type { Listing, Profile } from '../types'
 
@@ -140,6 +144,10 @@ export function MatchPage() {
   )
   const hubLane = parseMatchHubLane(searchParams.get('lane'))
   const rubric = parseMatchRubric(searchParams.get('rubric') ?? searchParams.get('lane'))
+  const matchQ = searchParams.get('q') || ''
+  const [matchQuery, setMatchQuery] = useState(matchQ)
+  const [jobHits, setJobHits] = useState<JobSearchHit[]>([])
+  const [goodsHits, setGoodsHits] = useState<GoodsSearchHit[]>([])
   const [deckMode, setDeckMode] = useState<MatchDeckMode>(() => {
     if (typeof window !== 'undefined' && window.location.pathname.includes('/crew')) return 'company'
     if (typeof window !== 'undefined' && window.location.pathname.includes('/treffer')) return 'seeker'
@@ -194,6 +202,24 @@ export function MatchPage() {
     next.delete('sell')
     setSearchParams(next, { replace: true })
   }
+
+  useEffect(() => {
+    setMatchQuery(matchQ)
+  }, [matchQ])
+
+  useEffect(() => {
+    if (!showHub) return
+    const ac = new AbortController()
+    if (rubric === 'jobs') {
+      void searchJobProviders({ q: matchQ, prefs, locale: resolved, signal: ac.signal }).then(setJobHits)
+    } else if (rubric === 'social') {
+      void searchGoodsProviders({ q: matchQ, prefs, locale: resolved }).then(setGoodsHits)
+    } else {
+      setJobHits([])
+      setGoodsHits([])
+    }
+    return () => ac.abort()
+  }, [showHub, rubric, matchQ, prefs, resolved])
 
   useEffect(() => {
     const u1 = subscribePrefs(() => setPrefs(getPrefs()))
@@ -561,6 +587,33 @@ export function MatchPage() {
   return (
     <div className="relative mx-auto flex min-h-[70dvh] max-w-lg flex-col gap-4 pb-scroll-chrome">
       {showHub && <MatchRubricBar rubric={rubric} onRubric={setRubric} />}
+
+      {showHub && (rubric === 'jobs' || rubric === 'social') && (
+        <form
+          className="flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault()
+            const next = new URLSearchParams(searchParams)
+            if (matchQuery.trim()) next.set('q', matchQuery.trim())
+            else next.delete('q')
+            setSearchParams(next, { replace: true })
+          }}
+          data-match-search="1"
+        >
+          <Input
+            value={matchQuery}
+            onChange={(e) => setMatchQuery(e.target.value)}
+            placeholder={rubric === 'jobs' ? t('match.searchJobsPh') : t('match.searchGoodsPh')}
+            className="min-h-11 flex-1"
+          />
+          <Button type="submit" size="sm" className="shrink-0">
+            {t('match.search')}
+          </Button>
+        </form>
+      )}
+
+      {showHub && rubric === 'jobs' && <MatchJobResults hits={jobHits} query={matchQ} />}
+      {showHub && rubric === 'social' && <MatchGoodsResults hits={goodsHits} query={matchQ} />}
 
       {showHub && (
         <MatchHubChrome
