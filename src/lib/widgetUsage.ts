@@ -7,6 +7,7 @@ export type WidgetArea =
   | 'abflug'
   | 'kabine'
   | 'match'
+  | 'dashboard'
   | 'campus'
   | 'entdecker'
   | 'firma'
@@ -18,6 +19,7 @@ const AREAS = new Set<WidgetArea>([
   'abflug',
   'kabine',
   'match',
+  'dashboard',
   'campus',
   'entdecker',
   'firma',
@@ -33,6 +35,8 @@ export function widgetIdForPath(pathname: string): WidgetArea | null {
   if (path === '/kabine' || path.startsWith('/kabine/') || path === '/look' || path.startsWith('/look/'))
     return 'kabine'
   if (path === '/match' || path.startsWith('/match/')) return 'match'
+  if (path === '/dashboard' || path.startsWith('/dashboard/')) return 'dashboard'
+  if (path === '/essen' || path.startsWith('/essen/')) return 'match'
   if (path === '/campus' || path.startsWith('/campus/') || path === '/lernen') return 'campus'
   if (path === '/entdecker' || path.startsWith('/entdecker/')) return 'entdecker'
   if (path === '/firma' || path.startsWith('/firma/')) return 'firma'
@@ -48,6 +52,7 @@ function emptyCounts(): Record<WidgetArea, number> {
     abflug: 0,
     kabine: 0,
     match: 0,
+    dashboard: 0,
     campus: 0,
     entdecker: 0,
     firma: 0,

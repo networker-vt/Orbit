@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Check, Sparkles } from 'lucide-react'
 import {
   COMPANY_SIZES,
@@ -55,20 +55,31 @@ function toggle<T extends string>(arr: T[], v: T): T[] {
 
 export function PrefsPage() {
   const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const moneyIntent = params.get('intent') === 'money'
+  const workRef = useRef<HTMLTextAreaElement>(null)
   const initial = useMemo(() => getPrefs(), [])
-  const [side, setSide] = useState<PrefsSide>(initial.side)
-  const [step, setStep] = useState(0)
+  const [side, setSide] = useState<PrefsSide>(moneyIntent ? 'seeker' : initial.side)
+  const [step, setStep] = useState(moneyIntent ? 2 : 0)
   const [seeker, setSeeker] = useState<SeekerPrefs>(initial.seeker)
   const [employer, setEmployer] = useState<EmployerPrefs>(initial.employer)
   const [firmName, setFirmName] = useState(() => getCompany().firmName)
   const [offerDraft, setOfferDraft] = useState('')
   const [seekDraft, setSeekDraft] = useState('')
+  const [skillDraft, setSkillDraft] = useState('')
   const [offers, setOffers] = useState(() => getCompany().offers)
   const [seeks, setSeeks] = useState(() => getCompany().seeks)
 
-  const seekerSteps = ['Seite', 'Ort', 'Kategorie']
+  const seekerSteps = moneyIntent
+    ? ['Seite', 'Ort', 'Arbeit & Skills']
+    : ['Seite', 'Ort', 'Kategorie']
   const employerSteps = ['Seite', 'Ort', 'Kategorie']
   const steps = side === 'seeker' ? seekerSteps : employerSteps
+
+  useEffect(() => {
+    if (!moneyIntent) return
+    window.requestAnimationFrame(() => workRef.current?.focus())
+  }, [moneyIntent])
 
   const finish = () => {
     savePrefs({ side, seeker, employer })
@@ -92,17 +103,25 @@ export function PrefsPage() {
     <div className="mx-auto max-w-lg space-y-5 pb-scroll-chrome">
       <header className="space-y-2">
         <p className="inline-flex items-center gap-2 rounded-full border border-cyan/35 bg-cyan/10 px-3 py-1 text-xs font-medium text-cyan">
-          <Sparkles size={14} /> Preference-first
+          <Sparkles size={14} /> {moneyIntent ? 'I need money' : 'Preference-first'}
         </p>
         <div className="flex items-center gap-3">
           <OrbitRobot size="compact" />
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold tracking-tight">Dein Orbit einrichten</h1>
-            <p className="text-sm text-muted">{ORBIT_TAGLINE_DE}</p>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {moneyIntent ? 'Was du arbeiten willst' : 'Dein Orbit einrichten'}
+            </h1>
+            <p className="text-sm text-muted">
+              {moneyIntent
+                ? 'Beschreibe gewünschte Arbeit und Skills — Match vermittelt, kein Lohnversprechen.'
+                : ORBIT_TAGLINE_DE}
+            </p>
           </div>
         </div>
         <p className="text-xs text-neutral-400">
-          Drei Fragen. Überspringen geht — Login erst beim Speichern oder Zahlen.
+          {moneyIntent
+            ? 'Kurz halten. Speichern öffnet Match — ohne Fake-Payroll.'
+            : 'Drei Fragen. Überspringen geht — Login erst beim Speichern oder Zahlen.'}
         </p>
       </header>
 
@@ -203,7 +222,53 @@ export function PrefsPage() {
       )}
 
       {step === 2 && side === 'seeker' && (
-        <section className="space-y-4">
+        <section className="space-y-4" data-prefs-money={moneyIntent ? '1' : undefined}>
+          <label className="block text-sm font-semibold">
+            Gewünschte Arbeit
+            <textarea
+              ref={workRef}
+              className="mt-1 w-full resize-none rounded-xl border border-border bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none focus:border-cyan/50"
+              rows={3}
+              value={seeker.desiredWork}
+              placeholder="z. B. Minijob abends, Pflegevertretung, React-Freelance"
+              data-prefs-desired-work="1"
+              onChange={(e) => setSeeker({ ...seeker, desiredWork: e.target.value })}
+            />
+          </label>
+          <label className="block text-sm font-semibold">
+            Skills (Enter zum Hinzufügen)
+            <div className="mt-1 flex gap-2">
+              <Input
+                value={skillDraft}
+                placeholder="z. B. GrandMA3, React, Staplerschein"
+                onChange={(e) => setSkillDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key !== 'Enter') return
+                  e.preventDefault()
+                  const v = skillDraft.trim()
+                  if (!v || seeker.mustHaveSkills.includes(v)) return
+                  setSeeker({ ...seeker, mustHaveSkills: [...seeker.mustHaveSkills, v] })
+                  setSkillDraft('')
+                }}
+              />
+            </div>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {seeker.mustHaveSkills.map((skill) => (
+                <Chip
+                  key={skill}
+                  active
+                  onClick={() =>
+                    setSeeker({
+                      ...seeker,
+                      mustHaveSkills: seeker.mustHaveSkills.filter((s) => s !== skill),
+                    })
+                  }
+                >
+                  {skill}
+                </Chip>
+              ))}
+            </div>
+          </label>
           <OccupationField
             selectedIds={seeker.occupations}
             other={seeker.occupationOther}

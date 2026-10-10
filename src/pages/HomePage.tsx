@@ -6,6 +6,7 @@ import { getWidgetTaps, subscribeWidgetTaps } from '../lib/widgetUsage'
 import { TripOptionCards } from '../components/assist/TripOptionCards'
 import { OrbitRobot } from '../components/home/OrbitRobot'
 import { Tageskarte } from '../components/home/Tageskarte'
+import { TileGrid } from '../components/ui/TileGrid'
 import { Button } from '../components/ui/Button'
 import { useStoreVersion } from '../hooks/useStore'
 import { useAuth } from '../lib/auth'
@@ -17,7 +18,8 @@ import {
 } from '../lib/assist'
 import { getCompany, subscribeCompany } from '../lib/company'
 import { isCompanySide, getPrefs, savePrefs, subscribePrefs } from '../lib/prefs'
-import { LIFE_EXAMPLES, alcoholChoiceBlocked, type LifeExample } from '../lib/lifeHome'
+import { alcoholChoiceBlocked } from '../lib/lifeHome'
+import { presetLabel, visibleHomePresets } from '../lib/homePresets'
 import { sentenceOpensParkmerke } from '../lib/parkmerkeIntent'
 import { hasConfirmedAdult } from '../lib/ageGate'
 import { subscribeBehavior } from '../lib/behavior'
@@ -67,6 +69,8 @@ export function HomePage() {
   const companyView = isCompanySide(prefs.side) && prefs.side !== 'both'
   const daily = useMemo(() => pickTageskarte(new Date(), { kids }), [kids])
   const hideWallet = kidsHideWallet()
+  const hideTravel = kidsHideTravel()
+  const presets = useMemo(() => visibleHomePresets(hideTravel), [hideTravel])
 
   useEffect(() => {
     try {
@@ -107,22 +111,15 @@ export function HomePage() {
     }
   }, [])
 
-  const newsItems = useMemo(() => rankHomeNews(prefs, resolved, 3), [prefs, behaviorTick, resolved])
+  const newsItems = useMemo(() => rankHomeNews(prefs, resolved, 8), [prefs, behaviorTick, resolved])
   const widgets = useMemo(
-    () => splitAdaptiveHome({ kids, hideTravel: kidsHideTravel(), hideWallet }, widgetTaps, t),
-    [kids, hideWallet, widgetTaps, t],
+    () => splitAdaptiveHome({ kids, hideTravel, hideWallet }, widgetTaps, t),
+    [kids, hideTravel, hideWallet, widgetTaps, t],
   )
 
   const first = companyView && company.firmName ? company.firmName : user?.name.split(' ')[0]
   const greeting = first ? `${t('home.hello')}, ${first}.` : `${t('home.hello')}.`
   const placeholder = t('home.phSeek')
-
-  const toggleExample = (name: LifeExample) => {
-    const current = getPrefs()
-    const selected = current.seeker.lifeExamples
-    const lifeExamples = selected.includes(name) ? selected.filter((item) => item !== name) : [...selected, name]
-    savePrefs({ seeker: { ...current.seeker, lifeExamples } })
-  }
 
   const fillPrompt = (prompt: string) => {
     setAsk(prompt)
@@ -155,7 +152,7 @@ export function HomePage() {
     }
     const spokenPick = plan?.tripOptions?.length ? matchSpokenTripChoice(q) : null
     if (spokenPick) {
-      if (kidsHideTravel()) {
+      if (hideTravel) {
         setAssistNote(t('trip.kids'))
         return
       }
@@ -270,30 +267,21 @@ export function HomePage() {
 
         <div
           role="group"
-          aria-label={t('home.examplesAria')}
-          data-life-examples="1"
-          className="flex flex-wrap gap-1.5"
+          aria-label={t('home.presetsAria')}
+          data-home-presets="1"
+          className="flex flex-wrap gap-2"
         >
-          {LIFE_EXAMPLES.map((name) => {
-            const on = prefs.seeker.lifeExamples.includes(name)
-            return (
-              <button
-                key={name}
-                type="button"
-                aria-pressed={on}
-                data-life-example={name}
-                onClick={() => toggleExample(name)}
-                className={cn(
-                  'min-h-9 rounded-lg border px-2.5 py-1 text-xs',
-                  on
-                    ? 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/15 text-ink'
-                    : 'border-transparent bg-surface-2/80 text-muted hover:border-border',
-                )}
-              >
-                {name}
-              </button>
-            )
-          })}
+          {presets.map((preset) => (
+            <button
+              key={preset.id}
+              type="button"
+              data-home-preset={preset.id}
+              onClick={() => navigate(preset.to)}
+              className="min-h-10 rounded-full border border-border bg-surface-2 px-3 py-1.5 text-sm text-ink hover:border-[var(--theme-accent)]/50 hover:text-ink"
+            >
+              {presetLabel(preset, resolved)}
+            </button>
+          ))}
         </div>
 
         <form
@@ -353,27 +341,14 @@ export function HomePage() {
         <h2 id="mehr-entdecken" className="text-xs font-medium uppercase tracking-wider text-muted">
           {t('home.mehrEntdecken')}
         </h2>
-        <ul
-          aria-label={t('home.mehrEntdecken')}
-          data-home-discover={Math.min(widgets.primary.length, HOME_PRIMARY_COUNT)}
-          className="space-y-0.5"
-        >
-          {widgets.primary.slice(0, HOME_PRIMARY_COUNT).map((tile) => (
-            <li key={tile.id ?? tile.to}>
-              <Link
-                to={tile.to}
-                data-tile-id={tile.id}
-                className="inline-flex min-h-11 items-center gap-2 text-sm text-muted hover:text-ink"
-              >
-                <span aria-hidden>{tile.emoji}</span>
-                <span>{tile.label}</span>
-                {tile.demo && (
-                  <span className="text-xs font-medium uppercase tracking-wide">{t('home.demoBadge')}</span>
-                )}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div data-home-discover={Math.min(widgets.primary.length, HOME_PRIMARY_COUNT)}>
+          <TileGrid
+            tiles={widgets.primary.slice(0, HOME_PRIMARY_COUNT)}
+            columns={2}
+            iconSize="lg"
+            label={t('home.mehrEntdecken')}
+          />
+        </div>
         {widgets.folded.length > 0 && (
           <Link to="/mehr" className="inline-flex min-h-11 items-center text-sm text-muted hover:text-ink">
             {t('home.widgetsMore')}

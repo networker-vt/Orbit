@@ -34,16 +34,26 @@ export function TileGrid({
   tiles,
   columns = 2,
   label,
+  iconSize = 'md',
 }: {
   tiles: HubTile[]
   columns?: 2 | 3
   label?: string
+  /** Home „Mehr entdecken“ uses larger marks. */
+  iconSize?: 'md' | 'lg'
 }) {
+  const mark =
+    iconSize === 'lg'
+      ? 'h-14 w-14 rounded-2xl text-[2.1rem]'
+      : 'h-11 w-11 rounded-xl text-[1.65rem]'
+  const sharePx = iconSize === 'lg' ? 28 : 22
+  const imgClass = iconSize === 'lg' ? 'h-10 w-10 object-contain' : 'h-8 w-8 object-contain'
   return (
     <ul
       data-tile-grid={tiles.length}
+      data-tile-icon-size={iconSize}
       aria-label={label}
-      className={cn('grid gap-3', columns === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-3')}
+      className={cn('grid gap-3', columns === 3 ? 'grid-cols-3' : 'grid-cols-2')}
     >
       {tiles.map((tile) => (
         <li key={`${tile.id ?? tile.to}:${tile.label}`}>
@@ -52,15 +62,21 @@ export function TileGrid({
             data-tile-id={tile.id}
             data-tile-emoji={tile.emoji}
             className={cn(
-              'btn-press flex min-h-[6.25rem] flex-col items-start justify-between rounded-2xl border-2 px-3 py-3',
+              'btn-press flex flex-col items-start justify-between rounded-2xl border-2 px-3 py-3',
+              iconSize === 'lg' ? 'min-h-[7.5rem]' : 'min-h-[6.25rem]',
               TONE[tile.tone],
             )}
           >
-            <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-surface/80 text-[1.65rem] leading-none shadow-sm">
+            <span
+              className={cn(
+                'flex items-center justify-center overflow-hidden bg-surface/80 leading-none shadow-sm',
+                mark,
+              )}
+            >
               {tile.icon === 'share' ? (
-                <Share2 size={22} aria-hidden />
+                <Share2 size={sharePx} aria-hidden />
               ) : tile.image ? (
-                <img src={tile.image} alt="" className="h-8 w-8 object-contain" />
+                <img src={tile.image} alt="" className={imgClass} />
               ) : (
                 <span aria-hidden>{tile.emoji}</span>
               )}

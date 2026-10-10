@@ -430,6 +430,18 @@ textarea:focus-visible,
     animation: el-check-in 0.35s ease-out both;
   }
 
+  @keyframes news-ticker-rtl {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .news-ticker-track {
+    animation: news-ticker-rtl 42s linear infinite;
+  }
+  .news-ticker:hover .news-ticker-track,
+  .news-ticker:focus-within .news-ticker-track {
+    animation-play-state: paused;
+  }
+
   /* Subtle list stagger — first 8 children only */
   .stagger-in > * {
     animation: el-fade-up 0.32s ease-out both;
@@ -516,6 +528,9 @@ textarea:focus-visible,
   .trip-card-tap:hover,
   .trip-card-tap:active {
     transform: none;
+  }
+  .news-ticker-track {
+    animation: none;
   }
 }
 

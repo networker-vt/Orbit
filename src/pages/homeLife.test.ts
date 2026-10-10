@@ -1,10 +1,12 @@
 import { createElement } from 'react'
 import { act } from 'react'
 import { createRoot } from 'react-dom/client'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { HomePage } from './HomePage'
 import { MatchPage } from './MatchPage'
+import { PrefsPage } from './PrefsPage'
+import { EssenPage } from './EssenPage'
 import { AuthProvider } from '../lib/auth'
 import { I18nProvider } from '../lib/i18n'
 import { confirmAdult } from '../lib/ageGate'
@@ -16,7 +18,7 @@ import { seedListings } from '../data/seed'
 
 let activeRoot: ReturnType<typeof createRoot> | null = null
 
-async function mount(node: ReturnType<typeof createElement>) {
+async function mount(node: ReturnType<typeof createElement>, initialPath = '/') {
   if (activeRoot) {
     const previous = activeRoot
     activeRoot = null
@@ -29,7 +31,17 @@ async function mount(node: ReturnType<typeof createElement>) {
   const root = createRoot(host)
   activeRoot = root
   await act(async () => {
-    root.render(createElement(MemoryRouter, null, createElement(I18nProvider, null, createElement(AuthProvider, null, node))))
+    root.render(
+      createElement(
+        MemoryRouter,
+        { initialEntries: [initialPath] },
+        createElement(
+          I18nProvider,
+          null,
+          createElement(AuthProvider, null, node),
+        ),
+      ),
+    )
     await new Promise((resolve) => setTimeout(resolve, 20))
   })
   return { host, root }
@@ -52,51 +64,71 @@ describe('first screen for a new visitor', () => {
     })
   })
 
-  it('shows Essen, Trinken and Freizeit off, one search, one bubble and one CTA', async () => {
+  it('shows three presets, one search, one bubble and one CTA', async () => {
     const { host } = await mount(createElement(HomePage))
-    const examples = [...host.querySelectorAll('[data-life-example]')].map((node) => ({
-      name: node.getAttribute('data-life-example'),
-      pressed: node.getAttribute('aria-pressed'),
-    }))
-    expect(examples).toEqual([
-      { name: 'Essen', pressed: 'false' },
-      { name: 'Trinken', pressed: 'false' },
-      { name: 'Freizeit', pressed: 'false' },
-    ])
-    expect(host.querySelector('[data-life-examples]')?.className).not.toContain('grid')
+    const presets = [...host.querySelectorAll('[data-home-preset]')].map((node) =>
+      node.getAttribute('data-home-preset'),
+    )
+    expect(presets).toEqual(['essen', 'money', 'reise'])
+    expect(host.textContent).toContain("Was gibt's heute zu essen")
+    expect(host.textContent).toContain('I need money')
+    expect(host.textContent).toContain('plane meine Reise')
+    expect(host.textContent).toMatch(/Essen, Geld verdienen oder Abflug/)
+    expect(host.querySelector('[data-home-presets]')?.className).not.toContain('grid')
     expect(host.querySelectorAll('textarea')).toHaveLength(1)
     expect(host.querySelector('textarea')?.getAttribute('placeholder') ?? '').not.toMatch(/Berlin|billigst|cheapest|Flug/i)
     expect(host.querySelectorAll('[data-orbi-bubble]')).toHaveLength(1)
     expect(host.querySelectorAll('[data-home-primary]')).toHaveLength(1)
-    const labels = [...host.querySelectorAll('button')].map((button) => button.textContent?.trim())
-    expect(labels).not.toContain('Fitness')
-    expect(labels).not.toContain('Auto')
-    expect(labels).not.toContain('Arbeit')
-    expect(labels).not.toContain('Vollzeit')
+    expect(host.querySelector('[data-news-ticker]')).toBeTruthy()
+    const discover = host.querySelector('[data-home-discover]')
+    expect(discover).toBeTruthy()
+    expect(discover?.querySelector('[data-tile-icon-size="lg"]')).toBeTruthy()
+    const tileIds = [...(discover?.querySelectorAll('[data-tile-id]') ?? [])].map((n) =>
+      n.getAttribute('data-tile-id'),
+    )
+    expect(tileIds).toEqual(['match', 'abflug', 'kabine', 'dashboard'])
+    expect(tileIds).not.toContain('firma')
     expect(host.textContent).not.toContain('Sara König')
     expect(getPrefs().seeker.jobTypes).toEqual([])
   })
 
-  it('does not switch the examples on when old industries are saved', async () => {
-    const current = getPrefs()
-    savePrefs({
-      seeker: {
-        ...current.seeker,
-        industries: ['Gastronomie / Hotel'],
-      },
+  it('routes money preset into prefs work surface', async () => {
+    const { host } = await mount(
+      createElement(
+        Routes,
+        null,
+        createElement(Route, { path: '/', element: createElement(HomePage) }),
+        createElement(Route, { path: '/prefs', element: createElement(PrefsPage) }),
+      ),
+      '/',
+    )
+    const money = host.querySelector('[data-home-preset="money"]') as HTMLButtonElement
+    await act(async () => {
+      money.click()
+      await new Promise((resolve) => setTimeout(resolve, 30))
     })
-    const { host } = await mount(createElement(HomePage))
-    for (const name of ['Essen', 'Trinken', 'Freizeit']) {
-      expect(host.querySelector(`[data-life-example="${name}"]`)?.getAttribute('aria-pressed')).toBe('false')
-    }
-    const essen = host.querySelector('[data-life-example="Essen"]') as HTMLButtonElement
+    expect(host.querySelector('[data-prefs-desired-work]')).toBeTruthy()
+    expect(host.textContent).toContain('Was du arbeiten willst')
+  })
+
+  it('opens Essenstipps from the food preset', async () => {
+    const { host } = await mount(
+      createElement(
+        Routes,
+        null,
+        createElement(Route, { path: '/', element: createElement(HomePage) }),
+        createElement(Route, { path: '/essen', element: createElement(EssenPage) }),
+      ),
+      '/',
+    )
+    const essen = host.querySelector('[data-home-preset="essen"]') as HTMLButtonElement
     await act(async () => {
       essen.click()
+      await new Promise((resolve) => setTimeout(resolve, 30))
     })
-    expect(getPrefs().seeker.lifeExamples).toEqual(['Essen'])
-    expect(getPrefs().seeker.industries).toEqual(['Gastronomie / Hotel'])
-    expect(host.querySelector('[data-life-example="Essen"]')?.getAttribute('aria-pressed')).toBe('true')
-    expect(host.querySelector('[data-life-example="Trinken"]')?.getAttribute('aria-pressed')).toBe('false')
+    expect(host.querySelector('[data-essen-query]')).toBeTruthy()
+    expect(host.querySelector('[data-essen-tips]')).toBeTruthy()
+    expect(host.textContent).toContain('Essenstipps')
   })
 
   it('stores any need or offer from the sentence', async () => {
@@ -113,10 +145,10 @@ describe('first screen for a new visitor', () => {
       await new Promise((resolve) => setTimeout(resolve, 30))
     })
     expect(getPrefs().seeker.lifeSentence).toBe('Ich biete Fitness und ein Auto')
-    expect([...host.querySelectorAll('[data-life-example]')].map((node) => node.textContent?.trim())).toEqual([
-      'Essen',
-      'Trinken',
-      'Freizeit',
+    expect([...host.querySelectorAll('[data-home-preset]')].map((node) => node.getAttribute('data-home-preset'))).toEqual([
+      'essen',
+      'money',
+      'reise',
     ])
   })
 })

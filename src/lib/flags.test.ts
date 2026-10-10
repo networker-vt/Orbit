@@ -16,7 +16,7 @@ describe('feature flags', () => {
     expect(isFlagOn('channels')).toBe(false)
     expect(isFlagOn('ideas')).toBe(false)
     expect(isFlagOn('integrations')).toBe(false)
-    expect(isFlagOn('kabine')).toBe(false)
+    expect(isFlagOn('kabine')).toBe(true)
     expect(isFlagOn('campus')).toBe(false)
     expect(isFlagOn('publishListings')).toBe(true)
   })

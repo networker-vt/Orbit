@@ -22,23 +22,25 @@ describe('Orbit 2.8.1 hub split', () => {
   beforeEach(() => {
     __setFlagForTests(null)
   })
-  it('Home discover is destinations only — no Mein, Social, Wallet', () => {
+  it('Home discover is destinations only — no Mein, Social, Wallet, Firma', () => {
     const tiles = homeDiscoverTiles((k) => tStatic(k, 'de'), adult)
     const paths = tiles.map((t) => t.to)
     expect(paths).toContain('/abflug')
+    expect(paths).toContain('/match')
+    expect(paths).toContain('/kabine')
+    expect(paths).toContain('/dashboard')
     expect(paths).not.toContain('/campus')
     expect(paths).not.toContain('/entdecker')
-    expect(paths).not.toContain('/kabine')
-    expect(paths).toContain('/firma')
-    expect(paths).toContain('/crew')
+    expect(paths).not.toContain('/firma')
     expect(homeDiscoverHasAccountLinks(tiles)).toBe(false)
     expect(paths.some((p) => p === '/mein' || p.startsWith('/social') || p === '/wallet')).toBe(false)
   })
 
-  it('Mehr discover also omits Mein / Social / Wallet', () => {
+  it('Mehr discover also omits Mein / Social / Wallet and keeps Firma off Home only', () => {
     const tiles = mehrDiscoverTiles((k) => tStatic(k, 'de'), adult)
     expect(homeDiscoverHasAccountLinks(tiles)).toBe(false)
     expect(tiles.some((t) => t.to === '/marktplatz')).toBe(true)
+    expect(tiles.some((t) => t.to === '/firma')).toBe(true)
   })
 
   it('Mein hub is account-only and sorted money → identity → create → connect → tools', () => {
@@ -58,26 +60,27 @@ describe('Orbit 2.8.1 hub split', () => {
     expect(refer?.label).toBe('Orbit weiterempfehlen')
   })
 
-  it('Kids hide Wallet / create / offer on Mein and travel / firma / crew on Home', () => {
+  it('Kids hide Wallet / create / offer on Mein and travel / kabine / crew on Home', () => {
     const mein = meinAccountTiles((k) => tStatic(k, 'de'), kids)
     expect(mein.some((t) => t.id === 'wallet' || t.id === 'create' || t.id === 'offer' || t.id === 'refer')).toBe(
       false,
     )
     const home = homeDiscoverTiles((k) => tStatic(k, 'de'), kids)
-    expect(home.some((t) => t.id === 'abflug' || t.id === 'firma' || t.id === 'crew')).toBe(false)
-    expect(home.some((t) => t.id === 'campus' || t.id === 'entdecker' || t.id === 'kabine')).toBe(false)
+    expect(home.some((t) => t.id === 'abflug' || t.id === 'firma' || t.id === 'crew' || t.id === 'kabine')).toBe(false)
+    expect(home.some((t) => t.id === 'campus' || t.id === 'entdecker')).toBe(false)
   })
 
-  it('Home discover shows at most three quiet links and folds the rest', () => {
+  it('Home discover pins Match / Abflug / Kabine / Dashboard with larger primary set', () => {
     const split = splitAdaptiveHome(adult, {}, (k) => tStatic(k, 'de'))
-    expect(HOME_PRIMARY_COUNT).toBe(3)
-    expect(split.primary).toHaveLength(3)
-    expect(split.primary.map((t) => t.id)).toEqual(['abflug', 'match', 'firma'])
+    expect(HOME_PRIMARY_COUNT).toBe(4)
+    expect(split.primary).toHaveLength(4)
+    expect(split.primary.map((t) => t.id)).toEqual(['match', 'abflug', 'kabine', 'dashboard'])
+    expect(split.primary.some((t) => t.id === 'firma')).toBe(false)
     expect(homeDiscoverHasAccountLinks(split.primary)).toBe(false)
     expect(split.folded.some((t) => t.id === 'jobs')).toBe(true)
     const kidsSplit = splitAdaptiveHome(kids, {}, (k) => tStatic(k, 'de'))
-    expect(kidsSplit.primary.length).toBeLessThanOrEqual(3)
-    expect(kidsSplit.primary.some((t) => t.id === 'abflug' || t.id === 'firma' || t.id === 'crew')).toBe(false)
+    expect(kidsSplit.primary.length).toBeLessThanOrEqual(4)
+    expect(kidsSplit.primary.some((t) => t.id === 'abflug' || t.id === 'firma' || t.id === 'crew' || t.id === 'kabine')).toBe(false)
   })
 
   it('every catalog tile has a visible emoji', () => {

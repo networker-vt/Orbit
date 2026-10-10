@@ -7,6 +7,7 @@ import { initRewards } from './lib/rewards'
 import { initStore } from './lib/store'
 import { OrbitRobot } from './components/home/OrbitRobot'
 import { HomePage } from './pages/HomePage'
+import { EssenPage } from './pages/EssenPage'
 import { PrefsPage } from './pages/PrefsPage'
 import { MatchPage } from './pages/MatchPage'
 import { MehrPage } from './pages/MehrPage'
@@ -121,6 +122,7 @@ function AppReady() {
               <Route path="transporter" element={<Navigate to="/marktplatz" replace />} />
               <Route path="kuriere" element={<Navigate to="/marktplatz" replace />} />
               <Route path="hotels" element={<Navigate to="/abflug" replace />} />
+              <Route path="essen" element={<EssenPage />} />
               <Route path="jobs" element={<JobsPage />} />
               <Route path="prefs" element={<PrefsPage />} />
               <Route path="match" element={<MatchPage />} />

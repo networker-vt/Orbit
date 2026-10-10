@@ -60,20 +60,22 @@ export function hubCtx(): HubCtx {
   }
 }
 
-/** Home „Mehr entdecken“ — destinations only. No Mein / Social / Wallet. */
+/** Home „Mehr entdecken“ — destinations only. No Mein / Social / Wallet / Firma. */
 export const HOME_DISCOVER_DEFS: HubTileDef[] = [
+  { id: 'match', to: '/match', labelKey: 'nav.match', emoji: '🎯', tone: 'teal', surface: 'discover' },
   { id: 'abflug', to: '/abflug', labelKey: 'travel.nav', emoji: '✈️', tone: 'sky', surface: 'discover', hide: (c) => c.hideTravel },
+  { id: 'kabine', to: '/kabine', labelKey: 'look.nav', emoji: '🪞', tone: 'rose', surface: 'discover', demo: true, hide: (c) => !isFlagOn('kabine') || c.kids },
+  { id: 'dashboard', to: '/dashboard', labelKey: 'mein.dashboard', emoji: '📊', tone: 'sky', surface: 'discover' },
   { id: 'campus', to: '/campus', labelKey: 'campus.nav', emoji: '🎓', tone: 'indigo', surface: 'discover', hide: () => !isFlagOn('campus') },
   { id: 'entdecker', to: '/entdecker', labelKey: 'tile.entdecker', emoji: '🔎', tone: 'lime', surface: 'discover', demo: true, hide: () => !isFlagOn('entdecker') },
-  { id: 'kabine', to: '/kabine', labelKey: 'look.nav', emoji: '🪞', tone: 'rose', surface: 'discover', demo: true, hide: () => !isFlagOn('kabine') },
-  { id: 'firma', to: '/firma', labelKey: 'firma.nav', emoji: '🏢', tone: 'slate', surface: 'discover', hide: (c) => c.kids },
   { id: 'crew', to: '/crew', labelKey: 'nav.crew', emoji: '🤝', tone: 'amber', surface: 'discover', hide: (c) => c.kids },
   { id: 'mehr', to: '/mehr', labelKey: 'nav.mehr', emoji: '✨', tone: 'orange', surface: 'discover' },
 ]
 
-/** Mehr page — fuller discover catalog. Still no Mein / Social / Wallet. */
+/** Mehr page — fuller discover catalog. Still no Mein / Social / Wallet. Firma stays off Home only. */
 export const MEHR_DISCOVER_DEFS: HubTileDef[] = [
   ...HOME_DISCOVER_DEFS.filter((d) => d.id !== 'mehr'),
+  { id: 'firma', to: '/firma', labelKey: 'firma.nav', emoji: '🏢', tone: 'slate', surface: 'discover', hide: (c) => c.kids },
   { id: 'marktplatz', to: '/marktplatz', labelKey: 'mehr.market', emoji: '🛒', tone: 'teal', surface: 'discover' },
 ]
 
@@ -129,16 +131,16 @@ export function homeDiscoverTiles(t: (key: string) => string, ctx: HubCtx = hubC
 }
 
 /**
- * Home links that can rise or fold. Default order is marketplace-wide.
- * Jobs sit last so a zero-tap visit keeps them under Mehr.
+ * Home links that can rise or fold. Default order pins Match / Abflug / Kabine / Dashboard.
+ * Firma is intentionally absent from Home.
  */
 export const HOME_ADAPTIVE_DEFS: HubTileDef[] = [
-  { id: 'abflug', to: '/abflug', labelKey: 'travel.nav', emoji: '✈️', tone: 'sky', surface: 'discover', hide: (c) => c.hideTravel },
-  { id: 'kabine', to: '/kabine', labelKey: 'look.nav', emoji: '🪞', tone: 'rose', surface: 'discover', demo: true, hide: () => !isFlagOn('kabine') },
   { id: 'match', to: '/match', labelKey: 'nav.match', emoji: '🎯', tone: 'teal', surface: 'discover' },
+  { id: 'abflug', to: '/abflug', labelKey: 'travel.nav', emoji: '✈️', tone: 'sky', surface: 'discover', hide: (c) => c.hideTravel },
+  { id: 'kabine', to: '/kabine', labelKey: 'look.nav', emoji: '🪞', tone: 'rose', surface: 'discover', demo: true, hide: (c) => !isFlagOn('kabine') || c.kids },
+  { id: 'dashboard', to: '/dashboard', labelKey: 'mein.dashboard', emoji: '📊', tone: 'sky', surface: 'discover' },
   { id: 'campus', to: '/campus', labelKey: 'campus.nav', emoji: '🎓', tone: 'indigo', surface: 'discover', hide: () => !isFlagOn('campus') },
   { id: 'entdecker', to: '/entdecker', labelKey: 'tile.entdecker', emoji: '🔎', tone: 'lime', surface: 'discover', demo: true, hide: () => !isFlagOn('entdecker') },
-  { id: 'firma', to: '/firma', labelKey: 'firma.nav', emoji: '🏢', tone: 'slate', surface: 'discover', hide: (c) => c.kids },
   { id: 'crew', to: '/crew', labelKey: 'nav.crew', emoji: '🤝', tone: 'amber', surface: 'discover', hide: (c) => c.kids },
   { id: 'marktplatz', to: '/marktplatz', labelKey: 'mehr.market', emoji: '🛒', tone: 'teal', surface: 'discover' },
   {
@@ -153,19 +155,21 @@ export const HOME_ADAPTIVE_DEFS: HubTileDef[] = [
 ]
 
 const ADAPTIVE_ORDER: WidgetArea[] = [
+  'match',
   'abflug',
   'kabine',
-  'match',
+  'dashboard',
   'campus',
   'entdecker',
-  'firma',
   'crew',
   'marktplatz',
   'jobs',
 ]
 
-/** At most three quiet Home links under „Mehr entdecken“. Home does not render the loud TileGrid. */
-export const HOME_PRIMARY_COUNT = 3
+/** Four primary Home discover tiles with larger icons (Match, Abflug, Kabine, Dashboard). */
+export const HOME_PRIMARY_COUNT = 4
+
+const HOME_PINNED_IDS: HubTileId[] = ['match', 'abflug', 'kabine', 'dashboard']
 
 export function splitAdaptiveHome(
   ctx: HubCtx,
@@ -174,20 +178,20 @@ export function splitAdaptiveHome(
 ): { primary: HubTile[]; folded: HubTile[] } {
   const taps: Record<string, number> = counts ?? getWidgetTaps()
   const visible = visibleDefs(HOME_ADAPTIVE_DEFS, ctx)
-  const ranked = [...visible].sort((a, b) => {
-    const diff = (taps[b.id] ?? 0) - (taps[a.id] ?? 0)
-    if (diff !== 0) return diff
-    const ia = ADAPTIVE_ORDER.indexOf(a.id as WidgetArea)
-    const ib = ADAPTIVE_ORDER.indexOf(b.id as WidgetArea)
-    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib)
-  })
-  const primaryDefs: HubTileDef[] = []
-  const foldedDefs: HubTileDef[] = []
-  for (const def of ranked) {
-    const unusedJobs = def.id === 'jobs' && (taps[def.id] ?? 0) === 0
-    if (unusedJobs || primaryDefs.length >= HOME_PRIMARY_COUNT) foldedDefs.push(def)
-    else primaryDefs.push(def)
-  }
+  const pinned = HOME_PINNED_IDS.map((id) => visible.find((d) => d.id === id)).filter(
+    (d): d is HubTileDef => Boolean(d),
+  )
+  const rest = visible
+    .filter((d) => !HOME_PINNED_IDS.includes(d.id))
+    .sort((a, b) => {
+      const diff = (taps[b.id] ?? 0) - (taps[a.id] ?? 0)
+      if (diff !== 0) return diff
+      const ia = ADAPTIVE_ORDER.indexOf(a.id as WidgetArea)
+      const ib = ADAPTIVE_ORDER.indexOf(b.id as WidgetArea)
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib)
+    })
+  const primaryDefs = pinned.slice(0, HOME_PRIMARY_COUNT)
+  const foldedDefs = [...pinned.slice(HOME_PRIMARY_COUNT), ...rest]
   return {
     primary: resolveHubTiles(primaryDefs, ctx, t),
     folded: resolveHubTiles(foldedDefs, ctx, t),

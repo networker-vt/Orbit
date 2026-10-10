@@ -29,6 +29,8 @@ export interface SeekerPrefs {
   lifeExamples: LifeExample[]
   /** Free sentence: any need or offer, including Fitness, Auto, Arbeit. */
   lifeSentence: string
+  /** Free text: desired work / how you want to earn (money preset). */
+  desiredWork: string
   jobTypes: JobType[]
   /** False until the person toggles an employment type. The old full default does not count. */
   jobTypesChosen: boolean
@@ -74,6 +76,7 @@ export function defaultPrefs(): OrbitPrefs {
       occupationOther: '',
       lifeExamples: [],
       lifeSentence: '',
+      desiredWork: '',
       jobTypes: [],
       jobTypesChosen: false,
       workModes: ['remote', 'hybrid', 'onsite'],
@@ -123,7 +126,11 @@ export function seekerFromStored(raw: Partial<SeekerPrefs> | undefined): SeekerP
     occupationOther: typeof raw?.occupationOther === 'string' ? raw.occupationOther : '',
     lifeExamples: sanitizeLifeExamples(raw?.lifeExamples),
     lifeSentence: typeof raw?.lifeSentence === 'string' ? raw.lifeSentence : '',
+    desiredWork: typeof raw?.desiredWork === 'string' ? raw.desiredWork : '',
     cities: Array.isArray(raw?.cities) ? raw.cities : base.cities,
+    mustHaveSkills: Array.isArray(raw?.mustHaveSkills)
+      ? raw.mustHaveSkills.filter((item): item is string => typeof item === 'string')
+      : base.mustHaveSkills,
     jobTypes: chosen ? storedTypes : [],
     jobTypesChosen: chosen,
   }

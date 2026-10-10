@@ -72,8 +72,8 @@ export const FEATURE_FLAG_DEFS = [
   },
   {
     id: 'kabine',
-    default: false,
-    reason: 'Kabine / Look ist ein Demo-Stub (Anprobe ohne echte Wirkung).',
+    default: true,
+    reason: 'Kabine / Look ist ein Demo-Stub (Anprobe ohne echte Wirkung) — auf Home wieder sichtbar, klar als Demo gekennzeichnet.',
   },
   {
     id: 'campus',

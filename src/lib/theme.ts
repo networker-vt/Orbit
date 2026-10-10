@@ -10,6 +10,7 @@ export function themeForPath(pathname: string): SectionTheme {
     pathname.startsWith('/marktplatz') ||
     pathname.startsWith('/reise') ||
     pathname.startsWith('/abflug') ||
+    pathname.startsWith('/essen') ||
     pathname.startsWith('/treffer') ||
     pathname.startsWith('/crew') ||
     pathname.startsWith('/campus')

@@ -70,10 +70,10 @@ describe('Parkmerke entry', () => {
 
   it('does not add a fourth button on the start screen', async () => {
     const host = await mount(createElement(HomePage))
-    expect([...host.querySelectorAll('[data-life-example]')].map((node) => node.getAttribute('data-life-example'))).toEqual([
-      'Essen',
-      'Trinken',
-      'Freizeit',
+    expect([...host.querySelectorAll('[data-home-preset]')].map((node) => node.getAttribute('data-home-preset'))).toEqual([
+      'essen',
+      'money',
+      'reise',
     ])
     expect(host.querySelector('[data-parkmerke-entry]')).toBeNull()
     const labels = [...host.querySelectorAll('a,button')].map((node) => node.textContent?.trim())
