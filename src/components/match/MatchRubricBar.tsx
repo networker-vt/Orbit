@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { cn } from '../../lib/utils'
 import { useI18n } from '../../lib/i18n'
 import { MATCH_RUBRICS, rubricHint, type MatchRubric } from '../../lib/matchRubrics'
@@ -47,9 +48,20 @@ export function MatchRubricBar({
         ))}
       </div>
 
-      <p className="text-xs text-muted" data-match-rubric-hint={rubric}>
-        {resolved === 'de' ? hint.de : hint.en}
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-muted" data-match-rubric-hint={rubric}>
+          {resolved === 'de' ? hint.de : hint.en}
+        </p>
+        {rubric === 'social' && (
+          <Link
+            to="/social"
+            className="text-xs font-medium text-[var(--theme-accent)] hover:underline"
+            data-match-orbit-social="1"
+          >
+            {t('match.orbitSocialLink')}
+          </Link>
+        )}
+      </div>
     </div>
   )
 }

@@ -98,7 +98,7 @@ function socialScore(post: SocialPost): MatchScore {
   return {
     percent: base,
     breakdown: { skills: base, land: 50, sprache: 50, gehalt: post.likes.length * 5, typ: 70 },
-    reasons: ['Social Market'],
+    reasons: ['Social Market · Orbit Social'],
     labels: [
       ['Skills', 'skills'],
       ['Land', 'land'],
@@ -251,7 +251,7 @@ export function MatchPage() {
               kind: 'social' as const,
               post,
               score: socialScore(post),
-              reason: 'Social Market',
+              reason: 'Social Market · Orbit Social',
             }))
           cards = [...posts, ...cards]
         }
@@ -295,7 +295,7 @@ export function MatchPage() {
               kind: 'social' as const,
               post,
               score: socialScore(post),
-              reason: 'Social Market',
+              reason: 'Social Market · Orbit Social',
             }))
           cards = [...posts, ...cards]
         }
@@ -781,7 +781,10 @@ function SocialCard({ post, score }: { post: SocialPost; score: MatchScore }) {
     <article className="relative flex flex-1 flex-col overflow-hidden rounded-3xl border border-cyan/30 bg-gradient-to-b from-surface-2 to-surface p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <Badge tone="cyan">{t('match.rubric.social')}</Badge>
+          <div className="mb-1 flex flex-wrap gap-1.5">
+            <Badge tone="cyan">{t('match.rubric.social')}</Badge>
+            <Badge>{t('match.orbitSocial')}</Badge>
+          </div>
           <h2 className="mt-2 text-lg font-bold text-ink">{post.authorName}</h2>
           <p className="text-xs text-muted">{post.authorKind}</p>
         </div>
