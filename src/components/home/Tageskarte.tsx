@@ -4,6 +4,7 @@ import {
   type AssistPlan,
 } from '../../lib/assist'
 import { enqueueReminder } from '../../lib/reminders'
+import type { ResumePoint } from '../../lib/resume'
 import {
   tageskarteCopy,
   type DaySlot,
@@ -12,16 +13,18 @@ import {
 import { useI18n } from '../../lib/i18n'
 import { Button, ButtonLink } from '../ui/Button'
 
-/** Exactly one Home product card — daily suggestion, with Assist plan merged in when present. */
+/** Exactly one Home product card — resume / job default, with Assist plan merged in when present. */
 export function Tageskarte({
   item,
   slot,
   plan,
+  resume,
   onUsePrompt,
 }: {
   item: TageskarteItem
   slot: DaySlot
   plan: AssistPlan | null
+  resume: ResumePoint | null
   onUsePrompt: (prompt: string) => void
 }) {
   const { t, resolved } = useI18n()
@@ -40,11 +43,12 @@ export function Tageskarte({
       aria-label={plan ? t('assist.planKicker') : t('home.tageskarte')}
       data-tageskarte="1"
       data-assist-plan={plan ? '1' : undefined}
+      data-tageskarte-mode={plan ? 'assist' : resume ? 'resume' : 'job-default'}
     >
       <div className="flex items-start justify-between gap-2">
         <p className="text-[13px] font-medium uppercase tracking-[0.14em] text-muted">
           {plan ? t('assist.planKicker') : t('home.tageskarte')}
-          {!plan && <span className="text-neutral-600"> · {t(`home.slot.${slot}`)}</span>}
+          {!plan && !resume && <span className="text-neutral-600"> · {t(`home.slot.${slot}`)}</span>}
         </p>
         {plan && (
           <Button type="button" size="sm" variant="ghost" onClick={() => clearPlan()}>
@@ -86,19 +90,32 @@ export function Tageskarte({
             {t('home.tageskarteAlso')}: {daily.title}
           </p>
         </>
+      ) : resume ? (
+        <>
+          <h2 className="mt-1 text-base font-semibold text-ink">{resume.title}</h2>
+          <p className="mt-1 text-sm text-neutral-300">{t('home.tageskarteContinueBody')}</p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <ButtonLink to={resume.path} size="sm" variant="secondary">
+              {t('home.tageskarteContinue')}
+            </ButtonLink>
+          </div>
+        </>
       ) : (
         <>
-          <h2 className="mt-1 text-base font-semibold text-ink">{daily.title}</h2>
-          <p className="mt-1 text-sm text-neutral-300">{daily.body}</p>
+          <h2 className="mt-1 text-base font-semibold text-ink">{t('home.tageskarteJobTitle')}</h2>
+          <p className="mt-1 text-sm text-neutral-300">{t('home.tageskarteJobBody')}</p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <Button type="button" size="sm" variant="secondary" onClick={() => onUsePrompt(daily.prompt)}>
-              {t('home.tageskarteDo')}
+            <ButtonLink to="/listings/new?intent=job" size="sm" variant="secondary">
+              {t('home.tageskarteJobTitle')}
+            </ButtonLink>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => onUsePrompt('Was liegt heute an — Job oder Auftrag?')}
+            >
+              {t('home.tageskarteJobBody')}
             </Button>
-            {item.to && (
-              <ButtonLink to={item.to} size="sm" variant="ghost">
-                {t('home.next')}
-              </ButtonLink>
-            )}
           </div>
         </>
       )}

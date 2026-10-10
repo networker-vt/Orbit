@@ -1,34 +1,23 @@
-import { ORBIT_BRAND, ORBIT_TAGLINE_DE } from '../../data/industries'
-import { useI18n } from '../../lib/i18n'
 import { cn } from '../../lib/utils'
 
 const base = () => import.meta.env.BASE_URL
 
-/** Adult Home hero — Wortmarke + Ring-Logo, keine Orbi-Kind-Posen. */
+/** Home background watermark — full-area Orbit mark, readable content stays on top. */
 export function OrbitWordmarkHero({ className }: { className?: string }) {
-  const { t } = useI18n()
   const logo = `${base()}icons/orbit-logo.png`
 
   return (
     <div
-      className={cn('orbit-wordmark-hero flex flex-col items-center gap-3 px-2 text-center', className)}
-      data-orbi-wordmark="1"
-      aria-hidden={false}
+      className={cn('orbit-brand-watermark pointer-events-none absolute inset-0 overflow-hidden', className)}
+      aria-hidden
+      data-orbi-watermark="1"
     >
-      <div className="orbit-wordmark-hero__mark relative flex h-[4.5rem] w-[4.5rem] items-center justify-center md:h-20 md:w-20">
-        <span className="orbit-wordmark-hero__ring absolute inset-0 rounded-full border-2 border-[var(--theme-accent)]/35" />
-        <span className="orbit-wordmark-hero__ring orbit-wordmark-hero__ring--outer absolute -inset-1 rounded-full border border-cyan/20" />
-        <img
-          src={logo}
-          alt=""
-          className="relative z-[1] h-14 w-14 rounded-2xl border border-cyan/25 object-cover shadow-[0_0_24px_color-mix(in_oklab,var(--theme-accent)_22%,transparent)] md:h-16 md:w-16"
-        />
-      </div>
-      <div className="space-y-0.5">
-        <p className="text-lg font-bold tracking-tight text-ink md:text-xl">{ORBIT_BRAND}</p>
-        <p className="text-xs uppercase tracking-[0.2em] text-cyan">{ORBIT_TAGLINE_DE}</p>
-        <p className="sr-only">{t('brand.tagline')}</p>
-      </div>
+      <img
+        src={logo}
+        alt=""
+        className="orbit-brand-watermark__mark absolute left-1/2 top-[42%] h-[min(88vw,22rem)] w-[min(88vw,22rem)] -translate-x-1/2 -translate-y-1/2 rounded-[2.5rem] object-cover opacity-[0.14] md:h-[26rem] md:w-[26rem] md:opacity-[0.16]"
+      />
+      <span className="orbit-brand-watermark__ring absolute left-1/2 top-[42%] h-[min(76vw,19rem)] w-[min(76vw,19rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[var(--theme-accent)]/20 md:h-[22rem] md:w-[22rem]" />
     </div>
   )
 }

@@ -493,6 +493,13 @@ textarea:focus-visible,
 
 }
 
+.orbit-brand-watermark__mark {
+  mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 78%);
+}
+.orbit-brand-watermark__ring {
+  opacity: 0.65;
+}
+
 .orbit-wordmark-hero__ring {
   animation: orbit-wordmark-ring 2.8s ease-in-out infinite;
 }
