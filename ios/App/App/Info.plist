@@ -9,7 +9,7 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
-	<string>Orbit verwendet die Kamera für Foto-Upload, Kabine, Entdecker und die lokale Interview-Vorschau.</string>
+	<string>Orbit verwendet die Kamera für Foto-Upload, Foto-Verkauf (Artikel fotografieren), Kabine, Entdecker und die lokale Interview-Vorschau.</string>
 	<key>CFBundleDisplayName</key>
         <string>Orbit</string>
 	<key>CFBundleExecutable</key>

@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Briefcase, Handshake, HelpCircle, Wrench, X } from 'lucide-react'
+import { Briefcase, Camera, Car, HelpCircle, Package, RefreshCw, Timer, Wrench, X } from 'lucide-react'
 import { useI18n } from '../../lib/i18n'
 
 type Props = {
@@ -21,6 +21,13 @@ export function CreateSheet({ open, onClose }: Props) {
       accent: 'text-cyan border-cyan/40 bg-cyan/10',
     },
     {
+      to: '/listings/new?intent=minijob',
+      label: t('create.minijob'),
+      hint: t('create.minijobHint'),
+      icon: Timer,
+      accent: 'text-teal border-teal/40 bg-teal/10',
+    },
+    {
       to: '/listings/new?intent=service',
       label: t('create.service'),
       hint: t('create.serviceHint'),
@@ -28,11 +35,32 @@ export function CreateSheet({ open, onClose }: Props) {
       accent: 'text-teal border-teal/40 bg-teal/10',
     },
     {
-      to: '/listings/new?intent=partnership',
-      label: t('create.partnership'),
-      hint: t('create.partnershipHint'),
-      icon: Handshake,
+      to: '/listings/new?intent=courier',
+      label: t('create.courier'),
+      hint: t('create.courierHint'),
+      icon: Package,
+      accent: 'text-cyan border-cyan/40 bg-cyan/10',
+    },
+    {
+      to: '/listings/new?intent=ride',
+      label: t('create.ride'),
+      hint: t('create.rideHint'),
+      icon: Car,
+      accent: 'text-amber-200 border-amber-500/40 bg-amber-500/10',
+    },
+    {
+      to: '/listings/new?intent=barter',
+      label: t('create.barter'),
+      hint: t('create.barterHint'),
+      icon: RefreshCw,
       accent: 'text-violet-300 border-violet-500/40 bg-violet-500/10',
+    },
+    {
+      to: '/match?lane=sell&sell=1',
+      label: t('create.sell'),
+      hint: t('create.sellHint'),
+      icon: Camera,
+      accent: 'text-cyan border-cyan/40 bg-cyan/10',
     },
     {
       to: '/listings/new?intent=need',
@@ -67,7 +95,7 @@ export function CreateSheet({ open, onClose }: Props) {
         aria-label={t('create.close')}
         onClick={onClose}
       />
-      <div className="absolute inset-x-0 bottom-0 safe-pb rounded-t-3xl border border-border bg-surface-2 p-4 shadow-2xl">
+      <div className="absolute inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto safe-pb rounded-t-3xl border border-border bg-surface-2 p-4 shadow-2xl">
         <div className="mb-3 flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-ink">{t('nav.create')}</h2>

@@ -9,11 +9,36 @@ export type Vertical =
   | 'job'
   | 'partnership'
 
-/** Unified marketplace taxonomy (v2.2) — Jobs remain one lane among several. */
-export type MarketType = 'job' | 'minijob' | 'service' | 'b2b' | 'partnership' | 'asset'
+/** Unified marketplace taxonomy — Match hub lanes include mobility + barter + sell-by-photo. */
+export type MarketType =
+  | 'job'
+  | 'minijob'
+  | 'service'
+  | 'b2b'
+  | 'partnership'
+  | 'asset'
+  | 'courier'
+  | 'ride'
+  | 'barter'
+  | 'sell'
+
+/** Tausch: rein natural vs. later Aufpreis/Escrow (Escrow gated in product). */
+export type BarterMode = 'natural' | 'hybrid'
+
+/** Second-hand condition for sell-by-photo listings. */
+export type ItemCondition = 'new' | 'like_new' | 'good' | 'fair' | 'parts'
 
 /** Simple create-sheet intents. Need = Gesuch on any lane. */
-export type CreateIntent = 'job' | 'service' | 'partnership' | 'need'
+export type CreateIntent =
+  | 'job'
+  | 'minijob'
+  | 'service'
+  | 'courier'
+  | 'ride'
+  | 'barter'
+  | 'sell'
+  | 'partnership'
+  | 'need'
 
 export type Role =
   | 'freelancer'
@@ -108,6 +133,10 @@ export interface Listing {
   salaryPeriod?: 'hour' | 'day' | 'month' | 'year'
   /** Marketplace lane; derived from vertical/jobType when omitted (legacy seeds). */
   marketType?: MarketType
+  /** Tausch only: natural swap vs hybrid with optional EUR top-up (Escrow later). */
+  barterMode?: BarterMode
+  /** Sell-by-photo: article condition (user-confirmed). */
+  itemCondition?: ItemCondition
   /** What this post offers (chips) — used in offer↔need scoring. */
   offerTags?: string[]
   /** What this post needs (chips). */

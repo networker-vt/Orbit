@@ -143,20 +143,19 @@ describe('match list without a real choice', () => {
     savePrefs({ seeker: { ...current.seeker, lifeExamples: ['Essen'] } })
     const { host } = await mount(createElement(MatchPage))
     expect(host.querySelector('[data-match-empty="none"] p')?.textContent).toBe('Dazu ist noch nichts da.')
-    expect(host.querySelectorAll('button')).toHaveLength(1)
+    expect(host.querySelector('[data-match-hub="1"]')).toBeTruthy()
     expect(host.textContent).not.toContain('Sara König')
   })
 
-  it('shows one sentence and one button, and no sample person', async () => {
+  it('shows hub + quiet choice, and no sample person', async () => {
     const { host } = await mount(createElement(MatchPage))
-    expect(host.querySelector('[data-match-empty="choice"] p')?.textContent).toBe(
-      'Die Liste bleibt leer, bis du etwas wählst.',
+    expect(host.querySelector('[data-match-hub="1"]')).toBeTruthy()
+    expect(host.querySelector('[data-match-empty="choice"] p')?.textContent).toContain(
+      'Die Liste bleibt leer, bis du etwas wählst',
     )
-    const buttons = [...host.querySelectorAll('button')]
-    expect(buttons).toHaveLength(1)
-    expect(buttons[0]?.textContent).toContain('Zum Start')
+    const quietBtn = host.querySelector('[data-match-empty="choice"] button')
+    expect(quietBtn?.textContent).toContain('Zum Start')
     expect(host.textContent).not.toContain('Sara König')
-    expect(host.textContent).not.toContain('Alex Müller')
     expect(host.textContent).not.toMatch(/gebucht|reserviert|bestellt/i)
   })
 

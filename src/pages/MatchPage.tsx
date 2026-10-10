@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Heart, SkipForward, SlidersHorizontal, MessageSquare, Plane } from 'lucide-react'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { Heart, SkipForward, MessageSquare, Plane } from 'lucide-react'
 import { rankPersonalizedMatch, type PersonalizedItem } from '../lib/personalizedMatch'
 import { chatHref } from '../lib/chatPath'
 import type { TravelOffer } from '../lib/travel'
@@ -8,6 +8,8 @@ import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
 import { LaneBadge } from '../components/credits/LaneBadge'
 import { SpeakButton } from '../components/a11y/SpeakButton'
+import { MatchHubChrome } from '../components/match/MatchHubChrome'
+import { SellByPhotoSheet } from '../components/match/SellByPhotoSheet'
 import { useStoreVersion } from '../hooks/useStore'
 import { useAuth } from '../lib/auth'
 import { store } from '../lib/store'
@@ -20,14 +22,15 @@ import { listingSpeech } from '../lib/tts'
 import { cn, formatPrice } from '../lib/utils'
 import { getCompany, subscribeCompany } from '../lib/company'
 import { deriveMarketType, isSeekerFeedListing } from '../lib/market'
-import { hasOccupationIntent, intentForMatch, listingVisibleForChoice, profileMatchesOccupationIntent } from '../lib/occupationMatch'
+import {
+  hasOccupationIntent,
+  intentForMatch,
+  listingVisibleForChoice,
+  profileMatchesOccupationIntent,
+} from '../lib/occupationMatch'
 import { alcoholChoiceBlocked, publicMatchLine } from '../lib/lifeHome'
 import { hasConfirmedAdult } from '../lib/ageGate'
-import {
-  filterCandidatesByEmployerPrefs,
-  getPrefs,
-  subscribePrefs,
-} from '../lib/prefs'
+import { filterCandidatesByEmployerPrefs, getPrefs, subscribePrefs } from '../lib/prefs'
 import {
   getMatchDeckMode,
   getSwipes,
@@ -44,6 +47,13 @@ import {
 } from '../lib/match'
 import { isFlagOn } from '../lib/flags'
 import { listingIsSafeForKids, kidsMaySeeJobs, isKidsMode, subscribeKids } from '../lib/kids'
+import {
+  hubLaneBypassesOccupation,
+  interestChecklist,
+  listingMatchesHubLane,
+  parseMatchHubLane,
+  type MatchHubLane,
+} from '../lib/matchHub'
 import type { Listing, Profile } from '../types'
 
 type DeckCard =
@@ -59,28 +69,49 @@ function fromPersonalized(item: PersonalizedItem): DeckCard {
   return { kind: 'company', listing: item.listing, score: item.score, reason: item.reason }
 }
 
+function listingCard(listing: Listing, prefs: ReturnType<typeof getPrefs>, company: ReturnType<typeof getCompany>): DeckCard {
+  const lane = deriveMarketType(listing)
+  if (lane === 'job' || lane === 'minijob') {
+    return { kind: 'job', listing, score: scoreJobMatch(listing, prefs) }
+  }
+  return { kind: 'company', listing, score: scoreB2bMatch(listing, prefs, company) }
+}
+
 export function MatchPage() {
   useStoreVersion()
   const { t, resolved } = useI18n()
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
   const forceCrew = location.pathname.startsWith('/crew')
   const forceTreffer = location.pathname.startsWith('/treffer')
   const personalized = !forceCrew && !forceTreffer
+  const showHub = personalized
   const { user, loginDemo, profile } = useAuth()
   const [prefs, setPrefs] = useState(getPrefs)
   const [company, setCompany] = useState(getCompany)
   const [, setSwipeTick] = useState(0)
   const [toast, setToast] = useState<MutualMatch | null>(null)
+  const [checklist, setChecklist] = useState<string[] | null>(null)
   const [explain, setExplain] = useState(false)
   const [capOpen, setCapOpen] = useState(false)
   const [budget, setBudget] = useState(getSwipeBudget)
+  const [sellOpen, setSellOpen] = useState(() => searchParams.get('sell') === '1')
+  const hubLane = parseMatchHubLane(searchParams.get('lane'))
   const [deckMode, setDeckMode] = useState<MatchDeckMode>(() => {
     if (typeof window !== 'undefined' && window.location.pathname.includes('/crew')) return 'company'
     if (typeof window !== 'undefined' && window.location.pathname.includes('/treffer')) return 'seeker'
     return getMatchDeckMode(getPrefs().side === 'employer' ? 'company' : 'seeker')
   })
   const [kids, setKids] = useState(isKidsMode)
+
+  const setHubLane = (lane: MatchHubLane) => {
+    const next = new URLSearchParams(searchParams)
+    if (lane === 'all') next.delete('lane')
+    else next.set('lane', lane)
+    if (lane !== 'sell') next.delete('sell')
+    setSearchParams(next, { replace: true })
+  }
 
   useEffect(() => {
     if (forceCrew) {
@@ -91,6 +122,14 @@ export function MatchPage() {
       setMatchDeckMode('seeker')
     }
   }, [forceCrew, forceTreffer])
+
+  useEffect(() => {
+    if (searchParams.get('sell') === '1') {
+      setSellOpen(true)
+      if (hubLane !== 'sell') setHubLane('sell')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   useEffect(() => {
     const u1 = subscribePrefs(() => setPrefs(getPrefs()))
@@ -116,18 +155,33 @@ export function MatchPage() {
 
   const adult = hasConfirmedAdult()
   const intent = intentForMatch(prefs)
+  const hasIntent = hasOccupationIntent(intent)
+  const hubBrowse = showHub && hubLaneBypassesOccupation(hubLane) && !hasIntent
+
   const deck = useMemo((): DeckCard[] => {
-    if (!hasOccupationIntent(intent)) return []
-    if (personalized) {
-      const skip = new Set<string>([
-        ...swipedIds(['job', 'company', 'candidate']),
-      ])
+    const kidsFilter = (l: Listing) => {
+      if (!kids) return true
+      if (deriveMarketType(l) === 'ride') return false
+      if (!kidsMaySeeJobs() && (deriveMarketType(l) === 'job' || deriveMarketType(l) === 'minijob')) return false
+      return listingIsSafeForKids(l)
+    }
+
+    let cards: DeckCard[] = []
+
+    if (hubBrowse) {
+      const done = swipedIds(['job', 'company'])
+      const pool = store
+        .listListings({})
+        .filter((l) => l.status === 'active' && !done.has(l.id) && listingMatchesHubLane(l, hubLane) && kidsFilter(l))
+      cards = rankForWorld(pool, prefs).map((l) => listingCard(l, prefs, company))
+    } else if (!hasIntent) {
+      cards = []
+    } else if (personalized) {
+      const skip = new Set<string>([...swipedIds(['job', 'company', 'candidate'])])
       const items = rankPersonalizedMatch({
         listings: store.listListings({}).filter((l) => {
           if (l.status !== 'active') return false
-          if (!kids) return true
-          if (!kidsMaySeeJobs()) return l.vertical !== 'job'
-          return listingIsSafeForKids(l)
+          return kidsFilter(l)
         }),
         profiles: kids ? [] : store.listProfiles(),
         prefs,
@@ -136,61 +190,74 @@ export function MatchPage() {
         skipIds: skip,
         adult,
       })
-      return items
+      cards = items
         .filter((item) => !(kids && (item.kind === 'travel' || item.kind === 'person')))
         .map(fromPersonalized)
-    }
-    if (kids && !useSeekerDeck) return []
-    if (useSeekerDeck) {
+        .filter((c) => {
+          if (c.kind === 'travel' || c.kind === 'candidate') return hubLane === 'all'
+          return listingMatchesHubLane(c.listing, hubLane)
+        })
+    } else if (kids && !useSeekerDeck) {
+      cards = []
+    } else if (useSeekerDeck) {
       const done = swipedIds(['job', 'company'])
       const pool = store
         .listListings({})
         .filter((l) => isSeekerFeedListing(l) && l.kind === 'offer' && l.status === 'active' && !done.has(l.id))
-        .filter((l) => {
-          if (!kids) return true
-          if (!kidsMaySeeJobs()) return false
-          return listingIsSafeForKids(l)
-        })
-      const matched = pool.filter((l) => listingVisibleForChoice(l, intent, adult))
-      const ranked = rankForWorld(matched, prefs)
-      return ranked.map((l) => {
-        const lane = deriveMarketType(l)
-        if (lane === 'service') {
-          return { kind: 'company' as const, listing: l, score: scoreB2bMatch(l, prefs, company) }
-        }
-        return { kind: 'job' as const, listing: l, score: scoreJobMatch(l, prefs) }
-      })
+        .filter(kidsFilter)
+        .filter((l) => listingVisibleForChoice(l, intent, adult))
+        .filter((l) => listingMatchesHubLane(l, hubLane))
+      cards = rankForWorld(pool, prefs).map((l) => listingCard(l, prefs, company))
+    } else {
+      const donePeople = swipedIds('candidate')
+      const doneListings = swipedIds(['company', 'job'])
+      const candidates = filterCandidatesByEmployerPrefs(
+        store.listProfiles().filter((p) => p.role === 'freelancer' || p.role === 'courier'),
+        prefs,
+      )
+        .filter((p) => profileMatchesOccupationIntent(p, prefs.employer))
+        .filter((p) => !donePeople.has(p.id) && p.id !== user?.id)
+      const listings = rankForCompanyWorld(
+        store
+          .listListings({})
+          .filter((l) => l.ownerId !== user?.id && l.status === 'active' && !doneListings.has(l.id))
+          .filter((l) => listingVisibleForChoice(l, intent, adult))
+          .filter((l) => listingMatchesHubLane(l, hubLane)),
+        prefs,
+      )
+      const peopleCards: DeckCard[] =
+        hubLane === 'all'
+          ? candidates.map((p) => ({
+              kind: 'candidate' as const,
+              profile: p,
+              score: scoreCandidateMatch(p, prefs, company),
+            }))
+          : []
+      const listingCards: DeckCard[] = listings.map((l) => ({
+        kind: 'company' as const,
+        listing: l,
+        score: scoreB2bMatch(l, prefs, company),
+      }))
+      cards = [...listingCards, ...peopleCards].sort((a, b) => b.score.percent - a.score.percent)
     }
-    const donePeople = swipedIds('candidate')
-    const doneListings = swipedIds(['company', 'job'])
-    const candidates = filterCandidatesByEmployerPrefs(
-      store.listProfiles().filter((p) => p.role === 'freelancer' || p.role === 'courier'),
-      prefs,
-    )
-      .filter((p) => profileMatchesOccupationIntent(p, prefs.employer))
-      .filter((p) => !donePeople.has(p.id) && p.id !== user?.id)
-    const listings = rankForCompanyWorld(
-      store
-        .listListings({})
-        .filter((l) => l.ownerId !== user?.id && l.status === 'active' && !doneListings.has(l.id))
-        .filter((l) => listingVisibleForChoice(l, intent, adult)),
-      prefs,
-    )
-    const peopleCards: DeckCard[] = candidates.map((p) => ({
-      kind: 'candidate',
-      profile: p,
-      score: scoreCandidateMatch(p, prefs, company),
-    }))
-    const listingCards: DeckCard[] = listings.map((l) => ({
-      kind: 'company',
-      listing: l,
-      score: scoreB2bMatch(l, prefs, company),
-    }))
-    return [...listingCards, ...peopleCards].sort((a, b) => b.score.percent - a.score.percent)
-  }, [prefs, company, useSeekerDeck, toast, user?.id, kids, personalized, resolved, adult, intent])
+    return cards
+  }, [
+    prefs,
+    company,
+    useSeekerDeck,
+    toast,
+    user?.id,
+    kids,
+    personalized,
+    resolved,
+    adult,
+    intent,
+    hubLane,
+    hubBrowse,
+    hasIntent,
+  ])
 
   const alcoholClosed = alcoholChoiceBlocked(intent, adult)
-
   const current = deck[0]
 
   const ensureActor = () => {
@@ -254,6 +321,7 @@ export function MatchPage() {
       }
     } else {
       const listing = current.listing
+      const lane = deriveMarketType(listing)
       trackBehavior({
         kind: action === 'skip' ? 'swipe_skip' : 'swipe_interest',
         listingId: listing.id,
@@ -282,6 +350,9 @@ export function MatchPage() {
             /* demo best-effort */
           }
         }
+        const tips = interestChecklist(lane)
+        setChecklist(resolved === 'de' ? tips.de : tips.en)
+        window.setTimeout(() => setChecklist(null), 6400)
         if (mutual) {
           setToast(mutual)
           window.setTimeout(() => setToast(null), 4200)
@@ -314,46 +385,47 @@ export function MatchPage() {
     )
   }
 
-  if (!hasOccupationIntent(intent) || !current) {
-    return (
-      <QuietMatch
-        marker={hasOccupationIntent(intent) ? 'none' : 'choice'}
-        sentence={hasOccupationIntent(intent) ? t('match.quietNone') : t('match.quietEmpty')}
-        action={t('match.quietAction')}
-        onAction={() => navigate('/')}
-      />
-    )
-  }
-
   const mutuals = getSwipes().mutuals
-  const heading = personalized ? t('match.title') : useSeekerDeck ? t('match.jobs') : t('match.companyDeck')
+  const showQuietChoice = showHub && !hasIntent && hubLane === 'all'
+  const showQuietNone = !showQuietChoice && !current
 
   return (
     <div className="relative mx-auto flex min-h-[70dvh] max-w-lg flex-col gap-4 pb-scroll-chrome">
-      <header className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-[var(--theme-accent)]">
-            {personalized ? t('match.forYou') : t('match.kicker')}
-          </p>
-          <h1 className="text-xl font-bold tracking-tight">{heading}</h1>
-          <p className="text-xs text-muted">
-            {deck.length} {t('match.cards')}
-            {isFlagOn('credits') && (
-              <>
-                {' '}
-                · {t('match.swipesLeft')} {budget.remaining}/{budget.freeCap}
-                {budget.extra ? ` +${budget.extra}` : ''}
-              </>
-            )}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
+      {showHub && (
+        <MatchHubChrome
+          lane={hubLane}
+          onLane={setHubLane}
+          cardCount={deck.length}
+          onSellPhoto={() => {
+            setHubLane('sell')
+            setSellOpen(true)
+          }}
+        />
+      )}
+
+      {!showHub && (
+        <header className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-[var(--theme-accent)]">
+              {t('match.kicker')}
+            </p>
+            <h1 className="text-xl font-bold tracking-tight">
+              {useSeekerDeck ? t('match.jobs') : t('match.companyDeck')}
+            </h1>
+            <p className="text-xs text-muted">
+              {deck.length} {t('match.cards')}
+              {isFlagOn('credits') && (
+                <>
+                  {' '}
+                  · {t('match.swipesLeft')} {budget.remaining}/{budget.freeCap}
+                  {budget.extra ? ` +${budget.extra}` : ''}
+                </>
+              )}
+            </p>
+          </div>
           {isFlagOn('credits') && <LaneBadge lane="free" />}
-          <Button size="sm" variant="secondary" onClick={() => navigate('/prefs')}>
-            <SlidersHorizontal size={16} /> {t('match.tweakPrefs')}
-          </Button>
-        </div>
-      </header>
+        </header>
+      )}
 
       {both && !personalized && (
         <div className="flex gap-1 rounded-full border border-border p-1" role="tablist">
@@ -376,59 +448,84 @@ export function MatchPage() {
         </div>
       )}
 
-      {current.kind === 'candidate' ? (
-        <CandidateCard
-          profile={current.profile}
-          score={current.score}
-          explain={explain}
-          onToggleExplain={() => setExplain((v) => !v)}
-        />
-      ) : current.kind === 'travel' ? (
-        <TravelCard
-          offer={current.offer}
-          score={current.score}
-          explain={explain}
-          onToggleExplain={() => setExplain((v) => !v)}
-        />
-      ) : (
-        <JobCard
-          listing={current.listing}
-          score={current.score}
-          explain={explain}
-          onToggleExplain={() => setExplain((v) => !v)}
-          lane={deriveMarketType(current.listing)}
+      {showQuietChoice && (
+        <QuietMatch
+          marker="choice"
+          sentence={t('match.quietEmpty')}
+          action={t('match.quietAction')}
+          onAction={() => navigate('/')}
+          embedded
         />
       )}
 
-      {current && (
-        <div className="sticky bottom-20 z-10 flex items-center justify-center gap-4 md:bottom-4">
-          <button
-            type="button"
-            aria-label={t('match.skip')}
-            onClick={() => swipe('skip')}
-            className="flex h-14 w-14 items-center justify-center rounded-full border border-border bg-surface-2 text-neutral-300 shadow-lg hover:border-rose-400/50 hover:text-rose-300"
-          >
-            <SkipForward size={24} />
-          </button>
-          <button
-            type="button"
-            aria-label={t('match.interest')}
-            onClick={() => swipe('interested')}
-            className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--theme-accent)] text-[var(--theme-on-accent)] shadow-[0_0_28px_color-mix(in_oklab,var(--theme-accent)_40%,transparent)]"
-          >
-            <Heart size={28} fill="currentColor" />
-          </button>
-        </div>
+      {showQuietNone && (
+        <QuietMatch
+          marker={hasIntent ? 'none' : 'choice'}
+          sentence={hasIntent ? t('match.quietNone') : t('match.quietEmpty')}
+          action={hubLane === 'sell' ? t('sell.cta') : t('match.quietAction')}
+          onAction={() => {
+            if (hubLane === 'sell') setSellOpen(true)
+            else navigate('/')
+          }}
+          embedded={showHub}
+        />
       )}
 
-      <div className="flex justify-center gap-6 text-xs text-muted">
-        <span className="inline-flex items-center gap-1">
-          <SkipForward size={12} /> {t('match.skip')}
-        </span>
-        <span className="inline-flex items-center gap-1 text-[var(--theme-accent)]">
-          <Heart size={12} /> {t('match.interest')}
-        </span>
-      </div>
+      {!showQuietChoice && !showQuietNone && current && (
+        <>
+          {current.kind === 'candidate' ? (
+            <CandidateCard
+              profile={current.profile}
+              score={current.score}
+              explain={explain}
+              onToggleExplain={() => setExplain((v) => !v)}
+            />
+          ) : current.kind === 'travel' ? (
+            <TravelCard
+              offer={current.offer}
+              score={current.score}
+              explain={explain}
+              onToggleExplain={() => setExplain((v) => !v)}
+            />
+          ) : (
+            <JobCard
+              listing={current.listing}
+              score={current.score}
+              explain={explain}
+              onToggleExplain={() => setExplain((v) => !v)}
+              lane={deriveMarketType(current.listing)}
+            />
+          )}
+
+          <div className="sticky bottom-20 z-10 flex items-center justify-center gap-4 md:bottom-4">
+            <button
+              type="button"
+              aria-label={t('match.skip')}
+              onClick={() => swipe('skip')}
+              className="flex h-14 w-14 items-center justify-center rounded-full border border-border bg-surface-2 text-neutral-300 shadow-lg hover:border-rose-400/50 hover:text-rose-300"
+            >
+              <SkipForward size={24} />
+            </button>
+            <button
+              type="button"
+              aria-label={t('match.interest')}
+              onClick={() => swipe('interested')}
+              className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--theme-accent)] text-[var(--theme-on-accent)] shadow-[0_0_28px_color-mix(in_oklab,var(--theme-accent)_40%,transparent)]"
+            >
+              <Heart size={28} fill="currentColor" />
+            </button>
+          </div>
+
+          <div className="flex justify-center gap-6 text-xs text-muted">
+            <span className="inline-flex items-center gap-1">
+              <SkipForward size={12} /> {t('match.skip')}
+            </span>
+            <span className="inline-flex items-center gap-1 text-[var(--theme-accent)]">
+              <Heart size={12} /> {t('match.interest')}
+            </span>
+          </div>
+        </>
+      )}
 
       {mutuals.length > 0 && (
         <section className="rounded-2xl border border-teal/30 bg-teal/5 p-4">
@@ -449,6 +546,20 @@ export function MatchPage() {
             ))}
           </ul>
         </section>
+      )}
+
+      {checklist && (
+        <div
+          className="fixed inset-x-4 bottom-28 z-40 mx-auto max-w-sm rounded-2xl border border-amber-500/40 bg-surface-2 p-4 shadow-xl md:bottom-8"
+          data-match-checklist="1"
+        >
+          <p className="text-sm font-semibold text-amber-100">{t('match.applyChecklist')}</p>
+          <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-neutral-200">
+            {checklist.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {toast && (
@@ -480,6 +591,16 @@ export function MatchPage() {
           onClose={() => setCapOpen(false)}
         />
       )}
+
+      <SellByPhotoSheet
+        open={sellOpen}
+        onClose={() => {
+          setSellOpen(false)
+          const next = new URLSearchParams(searchParams)
+          next.delete('sell')
+          setSearchParams(next, { replace: true })
+        }}
+      />
     </div>
   )
 }
@@ -532,15 +653,20 @@ function QuietMatch({
   action,
   onAction,
   marker,
+  embedded = false,
 }: {
   sentence: string
   action: string
   onAction: () => void
   marker: string
+  embedded?: boolean
 }) {
   return (
     <div
-      className="mx-auto flex min-h-[50dvh] max-w-md flex-col items-center justify-center gap-4 px-4 pb-scroll-chrome text-center"
+      className={cn(
+        'flex flex-col items-center justify-center gap-4 px-4 text-center',
+        embedded ? 'min-h-[28dvh] py-6' : 'mx-auto min-h-[50dvh] max-w-md pb-scroll-chrome',
+      )}
       data-match-empty={marker}
     >
       <p className="max-w-sm text-sm leading-relaxed text-muted">{sentence}</p>
@@ -573,6 +699,10 @@ function JobCard({
           <div className="mb-2 flex flex-wrap gap-1.5">
             {lane && <Badge tone="violet">{t(`market.${lane}` as 'market.job')}</Badge>}
             {L.kind === 'request' && <Badge tone="amber">{t('create.need')}</Badge>}
+            {L.barterMode && (
+              <Badge tone="teal">{L.barterMode === 'natural' ? t('match.barterNatural') : t('match.barterHybrid')}</Badge>
+            )}
+            {L.itemCondition && <Badge>{L.itemCondition}</Badge>}
             {L.industry && <Badge tone="cyan">{L.industry}</Badge>}
             {L.jobType && <Badge tone="teal">{L.jobType}</Badge>}
             {L.workMode && <Badge>{L.workMode}</Badge>}
@@ -585,9 +715,7 @@ function JobCard({
         </div>
         <ScoreRing score={score} />
       </div>
-      <p className="mt-4 line-clamp-5 flex-1 text-sm leading-relaxed text-neutral-300">
-        {listing.description}
-      </p>
+      <p className="mt-4 line-clamp-5 flex-1 text-sm leading-relaxed text-neutral-300">{listing.description}</p>
       <div className="mt-4 flex flex-wrap items-end justify-between gap-2">
         <div>
           {listing.priceFrom != null && (
@@ -663,11 +791,7 @@ function CandidateCard({
           </span>
         ))}
       </div>
-      <button
-        type="button"
-        onClick={onToggleExplain}
-        className="mt-3 self-end text-xs text-cyan hover:underline"
-      >
+      <button type="button" onClick={onToggleExplain} className="mt-3 self-end text-xs text-cyan hover:underline">
         {explain ? t('match.hideScore') : t('match.explain')}
       </button>
       <Breakdown score={score} open={explain} hidden={[profile.city]} />

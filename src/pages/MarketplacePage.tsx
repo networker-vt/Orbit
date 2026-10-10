@@ -50,11 +50,14 @@ export function MarketplacePage() {
           <SpeakButton compact text={`${t('market.title')}. ${t('market.lead')}`} />
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" onClick={() => navigate('/listings/new')}>
+          <Button size="sm" onClick={() => navigate('/match')}>
+            {t('match.hubTitle')}
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => navigate('/listings/new')}>
             {t('nav.create')}
           </Button>
-          <Button size="sm" variant="secondary" onClick={() => navigate('/match')}>
-            {t('nav.match')}
+          <Button size="sm" variant="secondary" onClick={() => navigate('/match?lane=sell&sell=1')}>
+            {t('sell.cta')}
           </Button>
         </div>
       </header>
