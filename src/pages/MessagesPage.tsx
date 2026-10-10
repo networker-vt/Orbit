@@ -19,6 +19,14 @@ import {
   listIncomingPending,
   subscribeSocialDm,
 } from '../lib/socialDm'
+import { isFlagOn } from '../lib/flags'
+import {
+  chatHistoryLimit,
+  chatMediaSlotsRemaining,
+  chatPlusActive,
+  CHAT_HISTORY_FREE,
+} from '../lib/chatExtras'
+import { buyBoost, boostCost, getCredits, subscribeCredits } from '../lib/credits'
 
 const KINDS: { id: 'all' | ThreadKind; key: string }[] = [
   { id: 'all', key: 'chat.all' },
@@ -41,8 +49,10 @@ export function MessagesPage() {
   const [body, setBody] = useState('')
   const [filter, setFilter] = useState<'all' | ThreadKind>('all')
   const [dmTick, setDmTick] = useState(0)
+  const [creditsBal, setCreditsBal] = useState(() => getCredits().balance)
 
   useEffect(() => subscribeSocialDm(() => setDmTick((n) => n + 1)), [])
+  useEffect(() => subscribeCredits(() => setCreditsBal(getCredits().balance)), [])
 
   const threads = useMemo(
     () => (user ? store.listThreads(user.id) : []),
@@ -121,6 +131,31 @@ export function MessagesPage() {
             </div>
           </div>
         </div>
+
+        {isFlagOn('credits') && (
+          <div className="border-b border-border px-3 py-2 text-xs text-muted">
+            <p>
+              {chatPlusActive()
+                ? 'Chat-Extras aktiv (heute): erweiterte lokale Historie & Medien-Slots.'
+                : `Basis: ${CHAT_HISTORY_FREE} Nachrichten sichtbar (lokal).`}
+              {' · '}
+              Medien-Slots heute: {chatMediaSlotsRemaining()}
+            </p>
+            {!chatPlusActive() && (
+              <button
+                type="button"
+                className="mt-1 text-[var(--theme-accent)] hover:underline"
+                disabled={creditsBal < boostCost('chat_plus')}
+                onClick={() => void buyBoost('chat_plus')}
+              >
+                Chat-Extras (−{boostCost('chat_plus')} Credits, kein echtes Geld)
+              </button>
+            )}
+            {active && messages.length >= chatHistoryLimit() && (
+              <p className="mt-1 text-amber-200">Ältere Nachrichten sind lokal ausgeblendet — Chat-Extras erweitern das Fenster.</p>
+            )}
+          </div>
+        )}
 
         {incoming.length > 0 && (
           <div className="space-y-2 border-b border-border bg-[var(--theme-accent)]/8 px-3 py-3">

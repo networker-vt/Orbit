@@ -19,7 +19,7 @@ import { store } from '../lib/store'
 import { useI18n } from '../lib/i18n'
 import { applyInterest } from '../lib/apply'
 import { rankForCompanyWorld, rankForWorld, trackBehavior } from '../lib/behavior'
-import { buyBoost, boostCost, consumeSwipe, getSwipeBudget, subscribeCredits } from '../lib/credits'
+import { buyBoost, boostCost, consumeSwipe, getSwipeBudget, hasMatchHighlight, subscribeCredits } from '../lib/credits'
 import { SoftPaywall } from '../components/credits/SoftPaywall'
 import { listingSpeech } from '../lib/tts'
 import { cn, formatPrice } from '../lib/utils'
@@ -132,6 +132,7 @@ export function MatchPage() {
   const [explain, setExplain] = useState(false)
   const [capOpen, setCapOpen] = useState(false)
   const [, setBudget] = useState(getSwipeBudget)
+  const [highlightActive, setHighlightActive] = useState(hasMatchHighlight)
   const [sellOpen, setSellOpen] = useState(
     () => searchParams.get('sell') === '1' || searchParams.get('photo') === '1',
   )
@@ -199,7 +200,10 @@ export function MatchPage() {
     const u1 = subscribePrefs(() => setPrefs(getPrefs()))
     const u2 = subscribeSwipes(() => setSwipeTick((n) => n + 1))
     const u3 = subscribeCompany(() => setCompany(getCompany()))
-    const u4 = subscribeCredits(() => setBudget(getSwipeBudget()))
+    const u4 = subscribeCredits(() => {
+      setBudget(getSwipeBudget())
+      setHighlightActive(hasMatchHighlight())
+    })
     const u5 = subscribeKids(() => setKids(isKidsMode()))
     const u6 = subscribeSocial(() => setSocial(getSocial()))
     return () => {
@@ -585,6 +589,12 @@ export function MatchPage() {
             </p>
           </div>
         </header>
+      )}
+
+      {highlightActive && (
+        <p className="rounded-xl border border-[var(--theme-accent)]/35 bg-[var(--theme-accent)]/10 px-3 py-2 text-xs text-[var(--theme-accent)]">
+          Match-Boost: Profil kurz hervorgehoben (24h Demo, Orbit Credits — kein echtes Geld).
+        </p>
       )}
 
       {both && !personalized && (

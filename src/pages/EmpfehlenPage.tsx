@@ -4,6 +4,7 @@ import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { useReferral } from '../hooks/useReferral'
 import { REFERRAL_RULES_DE, shareUrl } from '../lib/referral'
+import { CreditsBelegList } from '../components/credits/CreditsBelegList'
 import { claimReferralCreditsDemo, getCredits, subscribeCredits } from '../lib/credits'
 import { isFlagOn } from '../lib/flags'
 import { formatDateTime } from '../lib/utils'
@@ -73,8 +74,8 @@ export function EmpfehlenPage() {
           <Gift size={22} className="text-cyan" /> Orbit empfehlen
         </h1>
         <p className="text-sm text-muted">
-          Persönlicher Code und Share-Link. Referral-Credits kommen aus dem Rewards-Pool (21M Cap) —
-          Demo, lokal auf diesem Gerät.
+          Persönlicher Code und Share-Link. Referral-Credits kommen aus dem Rewards-Pool (21M Cap).
+          Credits sind Treuepunkte für Orbit-Boosts — kein echtes Geld, kein Auszahlungsanspruch.
         </p>
       </header>
 
@@ -156,6 +157,12 @@ export function EmpfehlenPage() {
             ))}
           </ul>
         )}
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-lg font-semibold">Belege (Ledger)</h2>
+        <p className="text-xs text-muted">Jede Gutschrift und jeder Boost hat eine Beleg-ID (txn_id).</p>
+        <CreditsBelegList limit={10} />
       </section>
 
       <section className="space-y-2">

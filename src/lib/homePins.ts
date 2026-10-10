@@ -11,8 +11,27 @@
 
 export const HOME_PINS_KEY = 'orbit_home_pins_v1'
 export const HOME_PINS_EVT = 'orbit-home-pins'
-/** Soft cap so Home stays scannable. Mein should enforce the same. */
-export const HOME_PINS_MAX = 8
+/** Base pin slots (free). Extra slots via Credits `home_pins_plus`. */
+export const HOME_PINS_BASE = 8
+/** @deprecated use getHomePinsMax() */
+export const HOME_PINS_MAX = HOME_PINS_BASE
+export const HOME_PINS_EXTRA_PER_BOOST = 2
+export const HOME_PINS_EXTRA_CAP = 4
+
+export function getHomePinExtraSlots(): number {
+  try {
+    const raw = localStorage.getItem('orbit_credits_v2')
+    if (!raw) return 0
+    const parsed = JSON.parse(raw) as { extraPinSlots?: number }
+    return Math.min(HOME_PINS_EXTRA_CAP, Math.max(0, parsed.extraPinSlots ?? 0))
+  } catch {
+    return 0
+  }
+}
+
+export function getHomePinsMax(): number {
+  return HOME_PINS_BASE + getHomePinExtraSlots()
+}
 
 export type HomePin = {
   /** Stable id (tile id or path slug), e.g. `parkmerke`, `abflug`. */
@@ -46,7 +65,7 @@ function sanitize(list: unknown): HomePin[] {
     if (!pin || seen.has(pin.id)) continue
     seen.add(pin.id)
     out.push(pin)
-    if (out.length >= HOME_PINS_MAX) break
+    if (out.length >= getHomePinsMax()) break
   }
   return out
 }

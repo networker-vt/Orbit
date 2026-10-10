@@ -118,7 +118,8 @@ export const REFERRAL_RULES_DE = [
   'Link teilen: ?ref=CODE — der Code wird beim ersten Besuch gespeichert.',
   'Bei Registrierung oder Demo-Login wird der Code dem neuen Account zugeordnet.',
   'Belohnung (Demo): 40 Orbit Credits pro geworbenem Signup — aus dem Rewards-Pool innerhalb der 21M, nicht neu gemintet.',
-  'Credits sind Orbit Credits (Boosts) — kein Auszahlungsanspruch.',
+  'Credits sind Orbit Credits für Boosts (Match, Listing, Pins, Social, Orbit+, Chat) — kein Auszahlungsanspruch.',
+  'Jede Gutschrift und jeder Spend erzeugt einen Ledger-Beleg (txn_id) auf diesem Gerät.',
   'Eigenen Code auf dem eigenen Gerät zu nutzen, bringt keine Extra-Credits.',
   'Programm ist ein Produkt-Stub bis echte Accounts, Anti-Fraud und Auszahlung existieren.',
 ]

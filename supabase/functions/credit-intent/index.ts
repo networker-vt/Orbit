@@ -44,6 +44,11 @@ const ALLOWED_KINDS = new Set([
   'exchange_in',
   'exchange_out',
   'rewards',
+  'home_pins_plus',
+  'orbit_plus_theme',
+  'chat_plus',
+  'match_highlight',
+  'referral',
 ])
 
 const WINDOW_MS = 60_000
