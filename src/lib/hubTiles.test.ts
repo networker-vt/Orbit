@@ -44,7 +44,7 @@ describe('Orbit 2.8.1 hub split', () => {
   it('Mein hub is account-only and sorted money → identity → create → connect → tools', () => {
     const tiles = meinAccountTiles((k) => tStatic(k, 'de'), adult)
     const ids = tiles.map((t) => t.id)
-    expect(ids).toEqual(['profile', 'prefs', 'create', 'offer', 'language', 'dashboard', 'refer'])
+    expect(ids).toEqual(['profile', 'prefs', 'chat', 'create', 'offer', 'language', 'dashboard', 'refer'])
     expect(meinHasDiscoverLinks(tiles)).toBe(false)
     expect(tiles.some((t) => t.to === '/ideen')).toBe(false)
     expect(tiles.some((t) => t.to === '/channels')).toBe(false)
@@ -60,9 +60,9 @@ describe('Orbit 2.8.1 hub split', () => {
 
   it('Kids hide Wallet / create / offer on Mein and travel / firma / crew on Home', () => {
     const mein = meinAccountTiles((k) => tStatic(k, 'de'), kids)
-    expect(mein.some((t) => t.id === 'wallet' || t.id === 'create' || t.id === 'offer' || t.id === 'refer')).toBe(
-      false,
-    )
+    expect(
+      mein.some((t) => t.id === 'wallet' || t.id === 'chat' || t.id === 'create' || t.id === 'offer' || t.id === 'refer'),
+    ).toBe(false)
     const home = homeDiscoverTiles((k) => tStatic(k, 'de'), kids)
     expect(home.some((t) => t.id === 'abflug' || t.id === 'firma' || t.id === 'crew')).toBe(false)
     expect(home.some((t) => t.id === 'campus' || t.id === 'entdecker' || t.id === 'kabine')).toBe(false)

@@ -21,6 +21,13 @@ import {
   subscribeSocial,
   toggleLike,
 } from '../lib/social'
+import {
+  getSocialDmPermission,
+  openAcceptedSocialChat,
+  requestSocialDm,
+  subscribeSocialDm,
+  type SocialDmPermission,
+} from '../lib/socialDm'
 import { store } from '../lib/store'
 import { formatDateTime, cn } from '../lib/utils'
 import { KidsBlocked } from '../components/kids/KidsBlocked'
@@ -39,10 +46,14 @@ export function SocialPage() {
   const [credits, setCredits] = useState(getCredits)
   const [kids, setKids] = useState(kidsHideSocialChat)
   const [shareNote, setShareNote] = useState<string | null>(null)
+  const [dmNote, setDmNote] = useState<string | null>(null)
+  const [dmTick, setDmTick] = useState(0)
 
   useEffect(() => subscribeSocial(() => setSocial(getSocial())), [])
   useEffect(() => subscribeCredits(() => setCredits(getCredits())), [])
   useEffect(() => subscribeKids(() => setKids(kidsHideSocialChat())), [])
+  useEffect(() => subscribeSocialDm(() => setDmTick((n) => n + 1)), [])
+  void dmTick
 
   const actor = user ?? { id: DEMO_USER_ID, name: 'Alex Müller' }
   const listings = store.listListings({}).slice(0, 8)
@@ -106,7 +117,7 @@ export function SocialPage() {
             <SpeakButton compact text={`${t('social.title')}. ${t('social.lead')}`} />
             {!kids && (
               <Button variant="secondary" size="sm" onClick={() => navigate(chatHref())}>
-                <MessageSquare size={14} /> {t('social.chat')}
+                <MessageSquare size={14} /> {t('chat.brand')}
               </Button>
             )}
           </div>
@@ -114,11 +125,11 @@ export function SocialPage() {
       </header>
 
       <p className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
-        {t('social.demo')}
+        {t('social.demo')} {t('social.dmConsent')}
       </p>
-      {shareNote && (
+      {(shareNote || dmNote) && (
         <p className="text-xs text-[var(--theme-accent)]" role="status">
-          {shareNote}
+          {dmNote ?? shareNote}
         </p>
       )}
 
@@ -206,7 +217,7 @@ export function SocialPage() {
                       {t('social.openOffer')} →
                     </Link>
                   )}
-                  <div className="mt-3 flex items-center gap-3 text-xs text-muted">
+                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted">
                     <button
                       type="button"
                       className={cn('inline-flex items-center gap-1', liked && 'text-rose-300')}
@@ -224,6 +235,18 @@ export function SocialPage() {
                     >
                       <Share2 size={14} /> {t('social.share')}
                     </button>
+                    {!kids && post.authorId !== actor.id && (
+                      <SocialDmAction
+                        meId={actor.id}
+                        meName={actor.name}
+                        otherId={post.authorId}
+                        otherName={post.authorName}
+                        onNote={(msg) => {
+                          setDmNote(msg)
+                          window.setTimeout(() => setDmNote(null), 2800)
+                        }}
+                      />
+                    )}
                   </div>
                   {post.comments.length > 0 && (
                     <ul className="mt-2 space-y-1 border-t border-border/60 pt-2">
@@ -261,5 +284,95 @@ export function SocialPage() {
         )}
       </section>
     </div>
+  )
+}
+
+function SocialDmAction({
+  meId,
+  meName,
+  otherId,
+  otherName,
+  onNote,
+}: {
+  meId: string
+  meName: string
+  otherId: string
+  otherName: string
+  onNote: (msg: string) => void
+}) {
+  const { t } = useI18n()
+  const navigate = useNavigate()
+  const { loginDemo } = useAuth()
+  const [perm, setPerm] = useState<SocialDmPermission>(() => getSocialDmPermission(meId, otherId))
+
+  useEffect(() => {
+    return subscribeSocialDm(() => setPerm(getSocialDmPermission(meId, otherId)))
+  }, [meId, otherId])
+
+  const ensure = () => {
+    loginDemo()
+    return { id: meId || DEMO_USER_ID, name: meName || 'Alex Müller' }
+  }
+
+  if (perm === 'accepted') {
+    return (
+      <button
+        type="button"
+        className="inline-flex items-center gap-1 text-[var(--theme-accent)]"
+        onClick={() => {
+          const me = ensure()
+          const thread = openAcceptedSocialChat({
+            meId: me.id,
+            meName: me.name,
+            otherId,
+            otherName,
+          })
+          if (thread) navigate(chatHref(thread.id))
+        }}
+      >
+        <MessageSquare size={14} /> {t('chat.open')}
+      </button>
+    )
+  }
+
+  if (perm === 'outgoing') {
+    return <span className="inline-flex items-center gap-1 opacity-80">{t('chat.requestSent')}</span>
+  }
+
+  if (perm === 'incoming') {
+    return (
+      <button
+        type="button"
+        className="inline-flex items-center gap-1 text-[var(--theme-accent)]"
+        onClick={() => navigate(chatHref())}
+      >
+        <MessageSquare size={14} /> {t('chat.requests')}
+      </button>
+    )
+  }
+
+  if (perm === 'declined') {
+    return <span className="inline-flex items-center gap-1 opacity-60">{t('chat.declined')}</span>
+  }
+
+  return (
+    <button
+      type="button"
+      className="inline-flex items-center gap-1 text-[var(--theme-accent)]"
+      onClick={() => {
+        const me = ensure()
+        requestSocialDm({
+          meId: me.id,
+          meName: me.name,
+          otherId,
+          otherName,
+          note: t('chat.requestDefaultNote'),
+        })
+        setPerm('outgoing')
+        onNote(t('chat.requestSent'))
+      }}
+    >
+      <MessageSquare size={14} /> {t('chat.request')}
+    </button>
   )
 }

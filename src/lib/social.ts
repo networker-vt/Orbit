@@ -1,4 +1,3 @@
-import { store } from './store'
 import { uid } from './utils'
 
 const KEY = 'orbit_social_v1'
@@ -182,19 +181,8 @@ export function discoverPeople() {
   return []
 }
 
-export function startSocialDm(input: {
-  meId: string
-  meName: string
-  otherId: string
-  otherName: string
-}) {
-  return store.createDirectThread({
-    participantIds: [input.meId, input.otherId],
-    participantNames: [input.meName, input.otherName],
-    listingTitle: input.otherName,
-    senderId: input.meId,
-    senderName: input.meName,
-    body: 'Orbit Social — kurzer DM (Demo).',
-    kind: 'social',
-  })
-}
+/**
+ * Social cold-DM entry — consent-gated via socialDm API.
+ * Prefer importing requestSocialDm / openAcceptedSocialChat from `./socialDm`.
+ */
+export { startSocialDm, requestSocialDm, openAcceptedSocialChat, getSocialDmPermission } from './socialDm'

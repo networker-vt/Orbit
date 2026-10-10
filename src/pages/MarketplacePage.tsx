@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { ListingCard } from '../components/listings/ListingCard'
+import { AnschreibenButton } from '../components/chat/AnschreibenButton'
 import { Button } from '../components/ui/Button'
+import { chatHref } from '../lib/chatPath'
 import { Empty } from '../components/ui/Empty'
 import { SpeakButton } from '../components/a11y/SpeakButton'
 import { useListings } from '../hooks/useStore'
@@ -56,6 +58,9 @@ export function MarketplacePage() {
           <Button size="sm" variant="secondary" onClick={() => navigate('/match')}>
             {t('nav.match')}
           </Button>
+          <Button size="sm" variant="ghost" onClick={() => navigate(chatHref())}>
+            {t('chat.brand')}
+          </Button>
         </div>
       </header>
 
@@ -108,7 +113,21 @@ export function MarketplacePage() {
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {items.slice(0, 24).map((l) => (
-            <ListingCard key={l.id} listing={l} highlightRate={deriveMarketType(l) === 'job' || deriveMarketType(l) === 'minijob'} />
+            <div key={l.id} className="space-y-2">
+              <ListingCard
+                listing={l}
+                highlightRate={deriveMarketType(l) === 'job' || deriveMarketType(l) === 'minijob'}
+              />
+              <AnschreibenButton
+                listing={l}
+                source={
+                  deriveMarketType(l) === 'job' || deriveMarketType(l) === 'minijob' ? 'job' : 'market'
+                }
+                variant="secondary"
+                size="sm"
+                fullWidth
+              />
+            </div>
           ))}
         </div>
       )}

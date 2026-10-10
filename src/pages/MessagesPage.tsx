@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Check, MessageSquare, X } from 'lucide-react'
 import { Button } from '../components/ui/Button'
-import { Textarea } from '../components/ui/Input'
 import { Empty } from '../components/ui/Empty'
 import { useStoreVersion } from '../hooks/useStore'
 import { useAuth } from '../lib/auth'
@@ -14,6 +13,12 @@ import { KidsBlocked } from '../components/kids/KidsBlocked'
 import { kidsHidePublicChat } from '../lib/kids'
 import { chatHref } from '../lib/chatPath'
 import { ReportButton } from '../components/report/ReportButton'
+import {
+  acceptSocialDm,
+  declineSocialDm,
+  listIncomingPending,
+  subscribeSocialDm,
+} from '../lib/socialDm'
 
 const KINDS: { id: 'all' | ThreadKind; key: string }[] = [
   { id: 'all', key: 'chat.all' },
@@ -31,12 +36,18 @@ export function MessagesPage() {
   const { threadId } = useParams()
   const { user, loginDemo } = useAuth()
   const { t } = useI18n()
-  useStoreVersion()
+  const version = useStoreVersion()
   const navigate = useNavigate()
   const [body, setBody] = useState('')
   const [filter, setFilter] = useState<'all' | ThreadKind>('all')
+  const [dmTick, setDmTick] = useState(0)
 
-  const threads = user ? store.listThreads(user.id) : []
+  useEffect(() => subscribeSocialDm(() => setDmTick((n) => n + 1)), [])
+
+  const threads = useMemo(
+    () => (user ? store.listThreads(user.id) : []),
+    [user?.id, version, dmTick],
+  )
   const visible = useMemo(
     () => (filter === 'all' ? threads : threads.filter((th) => threadKind(th.kind) === filter)),
     [threads, filter],
@@ -45,6 +56,7 @@ export function MessagesPage() {
   const messages = active ? store.listMessages(active.id) : []
   const showList = !threadId
   const showThread = Boolean(threadId)
+  const incoming = user ? listIncomingPending(user.id) : []
 
   useEffect(() => {
     if (!user) return
@@ -53,6 +65,10 @@ export function MessagesPage() {
     }
   }, [user, threadId, visible, navigate])
 
+  useEffect(() => {
+    if (user && active) store.markThreadRead(active.id, user.id)
+  }, [user, active, messages.length])
+
   if (kidsHidePublicChat()) {
     return <KidsBlocked title={t('kids.chatBlocked')} />
   }
@@ -60,8 +76,8 @@ export function MessagesPage() {
   if (!user) {
     return (
       <div className="rounded-2xl border border-border bg-surface-2 p-8 text-center">
-        <p className="mb-4">Chat benötigt Login.</p>
-        <Button onClick={() => loginDemo()}>Demo starten</Button>
+        <p className="mb-4">{t('chat.needLogin')}</p>
+        <Button onClick={() => loginDemo()}>{t('chat.startDemo')}</Button>
       </div>
     )
   }
@@ -80,12 +96,53 @@ export function MessagesPage() {
 
   const kindLabel = (kind?: ThreadKind) => t(`chat.${threadKind(kind)}`)
 
+  const peerName = (th: typeof threads[0]) =>
+    th.participantNames.filter((n) => n !== user.name).join(', ') || t('chat.brand')
+
   return (
-    <div className="grid gap-4 md:grid-cols-[280px_1fr]">
+    <div className="grid gap-4 md:grid-cols-[300px_1fr]">
       <aside
-        className={`rounded-2xl border border-border bg-surface-2 ${showThread ? 'hidden md:block' : 'block'}`}
+        className={`overflow-hidden rounded-2xl border border-border bg-surface-2 ${showThread ? 'hidden md:block' : 'block'}`}
       >
-        <div className="border-b border-border px-4 py-3 font-semibold">{t('nav.inbox')}</div>
+        <div className="border-b border-border px-4 py-3">
+          <div className="flex items-center gap-2">
+            <MessageSquare size={18} className="text-[var(--theme-accent)]" />
+            <div>
+              <div className="font-semibold tracking-tight">{t('chat.brand')}</div>
+              <p className="text-xs text-muted">{t('chat.brandLead')}</p>
+            </div>
+          </div>
+        </div>
+
+        {incoming.length > 0 && (
+          <div className="space-y-2 border-b border-border bg-[var(--theme-accent)]/8 px-3 py-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-accent)]">
+              {t('chat.requests')}
+            </p>
+            {incoming.map((req) => (
+              <div key={req.id} className="rounded-xl border border-border bg-surface-3 p-3">
+                <p className="text-sm font-medium text-ink">{req.fromName}</p>
+                {req.note && <p className="mt-1 text-xs text-muted">{req.note}</p>}
+                <p className="mt-1 text-xs text-muted">{t('chat.requestHint')}</p>
+                <div className="mt-2 flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      const { threadId: id } = acceptSocialDm(req.id, user.id)
+                      navigate(chatHref(id))
+                    }}
+                  >
+                    <Check size={14} /> {t('chat.accept')}
+                  </Button>
+                  <Button size="sm" variant="secondary" onClick={() => declineSocialDm(req.id, user.id)}>
+                    <X size={14} /> {t('chat.decline')}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="flex flex-wrap gap-1 border-b border-border px-2 py-2">
           {KINDS.map((k) => (
             <button
@@ -104,24 +161,32 @@ export function MessagesPage() {
           ))}
         </div>
         <div className="max-h-[70vh] overflow-y-auto pb-scroll-chrome">
-          {visible.map((th) => (
-            <Link
-              key={th.id}
-              to={chatHref(th.id)}
-              className={`block min-h-14 border-b border-border/60 px-4 py-3 hover:bg-ink/5 ${active?.id === th.id ? 'bg-cyan/10' : ''}`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <div className="truncate text-sm font-medium">
-                  {th.participantNames.filter((n) => n !== user.name).join(', ') || 'Chat'}
+          {visible.map((th) => {
+            const unread = store.unreadCount(th.id, user.id)
+            return (
+              <Link
+                key={th.id}
+                to={chatHref(th.id)}
+                className={`block min-h-14 border-b border-border/60 px-4 py-3 hover:bg-ink/5 ${active?.id === th.id ? 'bg-cyan/10' : ''}`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="truncate text-sm font-medium">
+                    {peerName(th)}
+                    {unread > 0 && (
+                      <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-cyan px-1.5 text-[10px] font-bold text-black">
+                        {unread}
+                      </span>
+                    )}
+                  </div>
+                  <span className="shrink-0 text-xs uppercase tracking-wide text-muted">
+                    {kindLabel(th.kind)}
+                  </span>
                 </div>
-                <span className="shrink-0 text-xs uppercase tracking-wide text-muted">
-                  {kindLabel(th.kind)}
-                </span>
-              </div>
-              <div className="truncate text-xs text-muted">{th.listingTitle}</div>
-              <div className="truncate text-xs text-neutral-500">{th.lastMessage}</div>
-            </Link>
-          ))}
+                <div className="truncate text-xs text-muted">{th.listingTitle}</div>
+                <div className="truncate text-xs text-neutral-500">{th.lastMessage}</div>
+              </Link>
+            )
+          })}
           {visible.length === 0 && (
             <Empty
               emoji="💬"
@@ -135,7 +200,7 @@ export function MessagesPage() {
       </aside>
 
       <section
-        className={`flex min-h-[60vh] flex-col rounded-2xl border border-border bg-surface-2 md:min-h-[420px] ${showList && !showThread ? 'hidden md:flex' : 'flex'}`}
+        className={`flex min-h-[60vh] flex-col overflow-hidden rounded-2xl border border-border bg-surface-2 md:min-h-[480px] ${showList && !showThread ? 'hidden md:flex' : 'flex'}`}
       >
         {active ? (
           <>
@@ -144,16 +209,25 @@ export function MessagesPage() {
                 type="button"
                 className="tap-target flex items-center justify-center rounded-lg text-muted md:hidden"
                 onClick={() => navigate(chatHref())}
-                aria-label="Zurück"
+                aria-label={t('chat.back')}
               >
                 <ArrowLeft size={20} />
               </button>
-              <div className="min-w-0">
-                <div className="truncate font-medium">{active.listingTitle ?? 'Konversation'}</div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate font-medium">{peerName(active)}</div>
                 <div className="truncate text-xs text-muted">
-                  {kindLabel(active.kind)} · {active.participantNames.join(' · ')}
+                  {kindLabel(active.kind)}
+                  {active.listingTitle ? ` · ${active.listingTitle}` : ''}
                 </div>
               </div>
+              {active.listingId && (
+                <Link
+                  to={`/listings/${active.listingId}`}
+                  className="shrink-0 text-xs text-[var(--theme-accent)] hover:underline"
+                >
+                  {t('chat.openListing')}
+                </Link>
+              )}
             </div>
             <div className="flex-1 space-y-3 overflow-y-auto p-4 pb-scroll-chrome">
               {messages.map((m) => {
@@ -176,21 +250,27 @@ export function MessagesPage() {
                 )
               })}
             </div>
-            <form onSubmit={send} className="border-t border-border p-3 safe-pb">
-              <Textarea
+            <form
+              onSubmit={send}
+              className="flex items-end gap-2 border-t border-border bg-surface-2/95 p-3 safe-pb backdrop-blur"
+            >
+              <input
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                placeholder="Nachricht schreiben…"
-                className="min-h-16"
+                placeholder={t('chat.compose')}
+                className="min-h-11 flex-1 rounded-xl border border-border bg-surface-3 px-3 text-sm outline-none focus:border-[var(--theme-accent)]"
+                aria-label={t('chat.compose')}
               />
-              <Button type="submit" className="mt-2 w-full sm:w-auto" disabled={!body.trim()}>
-                Senden
+              <Button type="submit" disabled={!body.trim()} className="shrink-0">
+                {t('chat.send')}
               </Button>
             </form>
           </>
         ) : (
-          <div className="flex flex-1 items-center justify-center p-6 text-sm text-muted">
-            Wähle einen Chat oder starte eine Anfrage.
+          <div className="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center text-sm text-muted">
+            <MessageSquare size={28} className="text-[var(--theme-accent)]" />
+            <p className="font-medium text-ink">{t('chat.brand')}</p>
+            <p>{t('chat.pick')}</p>
           </div>
         )}
       </section>
