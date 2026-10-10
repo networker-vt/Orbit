@@ -2,7 +2,15 @@
 
 Vite `base` for Pages builds is **`/orbit/`** (`vite.config.ts` → `PAGES_BASE`).
 
-Share links and `VITE_APP_URL` should use the public Orbit URL, e.g. `https://networker-vt.github.io/orbit/` (see `.env.production`).
+Share links and `VITE_APP_URL` should use the public Orbit URL (see `.env.production`).
+
+**Today** (repo still named `eventlogistik-event-os`, Vite `base: '/orbit/'`):
+
+`https://networker-vt.github.io/eventlogistik-event-os/orbit/`
+
+After renaming the repo to `orbit`, the same build layout maps to:
+
+`https://networker-vt.github.io/orbit/`
 
 ## Repo name vs URL
 
