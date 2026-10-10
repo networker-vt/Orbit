@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const root = new URL('..', import.meta.url)
 const EMAIL = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
@@ -58,11 +59,11 @@ export function checkDist(distDir) {
 }
 
 const sourceErrors = checkSourceCatalog()
-const distDir = new URL('./dist/', root)
-const distErrors = existsSync(distDir) ? checkDist(distDir.pathname) : []
+const distPath = fileURLToPath(new URL('./dist/', root))
+const distErrors = existsSync(distPath) ? checkDist(distPath) : []
 const errors = [...sourceErrors, ...distErrors]
 if (errors.length) {
   console.error(errors.join('\n'))
   process.exit(1)
 }
-console.log(existsSync(distDir) ? 'public bundle check ok (source + dist)' : 'public bundle check ok (source; dist not built)')
+console.log(existsSync(distPath) ? 'public bundle check ok (source + dist)' : 'public bundle check ok (source; dist not built)')
