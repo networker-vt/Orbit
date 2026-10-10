@@ -27,6 +27,13 @@ interface ImportMetaEnv {
   /** Sell-by-photo vision endpoint (FormData image). Falls back to demo stub when unset. */
   readonly VITE_VISION_API_URL?: string
   readonly VITE_SELL_VISION_URL?: string
+  /** LibreTranslate-compatible base URL (e.g. https://libretranslate.com) */
+  readonly VITE_TRANSLATE_URL?: string
+  readonly VITE_TRANSLATE_API_KEY?: string
+  /** DeepL API key (optional; `:fx` suffix uses free endpoint) */
+  readonly VITE_TRANSLATE_DEEPL_KEY?: string
+  /** libretranslate | mymemory | deepl | auto | none */
+  readonly VITE_TRANSLATE_PROVIDER?: string
 }
 
 interface ImportMeta {

@@ -30,6 +30,7 @@ import {
 } from '../lib/profileHub'
 import { getPrefs, savePrefs, subscribePrefs } from '../lib/prefs'
 import { formatDate, cn } from '../lib/utils'
+import { MessengerTranslateSettings } from '../components/messenger/MessengerTranslateSettings'
 
 const DOC_KINDS: { id: HubDocKind; key: 'mein.qual' | 'mein.cert' | 'mein.train' }[] = [
   { id: 'qualification', key: 'mein.qual' },
@@ -130,6 +131,8 @@ export function EinstellungPage() {
         <p className="mb-3 text-xs text-muted">{t('mein.languageHint')}</p>
         <LanguageSwitcher />
       </section>
+
+      <MessengerTranslateSettings />
 
       <section
         className="rounded-2xl border border-[var(--theme-accent)]/30 bg-[var(--theme-accent)]/10 p-4"

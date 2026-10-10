@@ -13,6 +13,10 @@ import { KidsBlocked } from '../components/kids/KidsBlocked'
 import { kidsHidePublicChat } from '../lib/kids'
 import { chatHref } from '../lib/chatPath'
 import { ReportButton } from '../components/report/ReportButton'
+import { MessengerComposer } from '../components/messenger/MessengerComposer'
+import { TranslatedMessageBubble } from '../components/messenger/TranslatedMessageBubble'
+import { orbitChatThreadKey } from '../lib/messengerTranslatePrefs'
+import { useMessengerTranslatePrefs } from '../hooks/useMessengerTranslate'
 import {
   acceptSocialDm,
   declineSocialDm,
@@ -38,7 +42,6 @@ export function MessagesPage() {
   const { t } = useI18n()
   const version = useStoreVersion()
   const navigate = useNavigate()
-  const [body, setBody] = useState('')
   const [filter, setFilter] = useState<'all' | ThreadKind>('all')
   const [dmTick, setDmTick] = useState(0)
 
@@ -57,6 +60,8 @@ export function MessagesPage() {
   const showList = !threadId
   const showThread = Boolean(threadId)
   const incoming = user ? listIncomingPending(user.id) : []
+  const threadKey = active ? orbitChatThreadKey(active.id) : null
+  const { prefs: translatePrefs } = useMessengerTranslatePrefs(threadKey)
 
   useEffect(() => {
     if (!user) return
@@ -80,18 +85,6 @@ export function MessagesPage() {
         <Button onClick={() => loginDemo()}>{t('chat.startDemo')}</Button>
       </div>
     )
-  }
-
-  const send = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!active || !body.trim()) return
-    store.sendMessage({
-      threadId: active.id,
-      senderId: user.id,
-      senderName: user.name,
-      body: body.trim(),
-    })
-    setBody('')
   }
 
   const kindLabel = (kind?: ThreadKind) => t(`chat.${threadKind(kind)}`)
@@ -242,37 +235,47 @@ export function MessagesPage() {
                 const mine = m.senderId === user.id
                 return (
                   <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-                    <div
-                      className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${mine ? 'bg-cyan text-black' : 'bg-surface-3 text-neutral-200'}`}
-                    >
-                      {!mine && <div className="mb-0.5 text-xs opacity-70">{m.senderName}</div>}
-                      <div>{m.body}</div>
-                      <div className="mt-1">
-                        <ReportButton targetKind="message" targetId={m.id} />
-                      </div>
-                      <div className={`mt-1 text-xs ${mine ? 'text-black/60' : 'text-muted'}`}>
-                        {formatDateTime(m.createdAt)}
-                      </div>
-                    </div>
+                    <TranslatedMessageBubble
+                      messageId={m.id}
+                      body={m.body}
+                      mine={mine}
+                      senderName={mine ? undefined : m.senderName}
+                      enabled={translatePrefs.enabled}
+                      myLang={translatePrefs.myLang}
+                      partnerLang={translatePrefs.partnerLang}
+                      autoDetect={translatePrefs.autoDetectIncoming}
+                      ttsIncoming={translatePrefs.ttsIncoming}
+                      bubbleClass={mine ? 'bg-cyan text-black' : 'bg-surface-3 text-neutral-200'}
+                      footer={
+                        <div className="mt-1">
+                          <ReportButton targetKind="message" targetId={m.id} />
+                        </div>
+                      }
+                      timestamp={
+                        <div className={`mt-1 text-xs ${mine ? 'text-black/60' : 'text-muted'}`}>
+                          {formatDateTime(m.createdAt)}
+                        </div>
+                      }
+                    />
                   </div>
                 )
               })}
             </div>
-            <form
-              onSubmit={send}
-              className="flex items-end gap-2 border-t border-border bg-surface-2/95 p-3 safe-pb backdrop-blur"
-            >
-              <input
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
+            {threadKey && (
+              <MessengerComposer
+                threadKey={threadKey}
                 placeholder={t('chat.compose')}
-                className="min-h-11 flex-1 rounded-xl border border-border bg-surface-3 px-3 text-sm outline-none focus:border-[var(--theme-accent)]"
-                aria-label={t('chat.compose')}
+                sendLabel={t('chat.send')}
+                onSend={(text) => {
+                  store.sendMessage({
+                    threadId: active!.id,
+                    senderId: user.id,
+                    senderName: user.name,
+                    body: text,
+                  })
+                }}
               />
-              <Button type="submit" disabled={!body.trim()} className="shrink-0">
-                {t('chat.send')}
-              </Button>
-            </form>
+            )}
           </>
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center text-sm text-muted">
