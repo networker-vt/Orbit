@@ -11,6 +11,7 @@ import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { StarRating } from '../components/ui/StarRating'
 import { CalendarExport } from '../components/calendar/CalendarExport'
+import { NewsFeedEditor } from '../components/home/NewsFeedEditor'
 import { OccupationField } from '../components/prefs/OccupationField'
 import { INDUSTRIES, JOB_TYPES, type Industry } from '../data/industries'
 import { listLocalCalendar, removeLocalCalendarItem, type LocalCalItem } from '../lib/calendar'
@@ -115,6 +116,8 @@ export function EinstellungPage() {
       <div id="erinnerungen">
         <ReminderOptIn />
       </div>
+
+      <NewsFeedEditor variant="settings" />
 
       <section id="rolle" className="space-y-2">
         <h2 className="text-lg font-semibold">{t('einstellung.role')}</h2>
