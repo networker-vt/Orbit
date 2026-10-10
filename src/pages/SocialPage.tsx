@@ -134,25 +134,27 @@ export function SocialPage() {
     <div className="orbit-social mx-auto max-w-lg space-y-5 pb-scroll-chrome">
       <section
         className={cn(
-          'orbit-social-hero relative -mx-4 overflow-hidden md:-mx-6',
+          'orbit-social-hero relative -mx-4 md:-mx-6',
           heroReady && 'orbit-social-hero--ready',
         )}
         aria-label="Orbit Social"
       >
-        <img
-          src={HERO_SRC}
-          alt=""
-          className="orbit-social-hero__img absolute inset-0 h-full w-full object-cover"
-          width={1600}
-          height={900}
-          onLoad={() => setHeroReady(true)}
-        />
-        <div className="orbit-social-hero__wash absolute inset-0" />
-        <div className="relative flex min-h-[220px] flex-col justify-end px-5 pb-5 pt-16 sm:min-h-[260px]">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+          <img
+            src={HERO_SRC}
+            alt=""
+            className="orbit-social-hero__img absolute inset-0 h-full w-full object-cover"
+            width={1600}
+            height={900}
+            onLoad={() => setHeroReady(true)}
+          />
+          <div className="orbit-social-hero__wash absolute inset-0" />
+        </div>
+        <div className="relative flex min-h-[240px] flex-col justify-end px-5 pb-5 pt-20 sm:min-h-[280px]">
           <p className="orbit-social-hero__brand text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-teal-100/90">
             {t('social.kicker')}
           </p>
-          <h1 className="orbit-social-hero__title mt-1 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          <h1 className="orbit-social-hero__title mt-1 text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl">
             {t('social.title')}
           </h1>
           <p className="mt-2 max-w-md text-sm text-white/85">{t('social.lead')}</p>
