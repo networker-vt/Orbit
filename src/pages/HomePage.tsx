@@ -272,7 +272,7 @@ export function HomePage() {
           role="group"
           aria-label={t('home.examplesAria')}
           data-life-examples="1"
-          className="flex flex-wrap gap-2"
+          className="flex flex-wrap gap-1.5"
         >
           {LIFE_EXAMPLES.map((name) => {
             const on = prefs.seeker.lifeExamples.includes(name)
@@ -284,10 +284,10 @@ export function HomePage() {
                 data-life-example={name}
                 onClick={() => toggleExample(name)}
                 className={cn(
-                  'min-h-10 rounded-full border px-3 py-1.5 text-sm',
+                  'min-h-9 rounded-lg border px-2.5 py-1 text-xs',
                   on
                     ? 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/15 text-ink'
-                    : 'border-border bg-transparent text-muted',
+                    : 'border-transparent bg-surface-2/80 text-muted hover:border-border',
                 )}
               >
                 {name}

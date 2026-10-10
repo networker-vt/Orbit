@@ -53,7 +53,7 @@ export function ReportButton({
       const href = reportMailto(saved)
       setMailHref(href)
       setDone(true)
-      window.location.href = href
+      // Keep the reviewer/user in-app; they tap the mailto link when ready.
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Meldung fehlgeschlagen')
     } finally {
@@ -88,11 +88,16 @@ export function ReportButton({
             {done ? (
               <>
                 <p className="text-sm text-neutral-200">
-                  {de ? 'Danke, wir prüfen das.' : 'Thank you, we will review this.'}
+                  {de
+                    ? 'Danke. Die Meldung liegt auf diesem Gerät. Optional kannst du sie per E-Mail an den Betreiber schicken.'
+                    : 'Thanks. The report is stored on this device. Optionally email it to the operator.'}
                 </p>
                 {mailHref && (
-                  <a href={mailHref} className="inline-flex min-h-11 items-center text-sm text-cyan underline">
-                    {de ? 'Per E-Mail an den Betreiber senden' : 'Email the operator'}
+                  <a
+                    href={mailHref}
+                    className="inline-flex min-h-11 items-center justify-center rounded-xl border border-cyan/40 bg-cyan/10 px-3 text-sm font-medium text-cyan"
+                  >
+                    {de ? 'E-Mail an Support öffnen' : 'Open email to support'}
                   </a>
                 )}
                 <Button type="button" onClick={close}>

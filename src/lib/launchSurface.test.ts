@@ -16,6 +16,9 @@ const KEYS = [
   'archive.missingTitle',
   'checkout.stubTitle',
   'checkout.openSearch',
+  'demo.bannerTitle',
+  'demo.bannerBody',
+  'auth.kidsNote',
 ] as const
 
 describe('launch surface', () => {
