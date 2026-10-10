@@ -433,6 +433,20 @@ export const store = {
     return msg
   },
 
+  markThreadRead(threadId: string, readerId: string) {
+    mutate((d) => {
+      for (const m of d.messages) {
+        if (m.threadId === threadId && m.senderId !== readerId) m.read = true
+      }
+    })
+  },
+
+  unreadCount(threadId: string, readerId: string): number {
+    return getData().messages.filter(
+      (m) => m.threadId === threadId && m.senderId !== readerId && !m.read,
+    ).length
+  },
+
   createDirectThread(input: {
     participantIds: [string, string]
     participantNames: [string, string]

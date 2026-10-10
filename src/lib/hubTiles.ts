@@ -34,6 +34,7 @@ export type HubTileId =
   | 'match'
   | 'jobs'
   | 'einstellung'
+  | 'chat'
 
 export type HubTileDef = {
   id: HubTileId
@@ -88,6 +89,7 @@ export const MEIN_ACCOUNT_DEFS: HubTileDef[] = [
   { id: 'einstellung', to: '/einstellung', labelKey: 'einstellung.title', emoji: '⚙️', tone: 'amber', surface: 'account' },
   { id: 'wallet', to: '/wallet', labelKey: 'nav.wallet', emoji: '👛', tone: 'teal', surface: 'account', hide: (c) => c.hideWallet || !isFlagOn('credits') },
   { id: 'profile', to: '/profile', labelKey: 'nav.mein', emoji: '👤', tone: 'slate', surface: 'account' },
+  { id: 'chat', to: '/social/chat', labelKey: 'chat.brand', emoji: '💬', tone: 'sky', surface: 'account', hide: (c) => c.kids },
   { id: 'create', to: '/listings/new', labelKey: 'nav.create', emoji: '➕', tone: 'slate', surface: 'account', hide: (c) => c.kids },
   { id: 'offer', to: '/listings/new?kind=offer', labelKey: 'mein.offer', emoji: '📣', tone: 'orange', surface: 'account', hide: (c) => c.kids },
   { id: 'kids', to: '/kids', labelKey: 'kids.title', emoji: '🧒', tone: 'orange', surface: 'account', hide: () => !isFlagOn('kids') },

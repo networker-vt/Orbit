@@ -666,7 +666,7 @@ export function MatchPage() {
                   to={m.listingId ? `/listings/${m.listingId}` : chatHref()}
                   className="shrink-0 text-cyan hover:underline"
                 >
-                  {t('apply.chat')}
+                  {t('chat.anschreiben')}
                 </Link>
               </li>
             ))}
@@ -697,7 +697,7 @@ export function MatchPage() {
             className="mt-3 w-full"
             onClick={() => navigate(toast.listingId ? `/listings/${toast.listingId}` : chatHref())}
           >
-            {t('apply.chat')}
+            {t('chat.anschreiben')}
           </Button>
         </div>
       )}

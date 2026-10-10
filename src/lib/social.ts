@@ -1,6 +1,6 @@
 import { store } from './store'
 import { getPrefs, type OrbitPrefs } from './prefs'
-import { requestSocialDm } from './socialDmConsent'
+import { requestSocialDm } from './socialDm'
 import { uid } from './utils'
 import type { Thread } from '../types'
 
@@ -411,7 +411,7 @@ export function listSearchTermChats(userId: string): Thread[] {
  * Does **not** create a chat thread (avoids racing the Telegram-like Orbit Chat model).
  * Topic / Suchbegriff rooms use `openSearchTermChat` and stay consent-free.
  *
- * @see `src/lib/socialDmConsent.ts` and internal contract `orbit-social-dm-consent.md`
+ * @see `src/lib/socialDm.ts`
  */
 export function startSocialDm(input: {
   meId: string
@@ -420,31 +420,16 @@ export function startSocialDm(input: {
   otherName: string
   note?: string
 }) {
-  return requestSocialDm({
-    fromId: input.meId,
-    fromName: input.meName,
-    toId: input.otherId,
-    toName: input.otherName,
-    note: input.note,
-  })
+  const { request } = requestSocialDm(input)
+  return request
 }
 
 export {
-  acceptSocialDmRequest,
-  attachSocialDmThreadId,
-  canOpenSocialDm,
-  declineSocialDmRequest,
-  findSocialDmRequestBetween,
-  getAcceptedSocialDmThreadId,
-  getSocialDmRequest,
-  listSocialDmRequests,
-  registerSocialDmThreadBinder,
-  requestSocialDm,
-  subscribeSocialDmRequests,
-  type SocialDmRequest,
-  type SocialDmRequestStatus,
-  type SocialDmThreadBinder,
-} from './socialDmConsent'
+  getSocialDmPermission,
+  openAcceptedSocialChat,
+  subscribeSocialDm,
+  type SocialDmPermission,
+} from './socialDm'
 
 /** Test helper — clears in-memory cache so the next read reloads from localStorage. */
 export function __resetSocialCacheForTests() {
