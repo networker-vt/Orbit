@@ -19,6 +19,7 @@ describe('live categories', () => {
   it('hides empty marketplace lanes', () => {
     const lanes = filledMarketTypes(seedListings)
     expect(lanes.length).toBeGreaterThan(0)
-    expect(lanes.length).toBeLessThanOrEqual(6)
+    expect(lanes.length).toBeLessThanOrEqual(10)
+    expect(lanes).toEqual(expect.arrayContaining(['courier', 'ride', 'barter', 'sell', 'minijob']))
   })
 })

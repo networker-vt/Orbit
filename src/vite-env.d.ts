@@ -24,6 +24,9 @@ interface ImportMetaEnv {
   readonly VITE_FLAG_ENTDECKER?: string
   readonly VITE_FLAG_INTERVIEW?: string
   readonly VITE_FLAG_PUBLISH_LISTINGS?: string
+  /** Sell-by-photo vision endpoint (FormData image). Falls back to demo stub when unset. */
+  readonly VITE_VISION_API_URL?: string
+  readonly VITE_SELL_VISION_URL?: string
 }
 
 interface ImportMeta {

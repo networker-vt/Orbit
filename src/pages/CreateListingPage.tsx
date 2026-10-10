@@ -188,7 +188,7 @@ function SimpleCreateListing() {
         </fieldset>
         {intent === 'need' && (
           <div className="flex flex-wrap gap-1.5">
-            {MARKET_TYPES.filter((m) => m !== 'minijob').map((m) => (
+            {MARKET_TYPES.filter((m) => m !== 'minijob' && m !== 'ride').map((m) => (
               <button
                 key={m}
                 type="button"

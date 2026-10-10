@@ -864,9 +864,9 @@ export const CREDITS_FREE_EN = [
 ]
 
 export const CREDITS_DISCLAIMER_DE =
-  'Orbit Credits: hartes Cap 21.000.000. Demo (VITE_APP_MODE=demo) nutzt localStorage (append-only, balance = Summe). Prod schreibt Intents erst nach Server-ok; ohne Supabase-Keys hard-fail (kein lokales Mint). Dieser Client mint nie über den Cap. Pack-Kauf ist ein Stub (kein Stripe/PayPal). Kern-Entdeckung bleibt kostenlos. Soft-Paywall nur an Geld-Momenten.'
+  'Orbit Credits: hartes Cap 21.000.000. Nur Demo/Boost/Kosmetik — kein Lohnersatz und kein echtes EUR. Demo (VITE_APP_MODE=demo) nutzt localStorage (append-only, balance = Summe). Prod schreibt Intents erst nach Server-ok; ohne Supabase-Keys hard-fail (kein lokales Mint). Dieser Client mint nie über den Cap. Pack-Kauf ist ein Stub (kein Stripe/PayPal). Kern-Entdeckung bleibt kostenlos. Soft-Paywall nur an Geld-Momenten.'
 
 export const CREDITS_DISCLAIMER_EN =
-  'Orbit Credits: hard cap 21,000,000. Demo (VITE_APP_MODE=demo) uses localStorage (append-only, balance = sum). Prod writes intents only after server ok; missing Supabase keys hard-fail (no local mint). This client never mints above the cap. Pack purchase is a stub (no Stripe/PayPal). Core discovery stays free. Soft paywall only at money moments.'
+  'Orbit Credits: hard cap 21,000,000. Demo/boost/cosmetics only — not a wage substitute and not real EUR. Demo (VITE_APP_MODE=demo) uses localStorage (append-only, balance = sum). Prod writes intents only after server ok; missing Supabase keys hard-fail (no local mint). This client never mints above the cap. Pack purchase is a stub (no Stripe/PayPal). Core discovery stays free. Soft paywall only at money moments.'
 
 export const EARLY_TESTER_COPY_DE = `Die ersten 50 Signups sind Early Testers (${EARLY_TESTER_GRANT.toLocaleString('de-DE')} Credits, 10× Welcome) plus −${Math.round(EARLY_BOOST_DISCOUNT * 100)} % Boost-Preis für immer. Ab Signup 51: ${WELCOME_GRANT} Credits.`

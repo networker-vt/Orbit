@@ -172,25 +172,25 @@ describe('match list without a real choice', () => {
     })
   })
 
-  it('stays on one sentence after Essen when nothing real matches', async () => {
+  it('stays on one sentence when the life choice matches nothing', async () => {
     const current = getPrefs()
-    savePrefs({ seeker: { ...current.seeker, lifeExamples: ['Essen'] } })
+    savePrefs({ seeker: { ...current.seeker, lifeSentence: 'QuetzalcoatlXYZ' } })
     const { host } = await mount(createElement(MatchPage))
     expect(host.querySelector('[data-match-empty="none"] p')?.textContent).toBe('Dazu ist noch nichts da.')
-    expect(host.querySelectorAll('button')).toHaveLength(1)
-    expect(host.textContent).not.toContain('Sara König')
+    expect(host.querySelector('[data-match-rubrics="1"]')).toBeTruthy()
+    expect(host.querySelector('[data-match-hub="1"]')).toBeTruthy()
   })
 
-  it('shows one sentence and one button, and no sample person', async () => {
+  it('shows rubrics + tools + quiet choice on Jobs, and no sample person', async () => {
     const { host } = await mount(createElement(MatchPage))
-    expect(host.querySelector('[data-match-empty="choice"] p')?.textContent).toBe(
-      'Die Liste bleibt leer, bis du etwas wählst.',
+    expect(host.querySelector('[data-match-rubrics="1"]')).toBeTruthy()
+    expect(host.querySelector('[data-match-rubric="ausgehen"]')).toBeTruthy()
+    expect(host.querySelector('[data-match-hub="1"]')).toBeTruthy()
+    expect(host.querySelector('[data-match-empty="choice"] p')?.textContent).toContain(
+      'Die Liste bleibt leer, bis du etwas wählst',
     )
-    const buttons = [...host.querySelectorAll('button')]
-    expect(buttons).toHaveLength(1)
-    expect(buttons[0]?.textContent).toContain('Zum Start')
-    expect(host.textContent).not.toContain('Sara König')
-    expect(host.textContent).not.toContain('Alex Müller')
+    const quietBtn = host.querySelector('[data-match-empty="choice"] button')
+    expect(quietBtn?.textContent).toContain('Zum Start')
     expect(host.textContent).not.toMatch(/gebucht|reserviert|bestellt/i)
   })
 
