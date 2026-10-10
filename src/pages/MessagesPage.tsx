@@ -66,8 +66,8 @@ export function MessagesPage() {
   }, [user, threadId, visible, navigate])
 
   useEffect(() => {
-    if (user && active) store.markThreadRead(active.id, user.id)
-  }, [user, active, messages.length])
+    if (user && threadId) store.markThreadRead(threadId, user.id)
+  }, [user?.id, threadId, messages.length])
 
   if (kidsHidePublicChat()) {
     return <KidsBlocked title={t('kids.chatBlocked')} />
