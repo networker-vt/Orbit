@@ -31,6 +31,9 @@ import {
 } from '../lib/profileHub'
 import { getPrefs, savePrefs, subscribePrefs } from '../lib/prefs'
 import { formatDate, cn } from '../lib/utils'
+import { CreditsBelegList } from '../components/credits/CreditsBelegList'
+import { getCredits, subscribeCredits } from '../lib/credits'
+import { getReferral, shareUrl, subscribeReferral } from '../lib/referral'
 import { getRegistration, requestSwitchToKids, requestSwitchToOrbit } from '../lib/registration'
 import { isBetaNoticeEnabled, setBetaNoticeEnabled } from '../lib/betaNotice'
 
@@ -51,7 +54,10 @@ export function EinstellungPage() {
   const [prefs, setPrefs] = useState(getPrefs)
   const [skillDraft, setSkillDraft] = useState('')
   const [docKind, setDocKind] = useState<HubDocKind>('certificate')
+  const [creditsBal, setCreditsBal] = useState(() => getCredits().balance)
+  const [referral, setReferral] = useState(getReferral)
   const complete = profileCompleteness()
+  const creditsOn = isFlagOn('credits')
 
   useEffect(() => {
     const h = () => setCal(listLocalCalendar())
@@ -59,11 +65,15 @@ export function EinstellungPage() {
     window.addEventListener('storage', h)
     const u1 = subscribeHub(() => setHub(getHub()))
     const u2 = subscribePrefs(() => setPrefs(getPrefs()))
+    const u3 = subscribeCredits(() => setCreditsBal(getCredits().balance))
+    const u4 = subscribeReferral(() => setReferral(getReferral()))
     return () => {
       window.removeEventListener('orbit-cal-changed', h)
       window.removeEventListener('storage', h)
       u1()
       u2()
+      u3()
+      u4()
     }
   }, [])
 
@@ -110,6 +120,42 @@ export function EinstellungPage() {
           </div>
         </div>
       </header>
+
+      {creditsOn && (
+        <section
+          className="space-y-3 rounded-2xl border-2 border-[var(--theme-accent)]/35 bg-surface-2 p-4 shadow-sm"
+          id="credits"
+          data-einstellung-credits="1"
+        >
+          <h2 className="text-lg font-semibold">Orbit Credits & Referral</h2>
+          <p className="text-xs text-muted">
+            Treuepunkte mit 21M Cap — Boosts in Orbit, kein Auszahlungsanspruch, kein Crypto-Marketing.
+          </p>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted">Guthaben (Wallet)</p>
+              <p className="text-2xl font-bold tabular-nums text-[var(--theme-accent)]">{creditsBal}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted">Ref-Code</p>
+              <p className="font-mono text-sm">{referral.code}</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link to="/empfehlen">
+              <Button size="sm" variant="secondary">
+                Empfehlen
+              </Button>
+            </Link>
+            <Link to="/wallet#credits">
+              <Button size="sm">Wallet & Boosts</Button>
+            </Link>
+          </div>
+          <p className="break-all text-[10px] text-muted">{shareUrl()}</p>
+          <h3 className="text-sm font-semibold">Belege (Ledger)</h3>
+          <CreditsBelegList limit={8} />
+        </section>
+      )}
 
       {isFlagOn('verifyId') && (
         <div id="verify">

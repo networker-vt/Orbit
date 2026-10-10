@@ -28,9 +28,14 @@ export const CREDIT_KIND_ALLOWLIST = [
   'look_tryon',
   'look_shop',
   'assist_priority',
+  'home_pins_plus',
+  'orbit_plus_theme',
+  'chat_plus',
+  'match_highlight',
   'exchange_in',
   'exchange_out',
   'rewards',
+  'referral',
 ] as const
 
 export type AllowedCreditKind = (typeof CREDIT_KIND_ALLOWLIST)[number]
@@ -45,6 +50,7 @@ export const CREDIT_MINT_KINDS = [
   'p2p',
   'exchange_in',
   'rewards',
+  'referral',
 ] as const
 
 export function isAllowedCreditKind(kind: string): boolean {

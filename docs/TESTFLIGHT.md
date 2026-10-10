@@ -8,7 +8,7 @@ Native shell only. The site stays on GitHub Pages. This repo has **no** Google P
 | Bundle ID | `app.orbit.companion` |
 | Operator | Mirco Küßner, private person (see Impressum) |
 | Web dir | `dist` (Vite) |
-| Pages base | `/eventlogistik-event-os/` (`npm run build`, `npm run deploy:pages`) |
+| Pages base | `/orbit/` (`npm run build`, `npm run deploy:pages`) |
 | Native base | `/` (`npm run build:ios`, `npm run cap:sync`) |
 | Workflow | [`.github/workflows/ios-testflight.yml`](../.github/workflows/ios-testflight.yml) |
 
@@ -32,9 +32,9 @@ Nach dem Merge dieses Workflows und den vier Secrets: **Actions → iOS TestFlig
    - `AuthKey_XXXXXXXXXX.p8` **einmal** laden. Apple zeigt die Datei kein zweites Mal. Weg = Key widerrufen, neuen anlegen, die drei Key-Secrets tauschen. Die Team ID bleibt.
 5. **Team ID** (10 Zeichen, nicht die Key ID): [developer.apple.com/account](https://developer.apple.com/account) → **Membership**.
 
-Privacy-URL: https://networker-vt.github.io/eventlogistik-event-os/privacy  
-Support-URL: https://networker-vt.github.io/eventlogistik-event-os/support  
-Impressum: https://networker-vt.github.io/eventlogistik-event-os/impressum
+Privacy-URL: https://networker-vt.github.io/orbit/privacy  
+Support-URL: https://networker-vt.github.io/orbit/support  
+Impressum: https://networker-vt.github.io/orbit/impressum
 
 ### Repository-Secrets
 
@@ -65,7 +65,7 @@ Fehlt ein Secret oder hat es die falsche Form (Key ID / Team ID / UUID / Base64)
 
 1. PR mergen. **Run workflow** gibt es erst, wenn die Datei auf `main` liegt.
 2. **Actions → iOS TestFlight → Run workflow**. Branch `main`. Optionales „What to Test“ leer lassen, dann wartet der Job nicht auf Apples Verarbeitung. Ein ausgefülltes Notizfeld lässt den Job warten, bis der Build in App Store Connect sichtbar ist, nur um die Notiz zu setzen.
-3. Der Mac-Job: Xcode 26 (Pflicht für Uploads seit 2026-04-28), `npm ci`, `npm run cap:sync`, Prüfung dass `dist/index.html` nicht die Pages-Base `/eventlogistik-event-os/` enthält, Fastlane, Upload.
+3. Der Mac-Job: Xcode 26 (Pflicht für Uploads seit 2026-04-28), `npm ci`, `npm run cap:sync`, Prüfung dass `dist/index.html` nicht die Pages-Base `/orbit/` enthält, Fastlane, Upload.
 4. Marketing-Version = `version` in `package.json` (aktuell 2.9.1). **Build** (`CFBundleVersion`) = letzte TestFlight-Build-Nummer + 1. Die `1` im Xcode-Projekt wird nicht hochgeladen und nicht committet. Dieselbe Build-Nummer darf nicht zweimal hoch.
 5. IPA bleibt 7 Tage als Actions-Artifact (`orbit-ios-<run>`), falls der Upload scheitert und die Datei schon existiert.
 
@@ -105,9 +105,9 @@ After this workflow is on `main` and the four secrets exist: **Actions → iOS T
    - Download `AuthKey_XXXXXXXXXX.p8` **once**. Apple does not show it again. If it is lost, revoke the key, create another, and replace the three key secrets. The Team ID stays.
 5. **Team ID** (10 characters, not the Key ID): [developer.apple.com/account](https://developer.apple.com/account) → **Membership**.
 
-Privacy URL: https://networker-vt.github.io/eventlogistik-event-os/privacy  
-Support URL: https://networker-vt.github.io/eventlogistik-event-os/support  
-Impressum: https://networker-vt.github.io/eventlogistik-event-os/impressum
+Privacy URL: https://networker-vt.github.io/orbit/privacy  
+Support URL: https://networker-vt.github.io/orbit/support  
+Impressum: https://networker-vt.github.io/orbit/impressum
 
 ### Repository secrets
 
@@ -138,7 +138,7 @@ If a secret is missing or the wrong shape (Key ID / Team ID / UUID / base64), th
 
 1. Merge the PR. **Run workflow** appears only after the file is on `main`.
 2. **Actions → iOS TestFlight → Run workflow**. Branch `main`. Leave the optional “What to Test” note empty so the job does not wait for Apple to list the build. A note makes the job wait until the build is visible, only to save that note.
-3. The Mac job selects Xcode 26 (required for uploads since 2026-04-28), runs `npm ci` and `npm run cap:sync`, checks that `dist/index.html` does not contain the Pages base `/eventlogistik-event-os/`, then Fastlane uploads.
+3. The Mac job selects Xcode 26 (required for uploads since 2026-04-28), runs `npm ci` and `npm run cap:sync`, checks that `dist/index.html` does not contain the Pages base `/orbit/`, then Fastlane uploads.
 4. Marketing version = `version` in `package.json` (currently 2.9.1). **Build** (`CFBundleVersion`) = latest TestFlight build number + 1. The `1` in the Xcode project is not what gets uploaded, and it is not committed. The same build number cannot be uploaded twice.
 5. The IPA is kept 7 days as an Actions artifact (`orbit-ios-<run>`) when export produced a file.
 

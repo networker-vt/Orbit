@@ -12,7 +12,7 @@ import { useI18n } from '../lib/i18n'
 import { hubCtx } from '../lib/hubTiles'
 import {
   getHomePins,
-  HOME_PINS_MAX,
+  getHomePinsMax,
   isHomePinned,
   subscribeHomePins,
   toggleHomePin,
@@ -77,8 +77,9 @@ export function MeinPage() {
 
   const onToggle = (opt: MeinPinOption) => {
     const pinned = isHomePinned(opt.id)
-    if (!pinned && getHomePins().length >= HOME_PINS_MAX) {
-      setPinFlash(`${t('pin.limit')} (${HOME_PINS_MAX})`)
+    const maxPins = getHomePinsMax()
+    if (!pinned && getHomePins().length >= maxPins) {
+      setPinFlash(`${t('pin.limit')} (${maxPins})`)
       window.setTimeout(() => setPinFlash(null), 1600)
       return
     }
@@ -121,7 +122,7 @@ export function MeinPage() {
           </div>
           {pins.length > 0 && (
             <Badge tone="teal">
-              {pins.length}/{HOME_PINS_MAX}
+              {pins.length}/{getHomePinsMax()}
             </Badge>
           )}
         </div>

@@ -11,7 +11,7 @@ import { DEMO_USER_ID, seedProfiles } from '../data/seed'
 import { store } from './store'
 import type { AuthUser, Profile, Role } from '../types'
 import { uid } from './utils'
-import { consumePendingReferral } from './referral'
+import { consumePendingReferral, getReferral } from './referral'
 import { isSupabaseConfigured, supabase } from './supabase'
 import { markDemoPhoneVerified, markEmailVerified } from './verify'
 import { hydrateCreditsLedger } from './credits'
@@ -24,6 +24,16 @@ import {
   verifySecondFactor,
   verifyUserPassword,
 } from './accountSecurity'
+
+function bindReferralReward(userId: string) {
+  const hadRef = getReferral().referredBy
+  consumePendingReferral(userId)
+  if (!hadRef && getReferral().referredBy) {
+    void import('./credits')
+      .then((m) => m.grantReferralRewardForReferee(userId))
+      .catch(() => undefined)
+  }
+}
 
 const AUTH_KEY = 'el_auth_user'
 const MAGIC_PENDING_KEY = 'orbit_magic_pending_v1'
@@ -163,7 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
           store.upsertProfile(p)
           persist({ id, email: p.email, name: p.name, role: p.role }, p)
-          consumePendingReferral(id)
+          bindReferralReward(id)
           void import('./rewards').then((m) => m.grantWelcomeOnSignup()).catch(() => undefined)
         })
         unsub = () => listener.subscription.unsubscribe()
@@ -183,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         seedProfiles.find((x) => x.id === id) ?? seedProfiles.find((x) => x.id === DEMO_USER_ID)!
       store.upsertProfile(p)
       persist({ id: p.id, email: p.email, name: p.name, role: p.role }, p)
-      consumePendingReferral(p.id)
+      bindReferralReward(p.id)
       markDemoPhoneVerified()
       void import('./rewards').then((m) => m.grantWelcomeOnSignup()).catch(() => undefined)
     },
@@ -221,7 +231,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       store.upsertProfile(p)
       persist({ id, email, name, role }, p)
-      consumePendingReferral(id)
+      bindReferralReward(id)
       void import('./rewards').then((m) => m.grantWelcomeOnSignup()).catch(() => undefined)
     },
     [persist],
@@ -245,7 +255,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       store.upsertProfile(p)
       persist({ id, email, name, role }, p)
-      consumePendingReferral(id)
+      bindReferralReward(id)
       void import('./rewards').then((m) => m.grantWelcomeOnSignup()).catch(() => undefined)
       return p
     },

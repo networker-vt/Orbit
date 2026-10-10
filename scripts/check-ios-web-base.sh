@@ -11,8 +11,8 @@ if [[ ! -f "$index" ]]; then
   exit 1
 fi
 
-if grep -q '/eventlogistik-event-os/' "$index"; then
-  echo "::error::$index still contains the GitHub Pages base /eventlogistik-event-os/. The iOS shell must be built with CAPACITOR=1 so Vite base is /."
+if grep -q '/orbit/' "$index"; then
+  echo "::error::$index still contains the GitHub Pages base /orbit/. The iOS shell must be built with CAPACITOR=1 so Vite base is /."
   exit 1
 fi
 

@@ -14,6 +14,7 @@ import { useI18n } from '../lib/i18n'
 import { ReportButton } from '../components/report/ReportButton'
 import { verificationLabel } from '../lib/utils'
 import type { Role } from '../types'
+import { OrbitPlusThemes } from '../components/credits/OrbitPlusThemes'
 
 export function ProfilePage() {
   const { profile, user, updateProfile, logout, loginDemo } = useAuth()
@@ -113,6 +114,8 @@ export function ProfilePage() {
         </Link>
         )}
       </div>
+
+      {isFlagOn('credits') && <OrbitPlusThemes />}
 
       <form onSubmit={save} className="space-y-3 rounded-2xl border border-border bg-surface-2 p-5">
         <h2 className="font-semibold">Profil bearbeiten</h2>

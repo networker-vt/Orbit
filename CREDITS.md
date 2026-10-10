@@ -118,6 +118,11 @@ While the **packs pool** has remainder, packs debit that pool:
 | Kabine extra try-on variants (today) | 15 | 12 |
 | Kabine nearby shop featured | 20 | 16 |
 | Gift / sponsoring | peer transfer, **1 burned** | — |
+| Match highlight (24h demo) | 22 | 18 |
+| Home-Pins+ (+2 slots) | 35 | 28 |
+| Orbit+ theme unlock | 28 | 22 |
+| Chat-Extras (local history today) | 18 | 14 |
+| Referral signup grant | 40 from rewards pool | — |
 
 ### Gift / Sponsoring (Demo stub)
 
