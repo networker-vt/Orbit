@@ -112,7 +112,11 @@ export function MessagesPage() {
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="truncate text-sm font-medium">
-                  {th.participantNames.filter((n) => n !== user.name).join(', ') || 'Chat'}
+                  {th.participantIds.some((id) => id.startsWith('topic:'))
+                    ? th.listingTitle?.replace(/\s*·\s*Orbit Social$/i, '') ||
+                      th.participantNames.find((n) => n.startsWith('#')) ||
+                      'Chat'
+                    : th.participantNames.filter((n) => n !== user.name).join(', ') || 'Chat'}
                 </div>
                 <span className="shrink-0 text-xs uppercase tracking-wide text-muted">
                   {kindLabel(th.kind)}
