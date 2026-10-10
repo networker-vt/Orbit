@@ -27,6 +27,18 @@ interface ImportMetaEnv {
   /** Sell-by-photo vision endpoint (FormData image). Falls back to demo stub when unset. */
   readonly VITE_VISION_API_URL?: string
   readonly VITE_SELL_VISION_URL?: string
+  readonly VITE_BOOKING_AID?: string
+  readonly VITE_SKYSCANNER_MEDIA_PARTNER_ID?: string
+  readonly VITE_DB_TIMETABLE_API_URL?: string
+  readonly VITE_DB_TIMETABLE_API_KEY?: string
+  readonly VITE_TRANSPORT_REST?: string
+  readonly VITE_TRANSPORT_REST_BASE?: string
+  readonly VITE_TRAVEL_DEMO_CATALOG?: string
+  readonly VITE_JOB_FEED_URL?: string
+  readonly VITE_JOB_FEED_API_KEY?: string
+  readonly VITE_ADZUNA_APP_ID?: string
+  readonly VITE_ADZUNA_APP_KEY?: string
+  readonly VITE_EBAY_CAMPAIGN_ID?: string
 }
 
 interface ImportMeta {
