@@ -14,10 +14,22 @@ const ROLES = Object.keys(ROLE_LABELS).filter((r) => r !== 'admin') as Role[]
 
 export function AuthPage() {
   const { t } = useI18n()
-  const { login, register, loginDemo, user, requestMagicLink, confirmDemoMagic, magicPending, authBackend } =
-    useAuth()
+  const {
+    login,
+    register,
+    loginDemo,
+    user,
+    requestMagicLink,
+    confirmDemoMagic,
+    magicPending,
+    authBackend,
+    loginWithPassword,
+    completePasswordLoginWithTotp,
+    registerWithPassword,
+    pendingTotpUserId,
+  } = useAuth()
   const navigate = useNavigate()
-  const [mode, setMode] = useState<'magic' | 'register'>('magic')
+  const [mode, setMode] = useState<'magic' | 'register' | 'password'>('magic')
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
   const [role, setRole] = useState<Role>('freelancer')
@@ -25,6 +37,10 @@ export function AuthPage() {
   const [busy, setBusy] = useState(false)
   const [note, setNote] = useState<string | null>(null)
   const [adult, setAdult] = useState(false)
+  const [password, setPassword] = useState('')
+  const [passwordConfirm, setPasswordConfirm] = useState('')
+  const [totpCode, setTotpCode] = useState('')
+  const [authError, setAuthError] = useState<string | null>(null)
 
   if (user) {
     return (
@@ -52,17 +68,84 @@ export function AuthPage() {
     }
   }
 
-  const submitRegister = (e: React.FormEvent) => {
+  const submitRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!adult) return
     confirmAdult()
+    setAuthError(null)
     if (mode === 'register') {
+      if (password) {
+        if (password !== passwordConfirm) {
+          setAuthError(t('security.passwordMismatch'))
+          return
+        }
+        const res = await registerWithPassword(email, name, role, city, password)
+        if (!res.ok) {
+          setAuthError(t('security.passwordWeak'))
+          return
+        }
+        navigate('/einstellung#sicherheit')
+        return
+      }
       register(email, name, role, city)
       navigate('/')
       return
     }
     login(email || 'alex@example.invalid', name || 'Alex Müller', role)
     navigate('/')
+  }
+
+  const submitPasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!adult) return
+    confirmAdult()
+    setAuthError(null)
+    setBusy(true)
+    try {
+      const res = await loginWithPassword(email, password)
+      if (!res.ok) {
+        setAuthError(res.reason === 'wrong' ? t('security.passwordWrong') : t('security.passwordUnknown'))
+        return
+      }
+      if (res.needsTotp) return
+      navigate('/')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const submitTotp = (e: React.FormEvent) => {
+    e.preventDefault()
+    setAuthError(null)
+    if (!completePasswordLoginWithTotp(totpCode)) {
+      setAuthError(t('security.totpInvalid'))
+      return
+    }
+    navigate('/')
+  }
+
+  if (pendingTotpUserId) {
+    return (
+      <div className="mx-auto max-w-md space-y-4 rounded-2xl border border-border bg-surface-2 p-6">
+        <h1 className="text-xl font-bold">{t('security.loginTotpTitle')}</h1>
+        <p className="text-sm text-muted">{t('security.loginTotpLead')}</p>
+        <form onSubmit={submitTotp} className="space-y-3">
+          <Input
+            label={t('security.totpCode')}
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            value={totpCode}
+            onChange={(e) => setTotpCode(e.target.value)}
+            required
+          />
+          {authError && <p className="text-sm text-rose-300">{authError}</p>}
+          <Button type="submit" className="w-full" disabled={totpCode.length < 6}>
+            {t('security.loginTotpSubmit')}
+          </Button>
+        </form>
+        <p className="text-xs text-muted">{t('security.backupLoginHint')}</p>
+      </div>
+    )
   }
 
   return (
@@ -119,12 +202,45 @@ export function AuthPage() {
         </button>
         <button
           type="button"
+          className={`flex-1 rounded-lg py-2 text-sm ${mode === 'password' ? 'bg-cyan text-black font-semibold' : 'text-muted'}`}
+          onClick={() => setMode('password')}
+        >
+          {t('auth.passwordTab')}
+        </button>
+        <button
+          type="button"
           className={`flex-1 rounded-lg py-2 text-sm ${mode === 'register' ? 'bg-cyan text-black font-semibold' : 'text-muted'}`}
           onClick={() => setMode('register')}
         >
           {t('auth.registerTab')}
         </button>
       </div>
+
+      {mode === 'password' && (
+        <form onSubmit={(e) => void submitPasswordLogin(e)} className="space-y-3 rounded-2xl border border-border bg-surface-2 p-5">
+          <p className="text-sm font-semibold">{t('auth.passwordTitle')}</p>
+          <p className="text-xs text-muted">{t('auth.passwordHint')}</p>
+          <Input
+            label={t('auth.email')}
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <Input
+            label={t('security.password')}
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          {authError && <p className="text-sm text-rose-300">{authError}</p>}
+          <Button type="submit" className="w-full" disabled={busy || !adult || !email.trim() || !password}>
+            {t('auth.passwordLogin')}
+          </Button>
+        </form>
+      )}
 
       {mode === 'register' && (
         <form onSubmit={submitRegister} className="space-y-3 rounded-2xl border border-border bg-surface-2 p-5">
@@ -150,6 +266,23 @@ export function AuthPage() {
               </option>
             ))}
           </Select>
+          <Input
+            label={t('security.newPassword')}
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder={t('security.passwordOptional')}
+          />
+          <Input
+            label={t('security.confirmPassword')}
+            type="password"
+            autoComplete="new-password"
+            value={passwordConfirm}
+            onChange={(e) => setPasswordConfirm(e.target.value)}
+          />
+          <p className="text-xs text-muted">{t('security.passwordRules')}</p>
+          {authError && <p className="text-sm text-rose-300">{authError}</p>}
           <Button type="submit" className="w-full" disabled={!adult}>
             {t('auth.createAccount')}
           </Button>
