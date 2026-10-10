@@ -141,8 +141,8 @@ export function rubricHint(rubric: MatchRubric): { de: string; en: string } {
       return { de: 'Jobs & Minijobs — swipen zum Interesse.', en: 'Jobs & minijobs — swipe for interest.' }
     case 'social':
       return {
-        de: 'Social Market (Orbit Social): Angebote & Gesuche — Feed-UI bleibt auf Orbit Social.',
-        en: 'Social Market (Orbit Social): offers & needs — feed UI stays on Orbit Social.',
+        de: 'Orbit Social: Angebote & Gesuche aus dem Feed — 1:1 über Orbit Chat nach Freigabe.',
+        en: 'Orbit Social: offers & needs from the feed — 1:1 via Orbit Chat after consent.',
       }
     case 'food':
       return { de: 'Essen & Trinken — lokale Treffer.', en: 'Food & drink — local hits.' }

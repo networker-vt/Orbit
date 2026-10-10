@@ -4,7 +4,7 @@ import { Mic, Send } from 'lucide-react'
 import { HOME_PRIMARY_COUNT, splitAdaptiveHome } from '../lib/hubTiles'
 import { getWidgetTaps, subscribeWidgetTaps } from '../lib/widgetUsage'
 import { TripOptionCards } from '../components/assist/TripOptionCards'
-import { OrbitRobot } from '../components/home/OrbitRobot'
+import { OrbitWordmarkHero } from '../components/brand/OrbitWordmarkHero'
 import { Tageskarte } from '../components/home/Tageskarte'
 import { TileGrid } from '../components/ui/TileGrid'
 import { Button } from '../components/ui/Button'
@@ -61,9 +61,7 @@ export function HomePage() {
   const [resume, setResume] = useState(getResume)
   const [reminders, setReminders] = useState(dueReminders)
   const [assistNote, setAssistNote] = useState<string | null>(null)
-  const [robotTapped, setRobotTapped] = useState(false)
   const [orbiBubble, setOrbiBubble] = useState(false)
-  const [orbiReaction, setOrbiReaction] = useState<'success' | 'error' | null>(null)
   const [kids, setKids] = useState(isKidsMode)
   const [tripVoicePick, setTripVoicePick] = useState<1 | 2 | 3 | null>(null)
   const [widgetTaps, setWidgetTaps] = useState(getWidgetTaps)
@@ -81,12 +79,6 @@ export function HomePage() {
       /* private mode */
     }
   }, [])
-
-  useEffect(() => {
-    if (!orbiReaction) return
-    const timer = window.setTimeout(() => setOrbiReaction(null), 1200)
-    return () => window.clearTimeout(timer)
-  }, [orbiReaction])
 
   useEffect(() => {
     const u1 = subscribePrefs(() => setPrefs(getPrefs()))
@@ -164,17 +156,14 @@ export function HomePage() {
     if (!isFlagOn('credits')) {
       if (gate !== 'ok') {
         setAssistNote(t('home.assistLimit'))
-        setOrbiReaction('error')
         return
       }
       setAssistNote(null)
     } else if (gate === 'limit') {
       setAssistNote(t('home.assistLimit'))
-      setOrbiReaction('error')
       return
     } else if (gate === 'need_credits') {
       setAssistNote(t('home.assistNeedCredits'))
-      setOrbiReaction('error')
       return
     } else if (gate === 'paid') {
       setAssistNote(t('home.assistPaid'))
@@ -187,12 +176,7 @@ export function HomePage() {
     setBusy(true)
     try {
       const next = await buildAssistPlan(q, resolved, ac.signal)
-      if (next) {
-        setPlan(next)
-        setOrbiReaction('success')
-      } else {
-        setOrbiReaction('error')
-      }
+      if (next) setPlan(next)
     } finally {
       setBusy(false)
     }
@@ -209,23 +193,11 @@ export function HomePage() {
     }
   }
 
-  const onRobotTap = () => {
-    setRobotTapped(true)
-    window.setTimeout(() => setRobotTapped(false), 700)
-  }
-
   return (
     <div className="mx-auto max-w-lg space-y-5 pb-scroll-chrome pt-6 md:pt-10">
       <header className="space-y-4">
         <div className="flex flex-col items-center px-2 text-center" data-orbi-primary="1" data-orbi-hero="above-greeting">
-          <OrbitRobot
-            tapped={robotTapped}
-            onTap={onRobotTap}
-            label={t('home.robotAria')}
-            stage="kind"
-            busy={busy}
-            reaction={orbiReaction}
-          />
+          <OrbitWordmarkHero />
           {orbiBubble && (
             <p
               className="mt-2 max-w-xs rounded-2xl border border-border bg-surface-2 px-3 py-2 text-sm text-ink"

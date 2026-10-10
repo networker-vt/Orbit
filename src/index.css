@@ -493,6 +493,25 @@ textarea:focus-visible,
 
 }
 
+.orbit-wordmark-hero__ring {
+  animation: orbit-wordmark-ring 2.8s ease-in-out infinite;
+}
+.orbit-wordmark-hero__ring--outer {
+  animation: orbit-wordmark-ring 3.6s ease-in-out infinite reverse;
+  opacity: 0.65;
+}
+.orbit-wordmark-hero__mark {
+  animation: orbit-wordmark-glow 2.4s ease-in-out infinite;
+}
+@keyframes orbit-wordmark-ring {
+  0%, 100% { transform: rotate(0deg) scale(1); opacity: 0.85; }
+  50% { transform: rotate(8deg) scale(1.04); opacity: 1; }
+}
+@keyframes orbit-wordmark-glow {
+  0%, 100% { filter: drop-shadow(0 0 0 transparent); }
+  50% { filter: drop-shadow(0 0 12px color-mix(in oklab, var(--theme-accent) 35%, transparent)); }
+}
+
 /* Orbit Social — hero atmosphere (search-term feed page) */
 .orbit-social-hero {
   min-height: 220px;
@@ -554,6 +573,10 @@ textarea:focus-visible,
   .orbit-social-hero__img {
     opacity: 1;
     transition: none;
+  }
+  .orbit-wordmark-hero__ring,
+  .orbit-wordmark-hero__mark {
+    animation: none !important;
   }
   .text-shimmer {
     background: linear-gradient(135deg, #00f0ff, #14b8a6);

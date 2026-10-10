@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-do
 import { Heart, SkipForward, MessageSquare, Plane } from 'lucide-react'
 import { rankPersonalizedMatch, type PersonalizedItem } from '../lib/personalizedMatch'
 import { chatHref } from '../lib/chatPath'
+import { openListingChat, openMutualMatchChat, chatSourceForListing } from '../lib/contextualChat'
+import { AnschreibenButton } from '../components/chat/AnschreibenButton'
 import type { TravelOffer } from '../lib/travel'
 import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
@@ -62,7 +64,7 @@ import {
   socialPostIsMarket,
   type MatchRubric,
 } from '../lib/matchRubrics'
-import { getSocial, subscribeSocial, type SocialPost } from '../lib/social'
+import { getSocial, startSocialDm, subscribeSocial, type SocialPost } from '../lib/social'
 import type { Listing, Profile } from '../types'
 
 type DeckCard =
@@ -99,7 +101,7 @@ function socialScore(post: SocialPost): MatchScore {
   return {
     percent: base,
     breakdown: { skills: base, land: 50, sprache: 50, gehalt: post.likes.length * 5, typ: 70 },
-    reasons: ['Social Market · Orbit Social'],
+    reasons: ['Orbit Social'],
     labels: [
       ['Skills', 'skills'],
       ['Land', 'land'],
@@ -273,7 +275,7 @@ export function MatchPage() {
               kind: 'social' as const,
               post,
               score: socialScore(post),
-              reason: 'Social Market · Orbit Social',
+              reason: 'Orbit Social',
             }))
           cards = [...posts, ...cards]
         }
@@ -317,7 +319,7 @@ export function MatchPage() {
               kind: 'social' as const,
               post,
               score: socialScore(post),
-              reason: 'Social Market · Orbit Social',
+              reason: 'Orbit Social',
             }))
           cards = [...posts, ...cards]
         }
@@ -399,6 +401,16 @@ export function MatchPage() {
     return actor
   }
 
+  const goMutualChat = (mutual: MutualMatch) => {
+    const actor = ensureActor()
+    const thread = openMutualMatchChat({
+      meId: actor.id,
+      meName: actor.name,
+      mutual,
+    })
+    navigate(chatHref(thread.id))
+  }
+
   const swipe = (action: 'interested' | 'skip') => {
     if (!current) return
     if (!consumeSwipe()) {
@@ -431,8 +443,33 @@ export function MatchPage() {
         title: current.post.body.slice(0, 48),
       })
       if (action === 'interested') {
-        if (current.post.listingId) navigate(`/listings/${current.post.listingId}`)
-        else navigate('/social')
+        const actor = ensureActor()
+        const post = current.post
+        if (post.listingId) {
+          const listing = store.getListing(post.listingId)
+          if (listing) {
+            const thread = openListingChat({
+              meId: actor.id,
+              meName: actor.name,
+              listing,
+              source: 'market',
+            })
+            navigate(chatHref(thread.id))
+          } else {
+            navigate(`/listings/${post.listingId}`)
+          }
+        } else if (post.authorId !== actor.id) {
+          startSocialDm({
+            meId: actor.id,
+            meName: actor.name,
+            otherId: post.authorId,
+            otherName: post.authorName,
+            note: t('chat.requestDefaultNote'),
+          })
+          navigate(chatHref())
+        } else {
+          navigate('/social')
+        }
       }
       setSwipeTick((n) => n + 1)
       return
@@ -662,12 +699,13 @@ export function MatchPage() {
             {mutuals.slice(0, 5).map((m) => (
               <li key={m.id} className="flex items-center justify-between gap-2 text-sm">
                 <span className="truncate text-neutral-200">{m.title}</span>
-                <Link
-                  to={m.listingId ? `/listings/${m.listingId}` : chatHref()}
+                <button
+                  type="button"
+                  onClick={() => goMutualChat(m)}
                   className="shrink-0 text-cyan hover:underline"
                 >
                   {t('chat.anschreiben')}
-                </Link>
+                </button>
               </li>
             ))}
           </ul>
@@ -692,11 +730,8 @@ export function MatchPage() {
         <div className="fixed inset-x-4 bottom-28 z-40 mx-auto max-w-sm rounded-2xl border border-cyan/40 bg-surface-2 p-4 shadow-xl md:bottom-8">
           <p className="text-sm font-semibold text-[var(--theme-accent)]">✨ {t('match.mutual')}</p>
           <p className="mt-1 text-sm text-neutral-200">{toast.title}</p>
-          <Button
-            size="sm"
-            className="mt-3 w-full"
-            onClick={() => navigate(toast.listingId ? `/listings/${toast.listingId}` : chatHref())}
-          >
+          <p className="mt-1 text-xs text-muted">{t('apply.sentHint')}</p>
+          <Button size="sm" className="mt-3 w-full" onClick={() => goMutualChat(toast)}>
             {t('chat.anschreiben')}
           </Button>
         </div>
@@ -813,7 +848,6 @@ function SocialCard({ post, score }: { post: SocialPost; score: MatchScore }) {
         <div>
           <div className="mb-1 flex flex-wrap gap-1.5">
             <Badge tone="cyan">{t('match.rubric.social')}</Badge>
-            <Badge>{t('match.orbitSocial')}</Badge>
           </div>
           <h2 className="mt-2 text-lg font-bold text-ink">{post.authorName}</h2>
           <p className="text-xs text-muted">{post.authorKind}</p>
@@ -821,7 +855,24 @@ function SocialCard({ post, score }: { post: SocialPost; score: MatchScore }) {
         <ScoreRing score={score} />
       </div>
       <p className="mt-4 line-clamp-6 flex-1 text-sm leading-relaxed text-neutral-300">{post.body}</p>
-      {post.listingId && <p className="mt-3 text-xs text-[var(--theme-accent)]">{t('social.openOffer')}</p>}
+      {post.listingId && (
+        <div className="relative z-10 mt-3 space-y-2">
+          <p className="text-xs text-[var(--theme-accent)]">{t('social.openOffer')}</p>
+          {(() => {
+            const listing = store.getListing(post.listingId!)
+            if (!listing) return null
+            return (
+              <AnschreibenButton
+                listing={listing}
+                source="market"
+                variant="secondary"
+                size="sm"
+                fullWidth
+              />
+            )
+          })()}
+        </div>
+      )}
     </article>
   )
 }
@@ -892,6 +943,15 @@ function JobCard({
         />
       </div>
       <Breakdown score={score} open={explain} hidden={[listing.city, listing.venue ?? '']} />
+      <div className="relative z-10 mt-3">
+        <AnschreibenButton
+          listing={listing}
+          source={chatSourceForListing(listing, 'match')}
+          variant="secondary"
+          size="sm"
+          fullWidth
+        />
+      </div>
       <div className="pointer-events-none absolute -right-8 -top-8 text-7xl opacity-20">
         {listing.imageEmoji || '💼'}
       </div>

@@ -4,11 +4,11 @@ import { tStatic } from './i18n'
 const META = /ruhig|quiet tiles|zwei Kachel|Discover-Liste|Nichts Lautes|Ruhige Links|Quiet links/i
 
 describe('Orbit 2.8.1 surface', () => {
-  it('renames bottom nav to Start · Match · Social · Mein', () => {
+  it('renames bottom nav to Start · Match · Orbit Social · Mein', () => {
     for (const locale of ['de', 'en'] as const) {
       expect(tStatic('nav.home', locale)).toMatch(/Start|Home/)
       expect(tStatic('nav.match', locale)).toBe('Match')
-      expect(tStatic('nav.social', locale)).toBe('Social')
+      expect(tStatic('nav.social', locale)).toBe('Orbit Social')
       expect(tStatic('nav.mein', locale)).toMatch(/Mein|Me/)
     }
   })

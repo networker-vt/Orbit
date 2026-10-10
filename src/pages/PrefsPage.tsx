@@ -9,7 +9,7 @@ import {
   type Industry,
 } from '../data/industries'
 import { OccupationField } from '../components/prefs/OccupationField'
-import { OrbitRobot } from '../components/home/OrbitRobot'
+import { BrandIcon } from '../components/brand/BrandMark'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { CITIES } from '../data/constants'
@@ -106,7 +106,7 @@ export function PrefsPage() {
           <Sparkles size={14} /> {moneyIntent ? 'I need money' : 'Preference-first'}
         </p>
         <div className="flex items-center gap-3">
-          <OrbitRobot size="compact" />
+          <BrandIcon size={40} />
           <div className="min-w-0">
             <h1 className="text-2xl font-bold tracking-tight">
               {moneyIntent ? 'Was du arbeiten willst' : 'Dein Orbit einrichten'}

@@ -9,7 +9,7 @@ describe('product surface names DE+EN', () => {
       expect(tStatic('travel.nav', locale)).toBe('Abflug')
       expect(tStatic('nav.match', locale)).toBe('Match')
       expect(tStatic('match.kicker', locale)).toBe('Treffer')
-      expect(tStatic('nav.social', locale)).toBe('Social')
+      expect(tStatic('nav.social', locale)).toBe('Orbit Social')
       expect(tStatic('nav.crew', locale)).toBe('Crew')
       expect(tStatic('match.companyDeck', locale)).toBe('Crew')
       expect(tStatic('nav.wallet', locale)).toBe('Wallet')
