@@ -98,19 +98,33 @@ describe('Parkmerke screen', () => {
       const style = notice ? window.getComputedStyle(notice) : null
       const noticeVisible = Boolean(
         notice?.isConnected &&
-          notice.textContent?.includes('Die Kartenbilder kommen von OpenStreetMap. An ihnen ist die Kartenstelle erkennbar.') &&
+          notice.textContent?.includes('Die Kartenbilder lädt Ihr Browser von der OpenStreetMap Foundation (Großbritannien). Dabei erhält sie Ihre IP-Adresse und erkennt den Kartenausschnitt.') &&
           style &&
           style.display !== 'none' &&
           style.visibility !== 'hidden' &&
           style.opacity !== '0',
       )
-      recorded.push({ url, method: init?.method ?? 'GET', body: init?.body ?? null, noticeVisible })
+      recorded.push({
+        url,
+        method: init?.method ?? 'GET',
+        body: init?.body ?? null,
+        noticeVisible,
+        referrerPolicy: init?.referrerPolicy ?? '',
+        cache: init?.cache ?? '',
+      })
       return new Response(new Blob(['png'], { type: 'image/png' }))
     })
     await resetParkmerkeStore()
   })
 
-  const recorded: { url: string; method: string; body: unknown; noticeVisible: boolean }[] = []
+  const recorded: {
+    url: string
+    method: string
+    body: unknown
+    noticeVisible: boolean
+    referrerPolicy: ReferrerPolicy | ''
+    cache: RequestCache | ''
+  }[] = []
 
   beforeEach(() => {
     recorded.length = 0
@@ -144,9 +158,12 @@ describe('Parkmerke screen', () => {
     await click(host, '[data-park-locate]')
     const block = host.querySelector('[data-park-map-block]')
     expect(block?.textContent).toContain(
-      'Die Kartenbilder kommen von OpenStreetMap. An ihnen ist die Kartenstelle erkennbar.',
+      'Die Kartenbilder lädt Ihr Browser von der OpenStreetMap Foundation (Großbritannien). Dabei erhält sie Ihre IP-Adresse und erkennt den Kartenausschnitt.',
     )
     expect(block?.querySelector('[data-park-map-credit]')?.textContent).toBe('© OpenStreetMap-Mitwirkende')
+    expect(block?.querySelector('[data-park-map-credit]')?.getAttribute('href')).toBe(
+      'https://www.openstreetmap.org/copyright',
+    )
     expect(block?.textContent).not.toContain('bleiben auf diesem Gerät')
     expect(block?.contains(host.querySelector('[data-park-storage="local"]'))).toBe(false)
     await click(host, '[data-park-preset="60"]')
@@ -275,17 +292,22 @@ describe('Parkmerke screen', () => {
       })
     }
     const notice = host.querySelector('[data-park-map-notice]')
-    expect(notice?.textContent).toBe('Die Kartenbilder kommen von OpenStreetMap. An ihnen ist die Kartenstelle erkennbar.')
+    expect(notice?.textContent).toBe('Die Kartenbilder lädt Ihr Browser von der OpenStreetMap Foundation (Großbritannien). Dabei erhält sie Ihre IP-Adresse und erkennt den Kartenausschnitt.')
     const noticeStyle = window.getComputedStyle(notice as Element)
     expect(noticeStyle.display).not.toBe('none')
     expect(noticeStyle.visibility).not.toBe('hidden')
     expect(host.querySelector('[data-park-map-credit]')?.textContent).toBe('© OpenStreetMap-Mitwirkende')
+    expect(host.querySelector('[data-park-map-credit]')?.getAttribute('href')).toBe(
+      'https://www.openstreetmap.org/copyright',
+    )
     expect(host.querySelector('[data-park-map-block]')?.contains(host.querySelector('[data-park-storage="local"]'))).toBe(
       false,
     )
     expect(recorded.length).toBeGreaterThan(0)
     for (const call of recorded) {
       expect(call.noticeVisible).toBe(true)
+      expect(call.referrerPolicy).toBe('strict-origin')
+      expect(call.cache).toBe('no-store')
       expect(call.method).toBe('GET')
       expect(call.body).toBeNull()
       expect(isOsmTileGet(call.url)).toBe(true)

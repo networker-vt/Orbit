@@ -146,20 +146,28 @@ describe('the spot stays on the device', () => {
     expect(beacon).not.toHaveBeenCalled()
   })
 
-  it('loads a map tile only as an OpenStreetMap image GET, and uses the cached image offline', async () => {
-    const seen: { url: string; method: string; body: unknown }[] = []
+  it('loads a map tile only as an OpenStreetMap image GET for the current view, and does not keep it', async () => {
+    const seen: { url: string; method: string; body: unknown; referrerPolicy?: ReferrerPolicy; cache?: RequestCache }[] = []
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
-      seen.push({ url, method: init?.method ?? 'GET', body: init?.body ?? null })
+      seen.push({
+        url,
+        method: init?.method ?? 'GET',
+        body: init?.body ?? null,
+        referrerPolicy: init?.referrerPolicy,
+        cache: init?.cache,
+      })
       return new Response(new Blob(['tile-bytes'], { type: 'image/png' }))
     })
     const ctrl = new AbortController()
     const spot = { lat: 52.52, lng: 13.405, photo: photo('own-car') }
-    const first = await loadMapTile(17, 17602, 10745, true, ctrl.signal, true)
+    const first = await loadMapTile(17, 17602, 10745, true, ctrl.signal)
     expect(await first?.text()).toBe('tile-bytes')
     expect(seen).toHaveLength(1)
     expect(seen[0]?.method).toBe('GET')
     expect(seen[0]?.body).toBeNull()
+    expect(seen[0]?.referrerPolicy).toBe('strict-origin')
+    expect(seen[0]?.cache).toBe('no-store')
     expect(isOsmTileGet(seen[0]?.url ?? '')).toBe(true)
     expect(seen[0]?.url).toBe(osmTileUrl(17, 17602, 10745))
     expect(requestCarriesSpot(seen[0]?.url ?? '', seen[0]?.body, spot)).toBe(false)
@@ -168,13 +176,13 @@ describe('the spot stays on the device', () => {
     expect(seen[0]?.url).not.toContain('own-car')
 
     fetchSpy.mockClear()
-    const cached = await loadMapTile(17, 17602, 10745, false, ctrl.signal, true)
-    expect(await cached?.text()).toBe('tile-bytes')
+    const offline = await loadMapTile(17, 17602, 10745, false, ctrl.signal)
+    expect(offline).toBeNull()
     expect(fetchSpy).not.toHaveBeenCalled()
 
-    const missing = await loadMapTile(17, 1, 1, false, ctrl.signal, true)
-    expect(missing).toBeNull()
-    expect(fetchSpy).not.toHaveBeenCalled()
+    const again = await loadMapTile(17, 17602, 10745, true, ctrl.signal)
+    expect(await again?.text()).toBe('tile-bytes')
+    expect(fetchSpy).toHaveBeenCalledTimes(1)
   })
 
   it('refuses tile URLs that carry a query or another host', () => {

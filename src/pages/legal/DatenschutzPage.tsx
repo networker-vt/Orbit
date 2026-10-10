@@ -51,6 +51,11 @@ export function DatenschutzPage() {
           </li>
         )}
       </ul>
+      <h2>Kartenbilder</h2>
+      <p>
+        Die Kartenbilder lädt Ihr Browser von der OpenStreetMap Foundation (Großbritannien). Dabei erhält sie Ihre IP-Adresse und erkennt den Kartenausschnitt.{' '}
+        <a href="https://osmfoundation.org/wiki/Privacy_Policy">https://osmfoundation.org/wiki/Privacy_Policy</a>
+      </p>
       <p>
         Es gibt kein Analyse-Werkzeug und keine Werbung von Dritten. Wenn du einen Suchlink
         (bahn.de, Google Flights, Booking, Kayak) selbst öffnest, gilt die Datenschutzerklärung
@@ -107,7 +112,10 @@ export function DatenschutzPage() {
         Active services: GitHub Pages (hosting the web app), storage on your device (technically
         necessary under § 25 (2) TDDDG, no consent banner), and Apple when you use the iOS app.
         {isSupabaseConfigured ? ' Supabase stores the account when that connection is enabled.' : ''}{' '}
-        There is no analytics tool. Opening a search link (bahn.de, Google Flights, Booking, Kayak)
+        Map images are loaded by your browser from the OpenStreetMap Foundation (United Kingdom).
+        That request includes your IP address and identifies the map area (
+        <a href="https://osmfoundation.org/wiki/Privacy_Policy">https://osmfoundation.org/wiki/Privacy_Policy</a>
+        ). There is no analytics tool. Opening a search link (bahn.de, Google Flights, Booking, Kayak)
         is your request; that site then applies its own policy. Orbit does not call those sites in
         the background.
       </p>
