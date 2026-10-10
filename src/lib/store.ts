@@ -434,6 +434,10 @@ export const store = {
   },
 
   markThreadRead(threadId: string, readerId: string) {
+    const needsUpdate = getData().messages.some(
+      (m) => m.threadId === threadId && m.senderId !== readerId && !m.read,
+    )
+    if (!needsUpdate) return
     mutate((d) => {
       for (const m of d.messages) {
         if (m.threadId === threadId && m.senderId !== readerId) m.read = true
