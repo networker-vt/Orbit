@@ -16,7 +16,8 @@ describe('match hub lanes', () => {
     expect(parseMatchHubLane('nope')).toBe('all')
     expect(hubLaneBypassesOccupation('all')).toBe(false)
     expect(hubLaneBypassesOccupation('minijob')).toBe(true)
-    expect(createPathForHubLane('sell')).toContain('sell=1')
+    expect(createPathForHubLane('sell')).toContain('photoMode=sell')
+    expect(createPathForHubLane('barter')).toContain('photoMode=barter')
   })
 
   it('filters seed listings onto hub lanes including sell-by-photo', () => {

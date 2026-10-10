@@ -38,8 +38,8 @@ export function createPathForHubLane(lane: MatchHubLane): string {
   if (lane === 'service') return '/listings/new?intent=service'
   if (lane === 'courier') return '/listings/new?intent=courier'
   if (lane === 'ride') return '/listings/new?intent=ride'
-  if (lane === 'barter') return '/listings/new?intent=barter'
-  if (lane === 'sell') return '/match?lane=sell&sell=1'
+  if (lane === 'sell') return '/match?lane=sell&photo=1&photoMode=sell'
+  if (lane === 'barter') return '/match?lane=barter&photo=1&photoMode=barter'
   if (lane === 'partnership') return '/listings/new?intent=partnership'
   if (lane === 'b2b') return '/listings/new?intent=need&lane=b2b'
   if (lane === 'asset') return '/listings/new?intent=need&lane=asset'
@@ -79,17 +79,17 @@ export function hubLaneLegalNote(lane: MatchHubLane): LaneLegalNote {
         de: 'Personenbeförderung (UX wie Ride-Hailing, keine Uber/Bolt-Marke). Live erst mit Schein/PBefG/Versicherung. Demo-Lane · kein Rechtsrat.',
         en: 'Passenger transport (ride-hailing-like UX, not Uber/Bolt branding). Live only with licence/PBefG/insurance. Demo lane · not legal advice.',
       }
-    case 'barter':
-      return {
-        tone: 'info',
-        de: 'Tausch: rein natural oder später Aufpreis. Escrow ist gesperrt, bis rechtlich ok. Credits ≠ Gegenwert in Euro.',
-        en: 'Barter: pure natural swap or later top-up. Escrow locked until legally OK. Credits ≠ euro value.',
-      }
     case 'sell':
       return {
         tone: 'info',
-        de: 'Foto-Verkauf: KI schlägt Titel/Zustand/Preis vor — du bestätigst immer vor Publish. Ohne Vision-API: ehrlicher Demo-Stub. Kein stilles Veröffentlichen. Credits ≠ Zahlung.',
-        en: 'Sell-by-photo: AI suggests title/condition/price — you always confirm before publish. Without vision API: honest demo stub. Never silent publish. Credits ≠ payment.',
+        de: 'Per Foto verkaufen: KI schlägt Titel/Zustand/Preis vor — du bestätigst immer vor Publish. Ohne Vision-API: Demo-Stub. Kein stilles Veröffentlichen.',
+        en: 'Sell by photo: AI suggests title/condition/price — you always confirm before publish. Without vision API: demo stub. Never silent publish.',
+      }
+    case 'barter':
+      return {
+        tone: 'info',
+        de: 'Per Foto tauschen (oder Text-Tausch): biete X / brauche Y oder „was bietest du?“. Natural + später Aufpreis; Escrow gated. Nie still publish. Credits ≠ Gegenwert.',
+        en: 'Barter by photo (or text): offer X / need Y or “what do you offer?”. Natural + later top-up; escrow gated. Never silent publish. Credits ≠ value.',
       }
     case 'service':
       return {
@@ -106,8 +106,8 @@ export function hubLaneLegalNote(lane: MatchHubLane): LaneLegalNote {
     default:
       return {
         tone: 'info',
-        de: 'Match-Hub: Jobs, Minijobs, Services, Kurier, Fahrt, Tausch, Foto-Verkauf. Orbit vermittelt — kein Lohn, kein echtes EUR in-app, Credits nur Demo/Boost.',
-        en: 'Match hub: jobs, minijobs, services, courier, ride, barter, sell-by-photo. Orbit brokers — no wages, no real in-app EUR, Credits are demo/boost only.',
+        de: 'Match-Hub: Rubriken + per Foto verkaufen/tauschen. Orbit vermittelt — kein Lohn, kein echtes EUR in-app, Credits nur Demo/Boost.',
+        en: 'Match hub: rubrics + sell/barter by photo. Orbit brokers — no wages, no real in-app EUR, Credits are demo/boost only.',
       }
   }
 }

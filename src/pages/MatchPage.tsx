@@ -54,6 +54,7 @@ import {
   parseMatchHubLane,
   type MatchHubLane,
 } from '../lib/matchHub'
+import { parsePhotoMode, type PhotoListingMode } from '../lib/sellByPhoto'
 import {
   listingMatchesRubric,
   parseMatchRubric,
@@ -129,7 +130,12 @@ export function MatchPage() {
   const [explain, setExplain] = useState(false)
   const [capOpen, setCapOpen] = useState(false)
   const [budget, setBudget] = useState(getSwipeBudget)
-  const [sellOpen, setSellOpen] = useState(() => searchParams.get('sell') === '1')
+  const [sellOpen, setSellOpen] = useState(
+    () => searchParams.get('sell') === '1' || searchParams.get('photo') === '1',
+  )
+  const [photoMode, setPhotoMode] = useState<PhotoListingMode>(() =>
+    parsePhotoMode(searchParams.get('photoMode') || searchParams.get('mode')),
+  )
   const hubLane = parseMatchHubLane(searchParams.get('lane'))
   const rubric = parseMatchRubric(searchParams.get('rubric') ?? searchParams.get('lane'))
   const [deckMode, setDeckMode] = useState<MatchDeckMode>(() => {
@@ -164,12 +170,28 @@ export function MatchPage() {
   }, [forceCrew, forceTreffer])
 
   useEffect(() => {
-    if (searchParams.get('sell') === '1') {
+    const openPhoto = searchParams.get('sell') === '1' || searchParams.get('photo') === '1'
+    if (openPhoto) {
       setSellOpen(true)
-      if (hubLane !== 'sell') setHubLane('sell')
+      setPhotoMode(parsePhotoMode(searchParams.get('photoMode') || searchParams.get('mode')))
+      const wantBarter = parsePhotoMode(searchParams.get('photoMode') || searchParams.get('mode')) === 'barter'
+      if (wantBarter && hubLane !== 'barter') setHubLane('barter')
+      else if (!wantBarter && hubLane !== 'sell') setHubLane('sell')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams])
+
+  const openPhotoSheet = (mode: PhotoListingMode) => {
+    setPhotoMode(mode)
+    setHubLane(mode === 'barter' ? 'barter' : 'sell')
+    setSellOpen(true)
+    const next = new URLSearchParams(searchParams)
+    next.set('photo', '1')
+    next.set('photoMode', mode)
+    next.set('lane', mode === 'barter' ? 'barter' : 'sell')
+    next.delete('sell')
+    setSearchParams(next, { replace: true })
+  }
 
   useEffect(() => {
     const u1 = subscribePrefs(() => setPrefs(getPrefs()))
@@ -508,10 +530,7 @@ export function MatchPage() {
           lane={hubLane}
           onLane={setHubLane}
           cardCount={deck.length}
-          onSellPhoto={() => {
-            setHubLane('sell')
-            setSellOpen(true)
-          }}
+          onPhotoListing={openPhotoSheet}
         />
       )}
 
@@ -566,9 +585,16 @@ export function MatchPage() {
         <QuietMatch
           marker={hasIntent ? 'none' : 'choice'}
           sentence={hasIntent ? t('match.quietNone') : t('match.quietEmpty')}
-          action={hubLane === 'sell' ? t('sell.cta') : t('match.quietAction')}
+          action={
+            hubLane === 'sell' || hubLane === 'barter'
+              ? hubLane === 'barter'
+                ? t('photoTrade.cta')
+                : t('sell.cta')
+              : t('match.quietAction')
+          }
           onAction={() => {
-            if (hubLane === 'sell') setSellOpen(true)
+            if (hubLane === 'sell') openPhotoSheet('sell')
+            else if (hubLane === 'barter') openPhotoSheet('barter')
             else navigate('/')
           }}
           embedded={showHub}
@@ -693,10 +719,14 @@ export function MatchPage() {
 
       <SellByPhotoSheet
         open={sellOpen}
+        initialMode={photoMode}
         onClose={() => {
           setSellOpen(false)
           const next = new URLSearchParams(searchParams)
           next.delete('sell')
+          next.delete('photo')
+          next.delete('photoMode')
+          next.delete('mode')
           setSearchParams(next, { replace: true })
         }}
       />

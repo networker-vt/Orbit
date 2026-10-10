@@ -12,15 +12,18 @@ import {
   CONDITION_LABELS_EN,
   ITEM_CONDITIONS,
   hasLiveSellVision,
-  proposeSellFromPhoto,
-  type SellProposal,
+  proposePhotoFromFile,
+  type PhotoListingMode,
+  type PhotoProposal,
 } from '../../lib/sellByPhoto'
-import type { ItemCondition } from '../../types'
+import type { BarterMode, ItemCondition } from '../../types'
 import { cn } from '../../lib/utils'
 
 type Props = {
   open: boolean
   onClose: () => void
+  /** Initial mode when opening the sheet. */
+  initialMode?: PhotoListingMode
 }
 
 type Draft = {
@@ -29,21 +32,31 @@ type Draft = {
   condition: ItemCondition
   category: string
   priceHintEur: number
+  offerLabel: string
+  needLabel: string
+  barterMode: BarterMode
 }
 
-export function SellByPhotoSheet({ open, onClose }: Props) {
+export function SellByPhotoSheet({ open, onClose, initialMode = 'sell' }: Props) {
   const { t, resolved } = useI18n()
   const navigate = useNavigate()
   const { user, profile, loginDemo } = useAuth()
   const cameraRef = useRef<HTMLInputElement>(null)
   const galleryRef = useRef<HTMLInputElement>(null)
+  const [mode, setMode] = useState<PhotoListingMode>(initialMode)
   const [preview, setPreview] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-  const [proposal, setProposal] = useState<SellProposal | null>(null)
+  const [proposal, setProposal] = useState<PhotoProposal | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
   const [confirmed, setConfirmed] = useState(false)
+  const [lastFile, setLastFile] = useState<File | null>(null)
   const live = hasLiveSellVision()
   const condLabels = resolved === 'de' ? CONDITION_LABELS_DE : CONDITION_LABELS_EN
+  const isBarter = mode === 'barter'
+
+  useEffect(() => {
+    if (open) setMode(initialMode)
+  }, [open, initialMode])
 
   useEffect(() => {
     if (!open) return
@@ -66,19 +79,12 @@ export function SellByPhotoSheet({ open, onClose }: Props) {
     setDraft(null)
     setConfirmed(false)
     setBusy(false)
+    setLastFile(null)
   }, [open])
 
   if (!open) return null
 
-  const onFile = async (file: File | undefined) => {
-    if (!file) return
-    setBusy(true)
-    setProposal(null)
-    setDraft(null)
-    setConfirmed(false)
-    const url = URL.createObjectURL(file)
-    setPreview(url)
-    const next = await proposeSellFromPhoto(file)
+  const applyProposal = (next: PhotoProposal) => {
     setProposal(next)
     setDraft({
       title: next.title,
@@ -86,12 +92,40 @@ export function SellByPhotoSheet({ open, onClose }: Props) {
       condition: next.condition,
       category: next.category,
       priceHintEur: next.priceHintEur,
+      offerLabel: next.offerLabel || next.title,
+      needLabel: next.needLabel || 'Offen — was bietest du?',
+      barterMode: next.barterMode || 'natural',
     })
+  }
+
+  const onFile = async (file: File | undefined) => {
+    if (!file) return
+    setBusy(true)
+    setProposal(null)
+    setDraft(null)
+    setConfirmed(false)
+    setLastFile(file)
+    setPreview(URL.createObjectURL(file))
+    applyProposal(await proposePhotoFromFile(file, mode))
+    setBusy(false)
+  }
+
+  const switchMode = async (next: PhotoListingMode) => {
+    setMode(next)
+    setConfirmed(false)
+    if (!lastFile) {
+      setProposal(null)
+      setDraft(null)
+      return
+    }
+    setBusy(true)
+    applyProposal(await proposePhotoFromFile(lastFile, next))
     setBusy(false)
   }
 
   const publish = () => {
     if (!draft || !confirmed || !draft.title.trim()) return
+    if (isBarter && !draft.offerLabel.trim()) return
     let u = user
     let p = profile
     if (!u || !p) {
@@ -100,42 +134,83 @@ export function SellByPhotoSheet({ open, onClose }: Props) {
       u = { id: demo.id, email: demo.email, name: demo.name, role: demo.role }
       p = demo
     }
-    const listing = store.createListing({
-      kind: 'offer',
-      vertical: 'material',
-      marketType: 'sell',
-      title: draft.title.trim(),
-      description: draft.description.trim() || draft.title.trim(),
-      city: p.city || 'Köln',
-      crafts: [draft.category],
-      priceFrom: draft.priceHintEur,
-      priceUnit: 'Stück',
-      currency: 'EUR',
-      ownerId: u.id,
-      ownerName: u.name,
-      ownerVerified: p.verified,
-      rating: p.rating,
-      tags: ['Verkauf', 'Foto', draft.category, draft.condition],
-      offerTags: [draft.category, draft.condition],
-      imageEmoji: '📷',
-      industry: draft.category,
-      itemCondition: draft.condition,
-      source: proposal?.source === 'vision' ? 'Orbit Vision' : 'Orbit Foto-Demo',
-      sellerKind: 'private',
-      matchReason: 'Foto-Verkauf · user-confirmed',
-    })
+
+    const listing = isBarter
+      ? store.createListing({
+          kind: 'offer',
+          vertical: 'material',
+          marketType: 'barter',
+          barterMode: draft.barterMode,
+          title: draft.title.trim(),
+          description: draft.description.trim() || draft.title.trim(),
+          city: p.city || 'Köln',
+          crafts: [draft.category, 'Tausch'],
+          priceFrom: draft.barterMode === 'hybrid' && draft.priceHintEur > 0 ? draft.priceHintEur : undefined,
+          priceUnit: draft.barterMode === 'hybrid' ? 'Aufpreis optional' : undefined,
+          currency: 'EUR',
+          ownerId: u.id,
+          ownerName: u.name,
+          ownerVerified: p.verified,
+          rating: p.rating,
+          tags: ['Tausch', 'Foto', draft.category, draft.condition, draft.barterMode],
+          offerTags: [draft.offerLabel.trim(), draft.category],
+          needTags: [draft.needLabel.trim() || 'Offen'],
+          imageEmoji: '🔁',
+          industry: draft.category,
+          itemCondition: draft.condition,
+          source: proposal?.source === 'vision' ? 'Orbit Vision' : 'Orbit Foto-Demo',
+          sellerKind: 'private',
+          matchReason: 'Foto-Tausch · user-confirmed',
+        })
+      : store.createListing({
+          kind: 'offer',
+          vertical: 'material',
+          marketType: 'sell',
+          title: draft.title.trim(),
+          description: draft.description.trim() || draft.title.trim(),
+          city: p.city || 'Köln',
+          crafts: [draft.category],
+          priceFrom: draft.priceHintEur,
+          priceUnit: 'Stück',
+          currency: 'EUR',
+          ownerId: u.id,
+          ownerName: u.name,
+          ownerVerified: p.verified,
+          rating: p.rating,
+          tags: ['Verkauf', 'Foto', draft.category, draft.condition],
+          offerTags: [draft.category, draft.condition],
+          imageEmoji: '📷',
+          industry: draft.category,
+          itemCondition: draft.condition,
+          source: proposal?.source === 'vision' ? 'Orbit Vision' : 'Orbit Foto-Demo',
+          sellerKind: 'private',
+          matchReason: 'Foto-Verkauf · user-confirmed',
+        })
+
     onClose()
     navigate(`/listings/${listing.id}`)
   }
 
+  const canPublish =
+    confirmed &&
+    Boolean(draft?.title.trim()) &&
+    (!isBarter || Boolean(draft?.offerLabel.trim()))
+
   return (
-    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={t('sell.title')} data-sell-sheet="1">
+    <div
+      className="fixed inset-0 z-50"
+      role="dialog"
+      aria-modal="true"
+      aria-label={isBarter ? t('photoTrade.title') : t('sell.title')}
+      data-sell-sheet="1"
+      data-photo-mode={mode}
+    >
       <button type="button" className="absolute inset-0 bg-black/60 backdrop-blur-sm" aria-label={t('create.close')} onClick={onClose} />
       <div className="absolute inset-x-0 bottom-0 max-h-[92dvh] overflow-y-auto safe-pb rounded-t-3xl border border-border bg-surface-2 p-4 shadow-2xl">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-ink">{t('sell.title')}</h2>
-            <p className="text-xs text-muted">{t('sell.lead')}</p>
+            <h2 className="text-lg font-semibold text-ink">{isBarter ? t('photoTrade.title') : t('sell.title')}</h2>
+            <p className="text-xs text-muted">{isBarter ? t('photoTrade.lead') : t('sell.lead')}</p>
           </div>
           <button
             type="button"
@@ -145,6 +220,27 @@ export function SellByPhotoSheet({ open, onClose }: Props) {
           >
             <X size={18} />
           </button>
+        </div>
+
+        <div className="mb-3 flex gap-1 rounded-full border border-border p-1" role="tablist" aria-label={t('photoTrade.modeLabel')}>
+          {(['sell', 'barter'] as const).map((id) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={mode === id}
+              data-photo-mode-tab={id}
+              onClick={() => void switchMode(id)}
+              className={cn(
+                'min-h-10 flex-1 rounded-full text-xs font-semibold',
+                mode === id
+                  ? 'bg-[var(--theme-accent)] text-[var(--theme-on-accent)]'
+                  : 'text-neutral-300',
+              )}
+            >
+              {id === 'sell' ? t('photoTrade.modeSell') : t('photoTrade.modeBarter')}
+            </button>
+          ))}
         </div>
 
         <p
@@ -192,11 +288,66 @@ export function SellByPhotoSheet({ open, onClose }: Props) {
         {proposal && draft && (
           <div className="space-y-3" data-sell-confirm="1">
             <p className="text-xs text-muted">{resolved === 'de' ? proposal.disclaimerDe : proposal.disclaimerEn}</p>
-            <Input
-              label={t('sell.fieldTitle')}
-              value={draft.title}
-              onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-            />
+
+            {isBarter ? (
+              <>
+                <Input
+                  label={t('photoTrade.fieldOffer')}
+                  value={draft.offerLabel}
+                  onChange={(e) => {
+                    const offerLabel = e.target.value
+                    const need = draft.needLabel
+                    const open = /offen|was bietest/i.test(need)
+                    setDraft({
+                      ...draft,
+                      offerLabel,
+                      title: open
+                        ? `Biete: ${offerLabel} · Was bietest du?`
+                        : `Biete: ${offerLabel} · Brauche: ${need}`,
+                    })
+                  }}
+                />
+                <Input
+                  label={t('photoTrade.fieldNeed')}
+                  value={draft.needLabel}
+                  onChange={(e) => {
+                    const needLabel = e.target.value
+                    const open = /offen|was bietest/i.test(needLabel)
+                    setDraft({
+                      ...draft,
+                      needLabel,
+                      title: open
+                        ? `Biete: ${draft.offerLabel} · Was bietest du?`
+                        : `Biete: ${draft.offerLabel} · Brauche: ${needLabel}`,
+                    })
+                  }}
+                />
+                <div className="flex gap-1 rounded-full border border-border p-1">
+                  {(['natural', 'hybrid'] as const).map((bm) => (
+                    <button
+                      key={bm}
+                      type="button"
+                      onClick={() => setDraft({ ...draft, barterMode: bm })}
+                      className={cn(
+                        'min-h-9 flex-1 rounded-full text-xs font-medium',
+                        draft.barterMode === bm
+                          ? 'bg-[var(--theme-accent)]/20 text-ink'
+                          : 'text-neutral-400',
+                      )}
+                    >
+                      {bm === 'natural' ? t('match.barterNatural') : t('match.barterHybrid')}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <Input
+                label={t('sell.fieldTitle')}
+                value={draft.title}
+                onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+              />
+            )}
+
             <label className="block space-y-1 text-sm">
               <span className="text-muted">{t('sell.fieldDesc')}</span>
               <textarea
@@ -224,14 +375,16 @@ export function SellByPhotoSheet({ open, onClose }: Props) {
               value={draft.category}
               onChange={(e) => setDraft({ ...draft, category: e.target.value })}
             />
-            <Input
-              label={t('sell.fieldPrice')}
-              type="number"
-              min={1}
-              step={1}
-              value={String(draft.priceHintEur)}
-              onChange={(e) => setDraft({ ...draft, priceHintEur: Number(e.target.value) || 2 })}
-            />
+            {(!isBarter || draft.barterMode === 'hybrid') && (
+              <Input
+                label={isBarter ? t('photoTrade.fieldTopUp') : t('sell.fieldPrice')}
+                type="number"
+                min={0}
+                step={1}
+                value={String(draft.priceHintEur)}
+                onChange={(e) => setDraft({ ...draft, priceHintEur: Number(e.target.value) || 0 })}
+              />
+            )}
             <label className="flex items-start gap-2 rounded-xl border border-border bg-black/20 px-3 py-2 text-sm">
               <input
                 type="checkbox"
@@ -240,16 +393,16 @@ export function SellByPhotoSheet({ open, onClose }: Props) {
                 data-sell-confirm-check="1"
                 onChange={(e) => setConfirmed(e.target.checked)}
               />
-              <span>{t('sell.confirmCheck')}</span>
+              <span>{isBarter ? t('photoTrade.confirmCheck') : t('sell.confirmCheck')}</span>
             </label>
             <Button
               type="button"
               className="w-full"
-              disabled={!confirmed || !draft.title.trim()}
+              disabled={!canPublish}
               data-sell-publish="1"
               onClick={publish}
             >
-              {t('sell.publish')}
+              {isBarter ? t('photoTrade.publish') : t('sell.publish')}
             </Button>
             <p className="text-center text-xs text-muted">{t('sell.noSilent')}</p>
           </div>

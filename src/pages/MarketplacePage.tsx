@@ -56,8 +56,11 @@ export function MarketplacePage() {
           <Button size="sm" variant="secondary" onClick={() => navigate('/listings/new')}>
             {t('nav.create')}
           </Button>
-          <Button size="sm" variant="secondary" onClick={() => navigate('/match?lane=sell&sell=1')}>
+          <Button size="sm" variant="secondary" onClick={() => navigate('/match?lane=sell&photo=1&photoMode=sell')}>
             {t('sell.cta')}
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => navigate('/match?lane=barter&photo=1&photoMode=barter')}>
+            {t('photoTrade.cta')}
           </Button>
         </div>
       </header>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Camera, ChevronDown, Plus } from 'lucide-react'
+import { Camera, ChevronDown, Plus, RefreshCw } from 'lucide-react'
 import { Button, ButtonLink } from '../ui/Button'
 import { cn } from '../../lib/utils'
 import { useI18n } from '../../lib/i18n'
@@ -9,22 +9,23 @@ import {
   hubLaneLegalNote,
   type MatchHubLane,
 } from '../../lib/matchHub'
+import type { PhotoListingMode } from '../../lib/sellByPhoto'
 
-/** Secondary marketplace tools under rubrics (minijob, sell-by-photo, mobility…). */
+/** Secondary marketplace tools under rubrics (minijob, foto verkaufen/tauschen, mobility…). */
 export function MatchHubChrome({
   lane,
   onLane,
   cardCount,
-  onSellPhoto,
+  onPhotoListing,
 }: {
   lane: MatchHubLane
   onLane: (lane: MatchHubLane) => void
   cardCount: number
-  onSellPhoto?: () => void
+  onPhotoListing?: (mode: PhotoListingMode) => void
 }) {
   const { t, resolved } = useI18n()
-  const [open, setOpen] = useState(lane !== 'all')
-  const note = hubLaneLegalNote(lane)
+  const [open, setOpen] = useState(() => lane !== 'all')
+  const note = hubLaneLegalNote(lane === 'all' ? 'sell' : lane)
   const noteText = resolved === 'de' ? note.de : note.en
   const toolLanes = MATCH_HUB_LANES.filter((id) => id !== 'all')
 
@@ -43,6 +44,28 @@ export function MatchHubChrome({
         </div>
         <ChevronDown size={18} className={cn('shrink-0 text-muted transition', open && 'rotate-180')} />
       </button>
+
+      {/* Always-visible Foto entries — Haus: verkaufen / tauschen PERFEKT */}
+      <div className="flex flex-wrap gap-2" data-photo-entries="1">
+        <Button
+          size="sm"
+          type="button"
+          variant="primary"
+          onClick={() => onPhotoListing?.('sell')}
+          data-sell-photo-cta="1"
+        >
+          <Camera size={14} /> {t('sell.cta')}
+        </Button>
+        <Button
+          size="sm"
+          type="button"
+          variant="secondary"
+          onClick={() => onPhotoListing?.('barter')}
+          data-barter-photo-cta="1"
+        >
+          <RefreshCw size={14} /> {t('photoTrade.cta')}
+        </Button>
+      </div>
 
       {open && (
         <div className="space-y-2 pt-1">
@@ -80,11 +103,7 @@ export function MatchHubChrome({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {lane === 'sell' ? (
-              <Button size="sm" type="button" onClick={onSellPhoto} data-sell-photo-cta="1">
-                <Camera size={14} /> {t('sell.cta')}
-              </Button>
-            ) : (
+            {lane !== 'sell' && lane !== 'barter' && (
               <ButtonLink size="sm" variant="secondary" to={createPathForHubLane(lane === 'all' ? 'job' : lane)}>
                 <Plus size={14} /> {t('match.hubPost')}
               </ButtonLink>
