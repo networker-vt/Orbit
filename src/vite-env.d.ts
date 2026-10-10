@@ -12,6 +12,10 @@ interface ImportMetaEnv {
   readonly VITE_LLM_API_KEY?: string
   readonly VITE_LLM_URL?: string
   readonly VITE_LLM_MODEL?: string
+  /** Comma-separated: duckduckgo, google, bing — query link providers (default duckduckgo). */
+  readonly VITE_ORBIT_WEB_SEARCH_PROVIDERS?: string
+  /** Extra providers for the primary query (e.g. google,bing). */
+  readonly VITE_ORBIT_WEB_SEARCH_ALSO?: string
   readonly VITE_FLAG_CREDITS?: string
   readonly VITE_FLAG_KIDS?: string
   readonly VITE_FLAG_CHANNELS?: string
