@@ -30,6 +30,7 @@ import {
 } from '../lib/profileHub'
 import { getPrefs, savePrefs, subscribePrefs } from '../lib/prefs'
 import { formatDate, cn } from '../lib/utils'
+import { getRegistration, requestSwitchToKids, requestSwitchToOrbit } from '../lib/registration'
 
 const DOC_KINDS: { id: HubDocKind; key: 'mein.qual' | 'mein.cert' | 'mein.train' }[] = [
   { id: 'qualification', key: 'mein.qual' },
@@ -40,6 +41,7 @@ const DOC_KINDS: { id: HubDocKind; key: 'mein.qual' | 'mein.cert' | 'mein.train'
 export function EinstellungPage() {
   const { t } = useI18n()
   const navigate = useNavigate()
+  const reg = getRegistration()
   const { hash } = useLocation()
   const [cal, setCal] = useState<LocalCalItem[]>(() => listLocalCalendar())
   const [hub, setHub] = useState(getHub)
@@ -115,6 +117,44 @@ export function EinstellungPage() {
       <div id="erinnerungen">
         <ReminderOptIn />
       </div>
+
+      <section id="mitentwickeln" className="space-y-2 rounded-2xl border border-border bg-surface-2 p-4">
+        <h2 className="text-lg font-semibold">{t('mitentwickeln.title')}</h2>
+        <p className="text-xs text-muted">{t('mitentwickeln.entryHint')}</p>
+        <Button type="button" variant="secondary" onClick={() => navigate('/mitentwickeln')}>
+          {t('mitentwickeln.open')}
+        </Button>
+      </section>
+
+      <section id="orbit-modus" className="space-y-2 rounded-2xl border border-border bg-surface-2 p-4">
+        <h2 className="text-lg font-semibold">{t('einstellung.orbitMode')}</h2>
+        <p className="text-xs text-muted">{t('einstellung.orbitModeLead')}</p>
+        <p className="text-xs text-muted">
+          {reg.productMode === 'kids' ? 'Orbit Kids' : reg.productMode === 'orbit' ? 'Orbit' : '—'}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              requestSwitchToKids()
+              navigate('/willkommen/kids')
+            }}
+          >
+            {t('einstellung.switchKids')}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              requestSwitchToOrbit()
+              navigate(reg.adultTourComplete ? '/' : '/willkommen/orbit')
+            }}
+          >
+            {t('einstellung.switchOrbit')}
+          </Button>
+        </div>
+      </section>
 
       <section id="rolle" className="space-y-2">
         <h2 className="text-lg font-semibold">{t('einstellung.role')}</h2>

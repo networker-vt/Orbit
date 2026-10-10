@@ -16,8 +16,9 @@ import { touchResume } from '../../lib/resume'
 import { SchemeToggle } from '../theme/SchemeToggle'
 import { KidsBanner } from '../kids/KidsBanner'
 import { ParentalGateHost } from '../kids/ParentalGate'
-import { isFlagOn } from '../../lib/flags'
 import { isKidsMode, subscribeKids } from '../../lib/kids'
+import { kidsSurfaceEnabled } from '../../lib/registrationFlags'
+import { OnboardingGate } from '../onboarding/OnboardingGate'
 import { cueOrbiNavRun } from '../../lib/orbiMotion'
 import { recordWidgetVisit } from '../../lib/widgetUsage'
 
@@ -94,7 +95,7 @@ export function AppShell() {
     >
       <SkipLink />
       <DemoStoreBanner />
-      {isFlagOn('kids') && kids && <KidsBanner />}
+      {kidsSurfaceEnabled() && kids && <KidsBanner />}
       {import.meta.env.DEV && stub && location.pathname !== '/' && (
         <p className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 text-center text-xs text-amber-100">
           {t('stub.banner')}
@@ -207,7 +208,9 @@ export function AppShell() {
       <div className="flex min-w-0 flex-1 flex-col pb-app-chrome">
         <main id="main-content" tabIndex={-1} className="flex-1 px-4 py-4 outline-none md:px-6 md:py-6 max-md:pb-2">
           <div key={location.pathname + location.search} className="page-enter">
-            <Outlet />
+            <OnboardingGate>
+              <Outlet />
+            </OnboardingGate>
           </div>
           <footer className="mt-16 space-y-2 border-t border-border/80 pt-6 text-xs text-muted">
             <nav className="flex flex-wrap gap-x-4 gap-y-2" aria-label="Legal">
@@ -234,7 +237,7 @@ export function AppShell() {
 
       <CreateSheet open={createOpen} onClose={() => setCreateOpen(false)} />
       <PwaInstallBanner />
-      {isFlagOn('kids') && <ParentalGateHost />}
+      {kidsSurfaceEnabled() && <ParentalGateHost />}
 
       <nav
         className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-border bg-surface/95 safe-pb backdrop-blur md:hidden"

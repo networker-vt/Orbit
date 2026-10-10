@@ -72,6 +72,10 @@ export function HomePage() {
   const presets = useMemo(() => visibleHomePresets(hideTravel), [hideTravel])
 
   useEffect(() => {
+    if (kids) navigate('/kids', { replace: true })
+  }, [kids, navigate])
+
+  useEffect(() => {
     try {
       if (!orbiTipsAllowed((key) => localStorage.getItem(key))) return
       if (claimOrbiSessionBubble(sessionStorage)) setOrbiBubble(true)

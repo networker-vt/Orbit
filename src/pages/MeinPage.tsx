@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Briefcase, Heart, Pin, PinOff, Settings } from 'lucide-react'
+import { Briefcase, Heart, HeartHandshake, Pin, PinOff, Settings } from 'lucide-react'
 import { FavoriteButton } from '../components/favorites/FavoriteButton'
 import { ListingCard } from '../components/listings/ListingCard'
 import { Badge } from '../components/ui/Badge'
@@ -188,7 +188,20 @@ export function MeinPage() {
         </ul>
       </section>
 
-      <section>
+      <section className="grid gap-3 sm:grid-cols-2">
+        <Link
+          to="/mitentwickeln"
+          data-mitentwickeln-entry="1"
+          className="btn-press flex min-h-[4.5rem] items-center gap-4 rounded-2xl border border-border bg-surface-2 px-4 py-3 transition-transform"
+        >
+          <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--theme-accent)]/12 text-[var(--theme-accent)]">
+            <HeartHandshake size={22} aria-hidden />
+          </span>
+          <span className="min-w-0 flex-1 text-left">
+            <span className="block text-sm font-semibold text-ink">{t('mitentwickeln.title')}</span>
+            <span className="mt-0.5 block text-xs text-muted">{t('mitentwickeln.entryHint')}</span>
+          </span>
+        </Link>
         <Link
           to="/einstellung"
           data-einstellung-entry="1"
