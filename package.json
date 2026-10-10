@@ -10,7 +10,7 @@
     "cap:sync": "npm run build:ios && npx cap sync ios",
     "cap:sync:android": "npm run build:ios && npx cap sync android",
     "lint": "oxlint",
-    "test": "vitest run && node --test scripts/emit-pages-legal.test.mjs scripts/ios-testflight.test.mjs scripts/parkmerke-boundary.test.mjs && node scripts/check-public-bundle.mjs",
+    "test": "vitest run && node --test scripts/emit-pages-legal.test.mjs scripts/ios-testflight.test.mjs scripts/parkmerke-boundary.test.mjs scripts/check-public-bundle.test.mjs && node scripts/check-public-bundle.mjs",
     "preview": "vite preview",
     "deploy:pages": "bash scripts/deploy-pages.sh",
     "build:zip": "npm run build && node scripts/check-public-bundle.mjs && cp dist/index.html dist/404.html && bash scripts/emit-pages-legal.sh dist && cd dist && zip -r ../orbit-web.zip ."

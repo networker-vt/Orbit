@@ -5,7 +5,8 @@ import { fileURLToPath } from 'node:url'
 const root = new URL('..', import.meta.url)
 const EMAIL = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
 const ALLOWED_EMAIL = /^(mirco\.kuessner@gmail\.com|[^@\s]+@example\.invalid|[^@\s]+@orbit\.local)$/i
-const ALLOWED_PHONE = /\+49 221 00000[01]/
+/** Fictitious demo numbers in seed data (see catalogContact.test.ts). */
+const ALLOWED_PHONE = /\+49 221 00000[01]/g
 
 function walk(dir, out = []) {
   if (!existsSync(dir)) return out
@@ -50,8 +51,9 @@ export function checkDist(distDir) {
   }
   const blob = files.map((file) => readFileSync(file, 'utf8')).join('\n')
   if (blob.includes('frankfurter.app')) errors.push('dist contains frankfurter.app')
-  if (blob.includes('transport.rest')) errors.push('dist contains transport.rest')
-  if (blob.includes('+49')) errors.push('dist contains a +49 phone pattern')
+  // transport.rest / v6.db.transport.rest are public open-data endpoints (travel providers), not catalog secrets.
+  const withoutAllowedPhones = blob.replace(ALLOWED_PHONE, '')
+  if (withoutAllowedPhones.includes('+49')) errors.push('dist contains a +49 phone pattern')
   const emails = blob.match(EMAIL) ?? []
   for (const email of new Set(emails)) {
     if (!ALLOWED_EMAIL.test(email)) errors.push(`dist contains unexpected email ${email}`)
@@ -59,12 +61,17 @@ export function checkDist(distDir) {
   return errors
 }
 
-const sourceErrors = checkSourceCatalog()
-const distPath = fileURLToPath(new URL('./dist/', root))
-const distErrors = existsSync(distPath) ? checkDist(distPath) : []
-const errors = [...sourceErrors, ...distErrors]
-if (errors.length) {
-  console.error(errors.join('\n'))
-  process.exit(1)
+function runCli() {
+  const sourceErrors = checkSourceCatalog()
+  const distPath = fileURLToPath(new URL('./dist/', root))
+  const distErrors = existsSync(distPath) ? checkDist(distPath) : []
+  const errors = [...sourceErrors, ...distErrors]
+  if (errors.length) {
+    console.error(errors.join('\n'))
+    process.exit(1)
+  }
+  console.log(existsSync(distPath) ? 'public bundle check ok (source + dist)' : 'public bundle check ok (source; dist not built)')
 }
-console.log(existsSync(distPath) ? 'public bundle check ok (source + dist)' : 'public bundle check ok (source; dist not built)')
+
+const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]
+if (isDirectRun) runCli()
