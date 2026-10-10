@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Briefcase, Heart, Pin, PinOff, Settings } from 'lucide-react'
 import { FavoriteButton } from '../components/favorites/FavoriteButton'
@@ -11,15 +11,14 @@ import { store } from '../lib/store'
 import { useI18n } from '../lib/i18n'
 import { hubCtx } from '../lib/hubTiles'
 import {
-  getPinnedIds,
-  isPinned,
-  MAX_PINS,
-  resolvePinnedShortcuts,
-  subscribePins,
-  togglePin,
-  visiblePinDefs,
-  type PinId,
-} from '../lib/pinnedShortcuts'
+  getHomePins,
+  HOME_PINS_MAX,
+  isHomePinned,
+  subscribeHomePins,
+  toggleHomePin,
+  type HomePin,
+} from '../lib/homePins'
+import { toHomePin, visibleMeinPinOptions, type MeinPinOption } from '../lib/meinPinCatalog'
 import { useAuth } from '../lib/auth'
 import { cn } from '../lib/utils'
 
@@ -43,19 +42,23 @@ export function MeinPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { hash } = useLocation()
-  const [pinIds, setPinIds] = useState(getPinnedIds)
+  const [pins, setPins] = useState<HomePin[]>(getHomePins)
   const [pinFlash, setPinFlash] = useState<string | null>(null)
   const ctx = hubCtx()
-  const catalog = visiblePinDefs(ctx)
-  const onHome = useMemo(() => resolvePinnedShortcuts(t, ctx, pinIds), [t, ctx, pinIds])
+  const catalog = visibleMeinPinOptions(ctx)
 
-  useEffect(() => subscribePins(() => setPinIds(getPinnedIds())), [])
+  useEffect(() => subscribeHomePins(() => setPins(getHomePins())), [])
 
   useEffect(() => {
     if (!hash) return
     const id = decodeURIComponent(hash.replace(/^#/, ''))
     if (SETTINGS_HASHES.has(id)) {
       navigate(`/einstellung#${id}`, { replace: true })
+      return
+    }
+    if (id === 'schnellzugriffe') {
+      const el = document.getElementById('schnellzugriffe')
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }, [hash, navigate])
 
@@ -72,15 +75,16 @@ export function MeinPage() {
     entry: resolveCatalogEntry(f.kind, f.id),
   }))
 
-  const onToggle = (id: PinId) => {
-    const before = isPinned(id)
-    const next = togglePin(id)
-    setPinIds(next)
-    if (!before && !next.includes(id)) {
-      setPinFlash(`${t('pin.limit')} (${MAX_PINS})`)
-    } else {
-      setPinFlash(before ? t('pin.removed') : t('pin.added'))
+  const onToggle = (opt: MeinPinOption) => {
+    const pinned = isHomePinned(opt.id)
+    if (!pinned && getHomePins().length >= HOME_PINS_MAX) {
+      setPinFlash(`${t('pin.limit')} (${HOME_PINS_MAX})`)
+      window.setTimeout(() => setPinFlash(null), 1600)
+      return
     }
+    const { pins: next, pinned: nowPinned } = toggleHomePin(toHomePin(opt, t))
+    setPins(next)
+    setPinFlash(nowPinned ? t('pin.added') : t('pin.removed'))
     window.setTimeout(() => setPinFlash(null), 1600)
   }
 
@@ -94,12 +98,20 @@ export function MeinPage() {
         <p className="max-w-md text-sm text-muted">{t('mein.lead')}</p>
         {user?.name && (
           <p className="text-xs text-muted">
-            {user.name.split(' ')[0]} · <Link to="/profile" className="underline-offset-2 hover:underline">{t('pin.profile')}</Link>
+            {user.name.split(' ')[0]} ·{' '}
+            <Link to="/profile" className="underline-offset-2 hover:underline">
+              {t('pin.profile')}
+            </Link>
           </p>
         )}
       </header>
 
-      <section className="space-y-3" aria-labelledby="schnellzugriffe-heading" data-schnellzugriffe="1">
+      <section
+        id="schnellzugriffe"
+        className="space-y-3"
+        aria-labelledby="schnellzugriffe-heading"
+        data-schnellzugriffe="1"
+      >
         <div className="flex items-end justify-between gap-3">
           <div>
             <h2 id="schnellzugriffe-heading" className="text-lg font-semibold">
@@ -107,9 +119,9 @@ export function MeinPage() {
             </h2>
             <p className="mt-0.5 text-xs text-muted">{t('pin.hint')}</p>
           </div>
-          {onHome.length > 0 && (
+          {pins.length > 0 && (
             <Badge tone="teal">
-              {onHome.length}/{MAX_PINS}
+              {pins.length}/{HOME_PINS_MAX}
             </Badge>
           )}
         </div>
@@ -120,19 +132,15 @@ export function MeinPage() {
           </p>
         )}
 
-        {onHome.length > 0 && (
-          <ul
-            className="flex flex-wrap gap-2"
-            aria-label={t('pin.onHome')}
-            data-pins-on-home={onHome.length}
-          >
-            {onHome.map((p) => (
+        {pins.length > 0 && (
+          <ul className="flex flex-wrap gap-2" aria-label={t('pin.onHome')} data-pins-on-home={pins.length}>
+            {pins.map((p) => (
               <li key={p.id}>
                 <Link
                   to={p.to}
                   className="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-[var(--theme-accent)]/35 bg-[var(--theme-accent)]/10 px-3 py-1.5 text-sm text-ink transition-colors"
                 >
-                  <span aria-hidden>{p.emoji}</span>
+                  {p.emoji ? <span aria-hidden>{p.emoji}</span> : null}
                   {p.label}
                 </Link>
               </li>
@@ -142,7 +150,7 @@ export function MeinPage() {
 
         <ul className="divide-y divide-border/70 overflow-hidden rounded-2xl border border-border bg-surface-2">
           {catalog.map((def) => {
-            const pinned = pinIds.includes(def.id)
+            const pinned = pins.some((p) => p.id === def.id)
             return (
               <li key={def.id} className="flex items-stretch">
                 <Link
@@ -164,7 +172,7 @@ export function MeinPage() {
                       ? `${t('pin.unpin')} ${t(def.labelKey)}`
                       : `${t('pin.pin')} ${t(def.labelKey)}`
                   }
-                  onClick={() => onToggle(def.id)}
+                  onClick={() => onToggle(def)}
                   className={cn(
                     'flex min-h-14 w-14 shrink-0 items-center justify-center border-l border-border/70 transition-colors',
                     pinned
