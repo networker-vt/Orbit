@@ -15,9 +15,9 @@ export function OrbitWordmarkHero({ className }: { className?: string }) {
       <img
         src={logo}
         alt=""
-        className="orbit-brand-watermark__mark absolute left-1/2 top-[42%] h-[min(88vw,22rem)] w-[min(88vw,22rem)] -translate-x-1/2 -translate-y-1/2 rounded-[2.5rem] object-cover opacity-[0.14] md:h-[26rem] md:w-[26rem] md:opacity-[0.16]"
+        className="orbit-brand-watermark__mark absolute left-1/2 top-[38%] h-[min(105vw,28rem)] w-[min(105vw,28rem)] -translate-x-1/2 -translate-y-1/2 rounded-[2.5rem] object-cover opacity-[0.32] md:h-[32rem] md:w-[32rem] md:opacity-[0.36]"
       />
-      <span className="orbit-brand-watermark__ring absolute left-1/2 top-[42%] h-[min(76vw,19rem)] w-[min(76vw,19rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[var(--theme-accent)]/20 md:h-[22rem] md:w-[22rem]" />
+      <span className="orbit-brand-watermark__ring absolute left-1/2 top-[38%] h-[min(92vw,24rem)] w-[min(92vw,24rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[var(--theme-accent)]/35 md:h-[28rem] md:w-[28rem]" />
     </div>
   )
 }
