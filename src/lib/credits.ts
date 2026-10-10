@@ -24,6 +24,7 @@ import {
 } from './creditProtocol'
 import { __setAppModeForTests, isFlagOn, isProdMode } from './flags'
 import { kidsCreditsFrozen } from './kids'
+import { unlockOrbitPlusTheme, type OrbitPlusThemeId } from './orbitPlus'
 import { getReferral, spendFeaturedCredits, simulateReferralSignup } from './referral'
 import { getWallet, mockAdjustBalance } from './wallet'
 import { uid } from './utils'
@@ -88,6 +89,10 @@ export type CreditSpendKind =
   | 'look_tryon'
   | 'look_shop'
   | 'assist_priority'
+  | 'home_pins_plus'
+  | 'orbit_plus_theme'
+  | 'chat_plus'
+  | 'match_highlight'
 
 export type CreditTxType = 'earn' | 'spend' | 'exchange_in' | 'exchange_out' | 'purchase' | 'gift' | 'p2p' | 'welcome'
 
@@ -113,6 +118,14 @@ export interface CreditsState {
   boostMonth?: string
   freeBoostUsed?: boolean
   meaningfulAt?: string
+  /** +2 home pins per purchase, max HOME_PINS_EXTRA_CAP. */
+  extraPinSlots?: number
+  /** ISO date — local chat history / media tier until end of day. */
+  chatPlusUntil?: string
+  /** ISO timestamp — Match profile highlight (~24h demo). */
+  matchHighlightUntil?: string
+  /** Pending Orbit+ theme unlock after spend (applied in buyBoost). */
+  pendingOrbitTheme?: OrbitPlusThemeId
 }
 
 export interface CreditPack {
@@ -161,6 +174,10 @@ function normalize(raw: Partial<CreditsState> & { balance: number; txs: CreditTx
     boostMonth: raw.boostMonth,
     freeBoostUsed: raw.boostMonth === day.slice(0, 7) ? Boolean(raw.freeBoostUsed) : false,
     meaningfulAt: raw.meaningfulAt,
+    extraPinSlots: Math.min(4, Math.max(0, raw.extraPinSlots ?? 0)),
+    chatPlusUntil: raw.chatPlusUntil,
+    matchHighlightUntil: raw.matchHighlightUntil,
+    pendingOrbitTheme: raw.pendingOrbitTheme,
   }
 }
 
@@ -177,6 +194,10 @@ const SPEND_KIND_SET = new Set<CreditSpendKind>([
   'look_tryon',
   'look_shop',
   'assist_priority',
+  'home_pins_plus',
+  'orbit_plus_theme',
+  'chat_plus',
+  'match_highlight',
 ])
 
 function txTypeFromEvent(e: LedgerEvent): CreditTxType {
@@ -323,6 +344,7 @@ async function creditWallet(
   label: string,
   kind?: CreditSpendKind,
   opId?: string,
+  ledgerKind?: string,
 ): Promise<CreditsState | null> {
   const next = structuredClone(get())
   const id = opId || uid('cr')
@@ -331,7 +353,7 @@ async function creditWallet(
   const intent = await submitCreditIntent({
     txn_id: id,
     delta: amt,
-    kind: kind || type,
+    kind: ledgerKind || kind || type,
     label,
     pool: type === 'welcome' ? undefined : type === 'purchase' ? 'packs' : type === 'p2p' ? 'p2p' : 'rewards',
   })
@@ -498,6 +520,55 @@ function applySpendSideEffects(next: CreditsState, kind: CreditSpendKind) {
   if (kind === 'look_tryon') {
     next.lookTryOnDay = todayKey()
   }
+  if (kind === 'home_pins_plus') {
+    next.extraPinSlots = Math.min(4, (next.extraPinSlots ?? 0) + 2)
+  }
+  if (kind === 'chat_plus') {
+    next.chatPlusUntil = todayKey()
+  }
+  if (kind === 'match_highlight') {
+    const until = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+    next.matchHighlightUntil = until
+  }
+  if (kind === 'orbit_plus_theme') {
+    unlockOrbitPlusTheme(next.pendingOrbitTheme ?? 'aurora')
+    next.pendingOrbitTheme = undefined
+  }
+}
+
+export function hasMatchHighlight(): boolean {
+  const until = get().matchHighlightUntil
+  if (!until) return false
+  return new Date(until).getTime() > Date.now()
+}
+
+export const REFERRAL_SIGNUP_GRANT = 40
+
+export async function grantReferralRewardForReferee(refereeUserId: string): Promise<CreditsState | null> {
+  if (creditsClosed()) return null
+  if (kidsCreditsFrozen()) return null
+  const ref = getReferral()
+  const code = ref.referredBy
+  if (!code || code === ref.code) return null
+  const op = `referral:referee:${refereeUserId}`
+  if (get().txs.some((t) => t.id === op) || getProtocol().seenOpIds.includes(op)) {
+    return getCredits()
+  }
+  const snap = snapshotProtocol()
+  if (!mintFromPool('rewards', REFERRAL_SIGNUP_GRANT, op)) return null
+  const credited = await creditWallet(
+    REFERRAL_SIGNUP_GRANT,
+    'earn',
+    `Referral · Geworbener Signup (${code}) · Demo-Gutschrift Referrer · Beleg ${op}`,
+    undefined,
+    op,
+    'referral',
+  )
+  if (!credited) {
+    restoreProtocolSnapshot(snap)
+    return null
+  }
+  return credited
 }
 
 export async function spendCredits(
@@ -509,6 +580,7 @@ export async function spendCredits(
   if (kidsCreditsFrozen()) return null
   const next = structuredClone(get())
   const amt = Math.max(0, Math.round(amount))
+  if (kind === 'home_pins_plus' && (next.extraPinSlots ?? 0) >= 4) return null
   if (next.balance < amt) return null
   const txn_id = uid('cr')
   const snap = snapshotProtocol()
@@ -644,8 +716,20 @@ export async function exchangeCreditsToEur(credits: number): Promise<CreditsStat
 export async function claimReferralCreditsDemo() {
   if (creditsClosed()) return null
   if (!get().meaningfulAt) return null
-  simulateReferralSignup()
-  return earnCredits(40, 'Referral-Bonus (Demo) — nach erster sinnvoller Aktion, Rewards-Pool')
+  const signup = simulateReferralSignup()
+  const refereeId = signup.signups[0]?.userId ?? uid('ref')
+  return grantReferralRewardForReferee(refereeId)
+}
+
+export function primeOrbitPlusThemePurchase(themeId: OrbitPlusThemeId) {
+  const next = structuredClone(get())
+  next.pendingOrbitTheme = themeId
+  commit(next)
+}
+
+export async function buyOrbitPlusTheme(themeId: OrbitPlusThemeId): Promise<CreditsState | null> {
+  primeOrbitPlusThemePurchase(themeId)
+  return buyBoost('orbit_plus_theme')
 }
 
 /** Demo checkout — credits appear only if the packs pool still has room. */
@@ -749,11 +833,15 @@ export async function buyBoost(kind: CreditSpendKind): Promise<CreditsState | nu
 export const CREDITS_BOOST_KINDS: CreditSpendKind[] = [
   'featured',
   'extra_swipes',
+  'match_highlight',
   'travel_scan',
   'social_boost',
   'interview_slot',
   'look_tryon',
   'look_shop',
+  'home_pins_plus',
+  'orbit_plus_theme',
+  'chat_plus',
 ]
 
 export const FREE_ASSIST_PER_DAY = 8
@@ -843,6 +931,10 @@ export const CREDITS_COSTS: Record<CreditSpendKind, { credits: number; label: st
   look_tryon: { credits: 15, label: 'Kabine: Extra-Varianten (heute)' },
   look_shop: { credits: 20, label: 'Kabine: Nearby-Shop featuren (Demo)' },
   assist_priority: { credits: 8, label: 'Assist extra (nach 8 frei/Tag)' },
+  home_pins_plus: { credits: 35, label: 'Home-Pins+ · +2 Schnellzugriffe' },
+  orbit_plus_theme: { credits: 28, label: 'Orbit+ Profil-Theme freischalten' },
+  chat_plus: { credits: 18, label: 'Chat-Extras · längere Historie (heute)' },
+  match_highlight: { credits: 22, label: 'Match-Boost · Profil hervorheben (24h Demo)' },
 }
 
 export const CREDITS_FREE_DE = [

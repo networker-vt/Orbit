@@ -20,7 +20,7 @@ VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJ...   # nur anon/public key — nie service_role im Frontend
 VITE_USE_MOCK=false
 VITE_APP_NAME=Orbit
-VITE_APP_URL=https://networker-vt.github.io/eventlogistik-event-os/
+VITE_APP_URL=https://networker-vt.github.io/orbit/
 ```
 
 - [ ] `.env` aus `.env.example` (nie committen)
@@ -35,7 +35,7 @@ Die App fällt ohne gültige Keys beim **Store/Auth** weiterhin auf Demo zurück
 - [ ] GitHub → Settings → Pages → Custom domain + HTTPS erzwingen
 - [ ] Nach Domain-Wechsel: Auth Redirects & Manifest/`start_url` prüfen
 
-**Hinweis:** Vite `base` ist für dieses Repo `/eventlogistik-event-os/`. Bei Root-Domain-Hosting (`https://app…/`) separat mit `base: '/'` bauen.
+**Hinweis:** Vite `base` ist für dieses Repo `/orbit/`. Bei Root-Domain-Hosting (`https://app…/`) separat mit `base: '/'` bauen.
 
 ## 4. GitHub Pages Deploy
 
@@ -45,20 +45,20 @@ Die App fällt ohne gültige Keys beim **Store/Auth** weiterhin auf Demo zurück
 
 Oder manuell: `npm run build` → `cp dist/index.html dist/404.html` → `bash scripts/emit-pages-legal.sh` → force-push `gh-pages`.
 
-`404.html` lässt GitHub Pages bei unbekannten Pfaden **HTTP 404** antworten (SPA rendert trotzdem). Apple will für Privacy und Support echtes **HTTP 200**. `scripts/emit-pages-legal.sh` legt dafür nach dem Vite-Build Kopien der Shell ab: `dist/privacy/index.html`, `dist/support/index.html`, `dist/impressum/index.html`, `dist/datenschutz/index.html`. `npm run build` und die Pages-Base `/eventlogistik-event-os/` bleiben unverändert. Das Skript läuft in `deploy:pages` und `build:zip`.
+`404.html` lässt GitHub Pages bei unbekannten Pfaden **HTTP 404** antworten (SPA rendert trotzdem). Apple will für Privacy und Support echtes **HTTP 200**. `scripts/emit-pages-legal.sh` legt dafür nach dem Vite-Build Kopien der Shell ab: `dist/privacy/index.html`, `dist/support/index.html`, `dist/impressum/index.html`, `dist/datenschutz/index.html`. `npm run build` und die Pages-Base `/orbit/` bleiben unverändert. Das Skript läuft in `deploy:pages` und `build:zip`.
 
 Prüfung **nach** Merge und Pages-Deploy (dieser Stand deployt Pages nicht selbst):
 
 ```bash
-curl -sI https://networker-vt.github.io/eventlogistik-event-os/privacy/
-curl -sI https://networker-vt.github.io/eventlogistik-event-os/support/
-curl -sI https://networker-vt.github.io/eventlogistik-event-os/impressum/
-curl -sI https://networker-vt.github.io/eventlogistik-event-os/datenschutz/
+curl -sI https://networker-vt.github.io/orbit/privacy/
+curl -sI https://networker-vt.github.io/orbit/support/
+curl -sI https://networker-vt.github.io/orbit/impressum/
+curl -sI https://networker-vt.github.io/orbit/datenschutz/
 ```
 
 Erwartung: `HTTP/2 200`. Ohne abschließenden Slash antwortet Pages mit `301` auf die Slash-URL; `curl -sI -L` endet bei `200`. In-App-Links (`/privacy`, `/support`, `/impressum`) bleiben Client-Routing.
 
-- [ ] https://networker-vt.github.io/eventlogistik-event-os/ lädt
+- [ ] https://networker-vt.github.io/orbit/ lädt
 - [ ] Deep Links (z. B. `/jobs`) über 404.html SPA-Fallback
 - [ ] `/privacy/`, `/support/`, `/impressum/`, `/datenschutz/` nach Deploy HTTP 200
 - [ ] PWA installierbar (HTTPS Pflicht)
@@ -88,11 +88,11 @@ Erwartung: `HTTP/2 200`. Ohne abschließenden Slash antwortet Pages mit `301` au
 - [ ] `/agb` — Entwurf liegt, **Marktplatz-AGB vor kommerziellem Betrieb anwaltlich prüfen**
 - [x] Links in Footer, Mehr und Impressum verdrahtet
 
-Store-URLs (Pages-Basis `/eventlogistik-event-os/`):
+Store-URLs (Pages-Basis `/orbit/`):
 
-- Privacy: https://networker-vt.github.io/eventlogistik-event-os/privacy
-- Support: https://networker-vt.github.io/eventlogistik-event-os/support
-- Impressum: https://networker-vt.github.io/eventlogistik-event-os/impressum
+- Privacy: https://networker-vt.github.io/orbit/privacy
+- Support: https://networker-vt.github.io/orbit/support
+- Impressum: https://networker-vt.github.io/orbit/impressum
 - [ ] AVV mit Supabase, sobald live
 
 ## 9. Go-Live Schritte

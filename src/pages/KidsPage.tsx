@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Shield } from 'lucide-react'
 import { ParentalGate } from '../components/kids/ParentalGate'
 import { Button, ButtonLink } from '../components/ui/Button'
@@ -20,6 +21,7 @@ import { cn } from '../lib/utils'
 
 export function KidsPage() {
   const { t, resolved } = useI18n()
+  const navigate = useNavigate()
   const [band, setBand] = useState<AgeBand | null>(kidsAgeBand)
   const [kids, setKids] = useState(isKidsMode)
   const [pinReady, setPinReady] = useState(hasParentalPin)
@@ -49,6 +51,7 @@ export function KidsPage() {
     setBand(setupBand)
     setKids(true)
     setFlash(t('kids.pinSaved'))
+    window.setTimeout(() => navigate('/kids', { replace: true }), 400)
   }
 
   return (
@@ -125,6 +128,9 @@ export function KidsPage() {
           </p>
           <p className="text-xs text-muted">{t('kids.ageTitle')}: {band ? t(`kids.band.${band}`) : t('kids.settings')}</p>
           <div className="flex flex-wrap gap-2">
+            <ButtonLink to="/kids" variant="secondary">
+              {t('kids.hub.title')}
+            </ButtonLink>
             <ButtonLink to="/campus" variant="secondary">
               {t('campus.nav')}
             </ButtonLink>

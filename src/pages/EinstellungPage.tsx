@@ -5,12 +5,14 @@ import { LanguageSwitcher } from '../components/i18n/LanguageSwitcher'
 import { RoleSwitcher } from '../components/role/RoleSwitcher'
 import { ChannelLinks } from '../components/mein/ChannelLinks'
 import { VerifyPanel } from '../components/verify/VerifyPanel'
+import { SecuritySettingsPanel } from '../components/security/SecuritySettingsPanel'
 import { ReminderOptIn } from '../components/reminders/ReminderOptIn'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { StarRating } from '../components/ui/StarRating'
 import { CalendarExport } from '../components/calendar/CalendarExport'
+import { NewsFeedEditor } from '../components/home/NewsFeedEditor'
 import { OccupationField } from '../components/prefs/OccupationField'
 import { INDUSTRIES, JOB_TYPES, type Industry } from '../data/industries'
 import { listLocalCalendar, removeLocalCalendarItem, type LocalCalItem } from '../lib/calendar'
@@ -30,6 +32,12 @@ import {
 } from '../lib/profileHub'
 import { getPrefs, savePrefs, subscribePrefs } from '../lib/prefs'
 import { formatDate, cn } from '../lib/utils'
+import { CreditsBelegList } from '../components/credits/CreditsBelegList'
+import { MessengerTranslateSettings } from '../components/messenger/MessengerTranslateSettings'
+import { getCredits, subscribeCredits } from '../lib/credits'
+import { getReferral, shareUrl, subscribeReferral } from '../lib/referral'
+import { getRegistration, requestSwitchToKids, requestSwitchToOrbit } from '../lib/registration'
+import { isBetaNoticeEnabled, setBetaNoticeEnabled } from '../lib/betaNotice'
 
 const DOC_KINDS: { id: HubDocKind; key: 'mein.qual' | 'mein.cert' | 'mein.train' }[] = [
   { id: 'qualification', key: 'mein.qual' },
@@ -40,13 +48,18 @@ const DOC_KINDS: { id: HubDocKind; key: 'mein.qual' | 'mein.cert' | 'mein.train'
 export function EinstellungPage() {
   const { t } = useI18n()
   const navigate = useNavigate()
+  const reg = getRegistration()
+  const [betaNotice, setBetaNotice] = useState(isBetaNoticeEnabled)
   const { hash } = useLocation()
   const [cal, setCal] = useState<LocalCalItem[]>(() => listLocalCalendar())
   const [hub, setHub] = useState(getHub)
   const [prefs, setPrefs] = useState(getPrefs)
   const [skillDraft, setSkillDraft] = useState('')
   const [docKind, setDocKind] = useState<HubDocKind>('certificate')
+  const [creditsBal, setCreditsBal] = useState(() => getCredits().balance)
+  const [referral, setReferral] = useState(getReferral)
   const complete = profileCompleteness()
+  const creditsOn = isFlagOn('credits')
 
   useEffect(() => {
     const h = () => setCal(listLocalCalendar())
@@ -54,11 +67,15 @@ export function EinstellungPage() {
     window.addEventListener('storage', h)
     const u1 = subscribeHub(() => setHub(getHub()))
     const u2 = subscribePrefs(() => setPrefs(getPrefs()))
+    const u3 = subscribeCredits(() => setCreditsBal(getCredits().balance))
+    const u4 = subscribeReferral(() => setReferral(getReferral()))
     return () => {
       window.removeEventListener('orbit-cal-changed', h)
       window.removeEventListener('storage', h)
       u1()
       u2()
+      u3()
+      u4()
     }
   }, [])
 
@@ -106,15 +123,109 @@ export function EinstellungPage() {
         </div>
       </header>
 
+      {creditsOn && (
+        <section
+          className="space-y-3 rounded-2xl border-2 border-[var(--theme-accent)]/35 bg-surface-2 p-4 shadow-sm"
+          id="credits"
+          data-einstellung-credits="1"
+        >
+          <h2 className="text-lg font-semibold">Orbit Credits & Referral</h2>
+          <p className="text-xs text-muted">
+            Treuepunkte mit 21M Cap — Boosts in Orbit, kein Auszahlungsanspruch, kein Crypto-Marketing.
+          </p>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted">Guthaben (Wallet)</p>
+              <p className="text-2xl font-bold tabular-nums text-[var(--theme-accent)]">{creditsBal}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted">Ref-Code</p>
+              <p className="font-mono text-sm">{referral.code}</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link to="/empfehlen">
+              <Button size="sm" variant="secondary">
+                Empfehlen
+              </Button>
+            </Link>
+            <Link to="/wallet#credits">
+              <Button size="sm">Wallet & Boosts</Button>
+            </Link>
+          </div>
+          <p className="break-all text-[10px] text-muted">{shareUrl()}</p>
+          <h3 className="text-sm font-semibold">Belege (Ledger)</h3>
+          <CreditsBelegList limit={8} />
+        </section>
+      )}
+
       {isFlagOn('verifyId') && (
         <div id="verify">
           <VerifyPanel />
         </div>
       )}
 
+      <SecuritySettingsPanel />
+
       <div id="erinnerungen">
         <ReminderOptIn />
       </div>
+
+      <section id="beta-hinweis" className="space-y-2 rounded-2xl border border-sky-500/25 bg-sky-500/5 p-4">
+        <h2 className="text-lg font-semibold">{t('beta.settingsTitle')}</h2>
+        <p className="text-xs text-muted">{t('beta.settingsLead')}</p>
+        <label className="flex items-start gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={betaNotice}
+            onChange={(e) => {
+              setBetaNoticeEnabled(e.target.checked)
+              setBetaNotice(e.target.checked)
+            }}
+          />
+          <span>{t('beta.settingsShowBanner')}</span>
+        </label>
+      </section>
+
+      <NewsFeedEditor variant="settings" />
+
+      <section id="mitentwickeln" className="space-y-2 rounded-2xl border border-border bg-surface-2 p-4">
+        <h2 className="text-lg font-semibold">{t('mitentwickeln.title')}</h2>
+        <p className="text-xs text-muted">{t('mitentwickeln.entryHint')}</p>
+        <Button type="button" variant="secondary" onClick={() => navigate('/mitentwickeln')}>
+          {t('mitentwickeln.open')}
+        </Button>
+      </section>
+
+      <section id="orbit-modus" className="space-y-2 rounded-2xl border border-border bg-surface-2 p-4">
+        <h2 className="text-lg font-semibold">{t('einstellung.orbitMode')}</h2>
+        <p className="text-xs text-muted">{t('einstellung.orbitModeLead')}</p>
+        <p className="text-xs text-muted">
+          {reg.productMode === 'kids' ? 'Orbit Kids' : reg.productMode === 'orbit' ? 'Orbit' : '—'}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              requestSwitchToKids()
+              navigate('/willkommen/kids')
+            }}
+          >
+            {t('einstellung.switchKids')}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              requestSwitchToOrbit()
+              navigate(reg.adultTourComplete ? '/' : '/willkommen/orbit')
+            }}
+          >
+            {t('einstellung.switchOrbit')}
+          </Button>
+        </div>
+      </section>
 
       <section id="rolle" className="space-y-2">
         <h2 className="text-lg font-semibold">{t('einstellung.role')}</h2>
@@ -130,6 +241,8 @@ export function EinstellungPage() {
         <p className="mb-3 text-xs text-muted">{t('mein.languageHint')}</p>
         <LanguageSwitcher />
       </section>
+
+      <MessengerTranslateSettings />
 
       <section
         className="rounded-2xl border border-[var(--theme-accent)]/30 bg-[var(--theme-accent)]/10 p-4"

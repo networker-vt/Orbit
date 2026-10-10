@@ -4,7 +4,7 @@
 
 **Android / Play:** kein `android/`-Projekt in diesem Repo. Die Notizen unten sind eine spätere Checkliste, kein Scaffold.
 
-GitHub Pages bleibt `base: /eventlogistik-event-os/` (`npm run build`, `npm run deploy:pages`).
+GitHub Pages bleibt `base: /orbit/` (`npm run build`, `npm run deploy:pages`).
 
 **Blocker:** Ohne **Apple Developer**-Account von Mirco Küßner kann niemand nach TestFlight hochladen. Dieses Repo enthält keine Secrets, Zertifikate oder Store-Binaries. Upload ohne Mac: GitHub Actions, siehe [`docs/TESTFLIGHT.md`](../docs/TESTFLIGHT.md).
 
@@ -25,7 +25,7 @@ GitHub Pages bleibt `base: /eventlogistik-event-os/` (`npm run build`, `npm run 
 3. Entwicklerprofil + D-U-N-S später, falls GmbH
 4. **App erstellen** → Name `Orbit` → App (nicht nur Spiel)
 5. Datenschutz-URL eintragen:  
-   `https://networker-vt.github.io/eventlogistik-event-os/datenschutz`
+   `https://networker-vt.github.io/orbit/datenschutz`
 
 ## 1. Store-Web-Build (root base)
 
@@ -90,10 +90,10 @@ Splash-Assets: `public/icons/splash-1290x2796.png`, `splash-750x1334.png`.
 
 ## 6. Privacy / Impressum URLs
 
-- Privacy / Datenschutz: `https://networker-vt.github.io/eventlogistik-event-os/privacy` (Alias `/datenschutz`)
-- Support: `https://networker-vt.github.io/eventlogistik-event-os/support`
-- Impressum: `https://networker-vt.github.io/eventlogistik-event-os/impressum`
-- AGB: `https://networker-vt.github.io/eventlogistik-event-os/agb`
+- Privacy / Datenschutz: `https://networker-vt.github.io/orbit/privacy` (Alias `/datenschutz`)
+- Support: `https://networker-vt.github.io/orbit/support`
+- Impressum: `https://networker-vt.github.io/orbit/impressum`
+- AGB: `https://networker-vt.github.io/orbit/agb`
 
 Ohne diese URLs lehnen beide Stores die Einreichung ab.
 

@@ -19,7 +19,7 @@ import { store } from '../lib/store'
 import { useI18n } from '../lib/i18n'
 import { applyInterest } from '../lib/apply'
 import { rankForCompanyWorld, rankForWorld, trackBehavior } from '../lib/behavior'
-import { buyBoost, boostCost, consumeSwipe, getSwipeBudget, subscribeCredits } from '../lib/credits'
+import { buyBoost, boostCost, consumeSwipe, getSwipeBudget, hasMatchHighlight, subscribeCredits } from '../lib/credits'
 import { SoftPaywall } from '../components/credits/SoftPaywall'
 import { listingSpeech } from '../lib/tts'
 import { cn, formatPrice } from '../lib/utils'
@@ -64,6 +64,10 @@ import {
   socialPostIsMarket,
   type MatchRubric,
 } from '../lib/matchRubrics'
+import { searchJobProviders, type JobSearchHit } from '../lib/providers/jobProviders'
+import { searchGoodsProviders, type GoodsSearchHit } from '../lib/providers/goodsProviders'
+import { MatchGoodsResults, MatchJobResults } from '../components/match/MatchProviderResults'
+import { Input } from '../components/ui/Input'
 import { getSocial, startSocialDm, subscribeSocial, type SocialPost } from '../lib/social'
 import type { Listing, Profile } from '../types'
 
@@ -132,6 +136,7 @@ export function MatchPage() {
   const [explain, setExplain] = useState(false)
   const [capOpen, setCapOpen] = useState(false)
   const [, setBudget] = useState(getSwipeBudget)
+  const [highlightActive, setHighlightActive] = useState(hasMatchHighlight)
   const [sellOpen, setSellOpen] = useState(
     () => searchParams.get('sell') === '1' || searchParams.get('photo') === '1',
   )
@@ -140,6 +145,10 @@ export function MatchPage() {
   )
   const hubLane = parseMatchHubLane(searchParams.get('lane'))
   const rubric = parseMatchRubric(searchParams.get('rubric') ?? searchParams.get('lane'))
+  const matchQ = searchParams.get('q') || ''
+  const [matchQuery, setMatchQuery] = useState(matchQ)
+  const [jobHits, setJobHits] = useState<JobSearchHit[]>([])
+  const [goodsHits, setGoodsHits] = useState<GoodsSearchHit[]>([])
   const [deckMode, setDeckMode] = useState<MatchDeckMode>(() => {
     if (typeof window !== 'undefined' && window.location.pathname.includes('/crew')) return 'company'
     if (typeof window !== 'undefined' && window.location.pathname.includes('/treffer')) return 'seeker'
@@ -196,10 +205,31 @@ export function MatchPage() {
   }
 
   useEffect(() => {
+    setMatchQuery(matchQ)
+  }, [matchQ])
+
+  useEffect(() => {
+    if (!showHub) return
+    const ac = new AbortController()
+    if (rubric === 'jobs') {
+      void searchJobProviders({ q: matchQ, prefs, locale: resolved, signal: ac.signal }).then(setJobHits)
+    } else if (rubric === 'social') {
+      void searchGoodsProviders({ q: matchQ, prefs, locale: resolved }).then(setGoodsHits)
+    } else {
+      setJobHits([])
+      setGoodsHits([])
+    }
+    return () => ac.abort()
+  }, [showHub, rubric, matchQ, prefs, resolved])
+
+  useEffect(() => {
     const u1 = subscribePrefs(() => setPrefs(getPrefs()))
     const u2 = subscribeSwipes(() => setSwipeTick((n) => n + 1))
     const u3 = subscribeCompany(() => setCompany(getCompany()))
-    const u4 = subscribeCredits(() => setBudget(getSwipeBudget()))
+    const u4 = subscribeCredits(() => {
+      setBudget(getSwipeBudget())
+      setHighlightActive(hasMatchHighlight())
+    })
     const u5 = subscribeKids(() => setKids(isKidsMode()))
     const u6 = subscribeSocial(() => setSocial(getSocial()))
     return () => {
@@ -562,6 +592,33 @@ export function MatchPage() {
     <div className="relative mx-auto flex min-h-[70dvh] max-w-lg flex-col gap-4 pb-scroll-chrome">
       {showHub && <MatchRubricBar rubric={rubric} onRubric={setRubric} />}
 
+      {showHub && (rubric === 'jobs' || rubric === 'social') && (
+        <form
+          className="flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault()
+            const next = new URLSearchParams(searchParams)
+            if (matchQuery.trim()) next.set('q', matchQuery.trim())
+            else next.delete('q')
+            setSearchParams(next, { replace: true })
+          }}
+          data-match-search="1"
+        >
+          <Input
+            value={matchQuery}
+            onChange={(e) => setMatchQuery(e.target.value)}
+            placeholder={rubric === 'jobs' ? t('match.searchJobsPh') : t('match.searchGoodsPh')}
+            className="min-h-11 flex-1"
+          />
+          <Button type="submit" size="sm" className="shrink-0">
+            {t('match.search')}
+          </Button>
+        </form>
+      )}
+
+      {showHub && rubric === 'jobs' && <MatchJobResults hits={jobHits} query={matchQ} />}
+      {showHub && rubric === 'social' && <MatchGoodsResults hits={goodsHits} query={matchQ} />}
+
       {showHub && (
         <MatchHubChrome
           lane={hubLane}
@@ -585,6 +642,12 @@ export function MatchPage() {
             </p>
           </div>
         </header>
+      )}
+
+      {highlightActive && (
+        <p className="rounded-xl border border-[var(--theme-accent)]/35 bg-[var(--theme-accent)]/10 px-3 py-2 text-xs text-[var(--theme-accent)]">
+          Match-Boost: Profil kurz hervorgehoben (24h Demo, Orbit Credits — kein echtes Geld).
+        </p>
       )}
 
       {both && !personalized && (

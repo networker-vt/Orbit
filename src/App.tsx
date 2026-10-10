@@ -2,11 +2,23 @@ import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom'
 import { AppShell } from './components/layout/AppShell'
 import { AuthProvider } from './lib/auth'
+import { AppUnlockGate } from './components/security/AppUnlockGate'
 import { I18nProvider, useI18n } from './lib/i18n'
 import { initRewards } from './lib/rewards'
 import { initStore } from './lib/store'
-import { OrbitRobot } from './components/home/OrbitRobot'
+import { OrbitWordmarkHero } from './components/brand/OrbitWordmarkHero'
 import { HomePage } from './pages/HomePage'
+import { ModeChooserPage } from './pages/onboarding/ModeChooserPage'
+import { KidsConsentPage } from './pages/onboarding/KidsConsentPage'
+import { OrbitRegistrationPage } from './pages/onboarding/OrbitRegistrationPage'
+import { MitentwickelnPage } from './pages/MitentwickelnPage'
+import { KidsHubPage } from './pages/kids/KidsHubPage'
+import { KidsSpielePage } from './pages/kids/KidsSpielePage'
+import { KidsLernenPage } from './pages/kids/KidsLernenPage'
+import { KidsHobbiesPage } from './pages/kids/KidsHobbiesPage'
+import { KidsNaturPage } from './pages/kids/KidsNaturPage'
+import { KidsPassungPage } from './pages/kids/KidsPassungPage'
+import { campusSurfaceEnabled, kidsSurfaceEnabled } from './lib/registrationFlags'
 import { EssenPage } from './pages/EssenPage'
 import { PrefsPage } from './pages/PrefsPage'
 import { MatchPage } from './pages/MatchPage'
@@ -81,6 +93,12 @@ const CampusPage = lazy(() => import('./pages/CampusPage').then((m) => ({ defaul
 const KidsPage = lazy(() => import('./pages/KidsPage').then((m) => ({ default: m.KidsPage })))
 const EntdeckerPage = lazy(() => import('./pages/EntdeckerPage').then((m) => ({ default: m.EntdeckerPage })))
 const ParkmerkePage = lazy(() => import('./pages/ParkmerkePage').then((m) => ({ default: m.ParkmerkePage })))
+const OutfitPage = lazy(() => import('./pages/OutfitPage').then((m) => ({ default: m.OutfitPage })))
+const TankenPage = lazy(() => import('./pages/TankenPage').then((m) => ({ default: m.TankenPage })))
+const KalenderPage = lazy(() => import('./pages/KalenderPage').then((m) => ({ default: m.KalenderPage })))
+const EinkaufszettelPage = lazy(() =>
+  import('./pages/EinkaufszettelPage').then((m) => ({ default: m.EinkaufszettelPage })),
+)
 
 function MessagesToSocial() {
   const { threadId } = useParams()
@@ -113,6 +131,7 @@ function AppReady() {
 
   return (
     <AuthProvider>
+      <AppUnlockGate>
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route element={<AppShell />}>
@@ -123,6 +142,9 @@ function AppReady() {
                 </Suspense>
               }
             >
+              <Route path="willkommen" element={<ModeChooserPage />} />
+              <Route path="willkommen/kids" element={<KidsConsentPage />} />
+              <Route path="willkommen/orbit" element={<OrbitRegistrationPage />} />
               <Route index element={<HomePage />} />
               <Route path="freelancer" element={<Navigate to="/" replace />} />
               <Route path="firmen" element={<Navigate to="/firma" replace />} />
@@ -157,13 +179,24 @@ function AppReady() {
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="mehr" element={<MehrPage />} />
               <Route path="parkmerke" element={<ParkmerkePage />} />
-              <Route path="campus" element={<FlagRoute flag="campus"><CampusPage /></FlagRoute>} />
-              <Route path="lernen" element={<Navigate to={isFlagOn('campus') ? '/campus' : '/'} replace />} />
-              <Route path="kids" element={<FlagRoute flag="kids"><KidsPage /></FlagRoute>} />
+              <Route path="outfit" element={<OutfitPage />} />
+              <Route path="tanken" element={<TankenPage />} />
+              <Route path="kalender" element={<KalenderPage />} />
+              <Route path="einkauf" element={<EinkaufszettelPage />} />
+              <Route path="campus" element={<CampusSurfaceRoute><CampusPage /></CampusSurfaceRoute>} />
+              <Route path="lernen" element={<Navigate to={campusSurfaceEnabled() ? '/campus' : '/'} replace />} />
+              <Route path="kids" element={<KidsSurfaceRoute><KidsHubPage /></KidsSurfaceRoute>} />
+              <Route path="kids/spiele" element={<KidsSurfaceRoute><KidsSpielePage /></KidsSurfaceRoute>} />
+              <Route path="kids/lernen" element={<KidsSurfaceRoute><KidsLernenPage /></KidsSurfaceRoute>} />
+              <Route path="kids/hobbies" element={<KidsSurfaceRoute><KidsHobbiesPage /></KidsSurfaceRoute>} />
+              <Route path="kids/natur" element={<KidsSurfaceRoute><KidsNaturPage /></KidsSurfaceRoute>} />
+              <Route path="kids/passung" element={<KidsSurfaceRoute><KidsPassungPage /></KidsSurfaceRoute>} />
+              <Route path="kids/einstellungen" element={<KidsSurfaceRoute><KidsPage /></KidsSurfaceRoute>} />
               <Route path="channels" element={<FlagRoute flag="channels"><ChannelsPage /></FlagRoute>} />
               <Route path="look" element={<FlagRoute flag="kabine"><LookPage /></FlagRoute>} />
               <Route path="kabine" element={<FlagRoute flag="kabine"><LookPage /></FlagRoute>} />
               <Route path="mein" element={<MeinPage />} />
+              <Route path="mitentwickeln" element={<MitentwickelnPage />} />
               <Route path="einstellung" element={<EinstellungPage />} />
               <Route path="foto" element={<FlagRoute flag="photoJobs"><PhotoJobsPage /></FlagRoute>} />
               <Route path="interview" element={<FlagRoute flag="interview"><InterviewPage /></FlagRoute>} />
@@ -197,6 +230,7 @@ function AppReady() {
           </Route>
         </Routes>
       </BrowserRouter>
+      </AppUnlockGate>
     </AuthProvider>
   )
 }
@@ -206,11 +240,21 @@ function FlagRoute({ flag, children }: { flag: FeatureFlag; children: ReactNode 
   return children
 }
 
+function KidsSurfaceRoute({ children }: { children: ReactNode }) {
+  if (!kidsSurfaceEnabled()) return <Navigate to="/" replace />
+  return children
+}
+
+function CampusSurfaceRoute({ children }: { children: ReactNode }) {
+  if (!campusSurfaceEnabled()) return <Navigate to="/" replace />
+  return children
+}
+
 function BootScreen() {
   const { t } = useI18n()
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-3 bg-surface">
-      <OrbitRobot motion="arbeiten" size="compact" />
+      <OrbitWordmarkHero />
       <p className="text-sm text-muted">{t('brand.loading')}</p>
     </div>
   )

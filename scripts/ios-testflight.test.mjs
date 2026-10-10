@@ -59,7 +59,7 @@ describe('ios testflight ci', () => {
     assert.equal(pkg.version, '2.9.1')
 
     const vite = read('../vite.config.ts')
-    assert.match(vite, /\/eventlogistik-event-os\//)
+    assert.match(vite, /\/orbit\//)
     assert.match(vite, /CAPACITOR === '1'/)
 
     const cap = JSON.parse(read('../capacitor.config.json'))
@@ -186,10 +186,10 @@ describe('ios testflight ci', () => {
   it('checks the iOS web bundle uses Vite base /', () => {
     const dir = mkdtempSync(join(tmpdir(), 'ios-base-'))
     try {
-      writeFileSync(join(dir, 'index.html'), '<script src="/eventlogistik-event-os/assets/app.js"></script>')
+      writeFileSync(join(dir, 'index.html'), '<script src="/orbit/assets/app.js"></script>')
       const pages = runBash('scripts/check-ios-web-base.sh', [dir], {})
       assert.notEqual(pages.code, 0)
-      assert.match(pages.out, /eventlogistik-event-os/)
+      assert.match(pages.out, /\/orbit\//)
 
       writeFileSync(join(dir, 'index.html'), '<script type="module" src="/assets/app.js"></script>')
       const native = runBash('scripts/check-ios-web-base.sh', [dir], {})

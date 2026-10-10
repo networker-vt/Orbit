@@ -5,7 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { fileURLToPath, URL } from 'node:url'
 
 /** GitHub Pages path. Do not change the default — `deploy:pages` depends on it. */
-const PAGES_BASE = '/eventlogistik-event-os/'
+const PAGES_BASE = '/orbit/'
 
 /**
  * Shell env only (not `.env`).

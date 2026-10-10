@@ -493,6 +493,13 @@ textarea:focus-visible,
 
 }
 
+.orbit-brand-watermark__mark {
+  mask-image: radial-gradient(circle at 50% 42%, #000 0%, transparent 88%);
+}
+.orbit-brand-watermark__ring {
+  opacity: 0.85;
+}
+
 .orbit-wordmark-hero__ring {
   animation: orbit-wordmark-ring 2.8s ease-in-out infinite;
 }
@@ -613,4 +620,18 @@ html.tweak-contrast body {
 }
 html[data-scheme="dark"].tweak-contrast {
   --color-muted: #c4c4c4;
+}
+
+/* Orbit+ accent themes (Credits cosmetic unlock) */
+html[data-orbit-plus="aurora"] {
+  --theme-accent: #6366f1;
+  --theme-accent-2: #818cf8;
+}
+html[data-orbit-plus="copper"] {
+  --theme-accent: #b45309;
+  --theme-accent-2: #d97706;
+}
+html[data-orbit-plus="neon"] {
+  --theme-accent: #c026d3;
+  --theme-accent-2: #e879f9;
 }

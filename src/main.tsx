@@ -3,11 +3,13 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { registerSW } from 'virtual:pwa-register'
 import { bootNativeShell } from './lib/nativeShell'
+import { initOrbitPlusDom } from './lib/orbitPlus'
 import { applyScheme, getScheme } from './lib/scheme'
 import App from './App'
 import './index.css'
 
 applyScheme(getScheme())
+initOrbitPlusDom()
 
 if (!Capacitor.isNativePlatform()) {
   registerSW({

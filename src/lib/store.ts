@@ -1,3 +1,4 @@
+import { chatHistoryLimit } from './chatExtras'
 import {
   seedBookings,
   seedListings,
@@ -401,9 +402,12 @@ export const store = {
   },
 
   listMessages(threadId: string): Message[] {
-    return getData()
+    const sorted = getData()
       .messages.filter((m) => m.threadId === threadId)
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+    const lim = chatHistoryLimit()
+    if (sorted.length <= lim) return sorted
+    return sorted.slice(sorted.length - lim)
   },
 
   sendMessage(input: {

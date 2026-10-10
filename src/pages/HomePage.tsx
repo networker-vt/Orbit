@@ -10,12 +10,7 @@ import { TileGrid } from '../components/ui/TileGrid'
 import { Button } from '../components/ui/Button'
 import { useStoreVersion } from '../hooks/useStore'
 import { useAuth } from '../lib/auth'
-import {
-  buildAssistPlan,
-  getLastPlan,
-  subscribeAssist,
-  type AssistPlan,
-} from '../lib/assist'
+import { getLastPlan, subscribeAssist, type AssistPlan } from '../lib/assist'
 import { getCompany, subscribeCompany } from '../lib/company'
 import { isCompanySide, getPrefs, savePrefs, subscribePrefs } from '../lib/prefs'
 import { alcoholChoiceBlocked } from '../lib/lifeHome'
@@ -25,9 +20,13 @@ import { hasConfirmedAdult } from '../lib/ageGate'
 import { subscribeBehavior } from '../lib/behavior'
 import { subscribeChannels } from '../lib/channels'
 import { HomePins } from '../components/home/HomePins'
+import { HomeDailyPresets } from '../components/home/HomeDailyPresets'
 import { NewsStrip } from '../components/home/NewsStrip'
-import { consumeAssistTurn } from '../lib/credits'
-import { isDemo, isFlagOn } from '../lib/flags'
+import { isDemo } from '../lib/flags'
+import { runOrbitAi } from '../lib/orbitAi'
+import { OrbitAiReply } from '../components/home/OrbitAiReply'
+import { OrbitAiWebSearch } from '../components/home/OrbitAiWebSearch'
+import type { OrbitAiWebSearchOffer } from '../lib/orbitAiWebSearch'
 import { getResume, subscribeResume } from '../lib/resume'
 import { dueReminders, subscribeReminders, tapReminder } from '../lib/reminders'
 import { rankHomeNews } from '../lib/homeSuggestions'
@@ -61,6 +60,9 @@ export function HomePage() {
   const [resume, setResume] = useState(getResume)
   const [reminders, setReminders] = useState(dueReminders)
   const [assistNote, setAssistNote] = useState<string | null>(null)
+  const [aiReply, setAiReply] = useState<string | null>(null)
+  const [aiBlocked, setAiBlocked] = useState(false)
+  const [aiWebSearch, setAiWebSearch] = useState<OrbitAiWebSearchOffer | null>(null)
   const [orbiBubble, setOrbiBubble] = useState(false)
   const [kids, setKids] = useState(isKidsMode)
   const [tripVoicePick, setTripVoicePick] = useState<1 | 2 | 3 | null>(null)
@@ -70,6 +72,10 @@ export function HomePage() {
   const hideWallet = kidsHideWallet()
   const hideTravel = kidsHideTravel()
   const presets = useMemo(() => visibleHomePresets(hideTravel), [hideTravel])
+
+  useEffect(() => {
+    if (kids) navigate('/kids', { replace: true })
+  }, [kids, navigate])
 
   useEffect(() => {
     try {
@@ -110,8 +116,9 @@ export function HomePage() {
     [kids, hideTravel, hideWallet, widgetTaps, t],
   )
 
-  const first = companyView && company.firmName ? company.firmName : user?.name.split(' ')[0]
-  const greeting = first ? `${t('home.hello')}, ${first}.` : `${t('home.hello')}.`
+  const greetingFirst =
+    companyView && company.firmName ? company.firmName : user?.name?.trim().split(/\s+/)[0] || t('home.guestName')
+  const greeting = `${t('home.hello')}, ${greetingFirst}.`
   const placeholder = t('home.phSeek')
 
   const fillPrompt = (prompt: string) => {
@@ -126,7 +133,7 @@ export function HomePage() {
   }
 
   const submitAsk = async (text: string) => {
-    const q = text.trim()
+    const q = (askRef.current?.value ?? text).trim()
     if (busy) return
     if (!q) {
       if (getPrefs().seeker.lifeExamples.length > 0) navigate('/match')
@@ -134,13 +141,6 @@ export function HomePage() {
     }
     if (sentenceOpensParkmerke(q)) {
       navigate('/parkmerke')
-      return
-    }
-    const current = getPrefs()
-    const seeker = { ...current.seeker, lifeSentence: q }
-    savePrefs({ seeker })
-    if (alcoholChoiceBlocked(seeker, hasConfirmedAdult())) {
-      navigate('/match')
       return
     }
     const spokenPick = plan?.tripOptions?.length ? matchSpokenTripChoice(q) : null
@@ -152,31 +152,39 @@ export function HomePage() {
       setTripVoicePick(spokenPick)
       return
     }
-    const gate = await consumeAssistTurn()
-    if (!isFlagOn('credits')) {
-      if (gate !== 'ok') {
-        setAssistNote(t('home.assistLimit'))
-        return
-      }
-      setAssistNote(null)
-    } else if (gate === 'limit') {
-      setAssistNote(t('home.assistLimit'))
-      return
-    } else if (gate === 'need_credits') {
-      setAssistNote(t('home.assistNeedCredits'))
-      return
-    } else if (gate === 'paid') {
-      setAssistNote(t('home.assistPaid'))
-    } else {
-      setAssistNote(null)
-    }
     abortRef.current?.abort()
     const ac = new AbortController()
     abortRef.current = ac
     setBusy(true)
+    setAssistNote(null)
+    setAiBlocked(false)
+    setAiWebSearch(null)
     try {
-      const next = await buildAssistPlan(q, resolved, ac.signal)
-      if (next) setPlan(next)
+      const outcome = await runOrbitAi({
+        text: q,
+        locale: resolved,
+        kids,
+        hideTravel,
+        signal: ac.signal,
+      })
+      if (outcome.kind === 'blocked') {
+        setAiReply(outcome.reply)
+        setAiBlocked(true)
+        setAiWebSearch(null)
+        setAsk('')
+        return
+      }
+      const current = getPrefs()
+      const seeker = { ...current.seeker, lifeSentence: q }
+      savePrefs({ seeker })
+      if (alcoholChoiceBlocked(seeker, hasConfirmedAdult())) {
+        navigate('/match')
+        return
+      }
+      setAiReply(outcome.reply)
+      setAiWebSearch(outcome.webSearch ?? null)
+      if (outcome.plan) setPlan(outcome.plan)
+      if (outcome.navigateTo) navigate(outcome.navigateTo)
     } finally {
       setBusy(false)
     }
@@ -195,31 +203,31 @@ export function HomePage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-5 pb-scroll-chrome pt-6 md:pt-10">
-      <header className="space-y-4">
-        <div className="flex flex-col items-center px-2 text-center" data-orbi-primary="1" data-orbi-hero="above-greeting">
-          <OrbitWordmarkHero />
-          {orbiBubble && (
-            <p
-              className="mt-2 max-w-xs rounded-2xl border border-border bg-surface-2 px-3 py-2 text-sm text-ink"
-              role="status"
-              data-orbi-bubble="1"
+      <header className="relative space-y-4 overflow-hidden pb-1">
+        <OrbitWordmarkHero />
+        {orbiBubble && (
+          <p
+            className="relative z-[1] max-w-xs rounded-2xl border border-border bg-surface-2 px-3 py-2 text-sm text-ink"
+            role="status"
+            data-orbi-bubble="1"
+            data-orbi-primary="1"
+            data-orbi-hero="above-greeting"
+          >
+            {t('home.orbiOnce')}
+            <button
+              type="button"
+              className="ml-2 text-xs text-muted hover:text-ink"
+              onClick={() => setOrbiBubble(false)}
             >
-              {t('home.orbiOnce')}
-              <button
-                type="button"
-                className="ml-2 text-xs text-muted hover:text-ink"
-                onClick={() => setOrbiBubble(false)}
-              >
-                {t('home.robotDismiss')}
-              </button>
-            </p>
-          )}
-        </div>
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-muted">
-            Orbit{isDemo ? ` · ${t('home.demoBadge')}` : ''}
+              {t('home.robotDismiss')}
+            </button>
           </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-ink md:text-[2rem]">{greeting}</h1>
+        )}
+        <div className="relative z-[1]" data-orbi-primary="1" data-orbi-hero="greeting">
+          {isDemo && (
+            <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">{t('home.demoBadge')}</p>
+          )}
+          <h1 className="text-3xl font-bold tracking-tight text-ink md:text-[2rem]">{greeting}</h1>
           <p className="mt-1 max-w-sm text-sm text-muted">{t('home.need')}</p>
         </div>
 
@@ -257,11 +265,14 @@ export function HomePage() {
           ))}
         </div>
 
+        <HomeDailyPresets />
+
         <form
           className="space-y-2"
           onSubmit={(e) => {
             e.preventDefault()
-            void submitAsk(ask)
+            const q = askRef.current?.value ?? ask
+            void submitAsk(q)
           }}
         >
           <label className="block">
@@ -276,6 +287,8 @@ export function HomePage() {
               className="w-full resize-none rounded-2xl border border-border bg-surface-2 px-3 py-3 text-base text-ink placeholder:text-muted outline-none focus:border-[var(--theme-accent)]/50"
             />
           </label>
+          {aiReply && <OrbitAiReply text={aiReply} blocked={aiBlocked} />}
+          {aiWebSearch && !aiBlocked && <OrbitAiWebSearch offer={aiWebSearch} />}
           {assistNote && <p className="text-xs text-amber-200">{assistNote}</p>}
           <div className="flex items-center gap-2">
             {canListen() && (
@@ -290,7 +303,13 @@ export function HomePage() {
                 <Mic size={18} />
               </Button>
             )}
-            <Button type="submit" className="flex-1" disabled={busy} data-home-primary="1">
+            <Button
+              type="submit"
+              className="flex-1"
+              disabled={busy}
+              data-home-primary="1"
+              data-orbit-ai-submit="1"
+            >
               {busy ? t('assist.thinking') : t('assist.submit')} <Send size={16} />
             </Button>
           </div>
@@ -298,7 +317,13 @@ export function HomePage() {
       </header>
 
       <div className={plan ? 'assist-result space-y-6' : undefined} data-assist-result={plan ? '1' : undefined}>
-        <Tageskarte item={daily.item} slot={daily.slot} plan={plan} onUsePrompt={fillPrompt} />
+        <Tageskarte
+          item={daily.item}
+          slot={daily.slot}
+          plan={plan}
+          resume={resume}
+          onUsePrompt={fillPrompt}
+        />
         {plan?.tripOptions && plan.tripOptions.length > 0 && (
           <TripOptionCards
             options={plan.tripOptions}

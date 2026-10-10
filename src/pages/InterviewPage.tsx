@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { CalendarClock, MessageSquare, Video } from 'lucide-react'
 import { Button } from '../components/ui/Button'
-import { Textarea } from '../components/ui/Input'
 import { Empty } from '../components/ui/Empty'
 import { LaneBadge } from '../components/credits/LaneBadge'
 import { SpeakButton } from '../components/a11y/SpeakButton'
@@ -17,6 +16,10 @@ import {
   type InterviewRoom,
 } from '../lib/interviews'
 import { formatDateTime } from '../lib/utils'
+import { MessengerComposer } from '../components/messenger/MessengerComposer'
+import { TranslatedMessageBubble } from '../components/messenger/TranslatedMessageBubble'
+import { interviewThreadKey } from '../lib/messengerTranslatePrefs'
+import { useMessengerTranslatePrefs } from '../hooks/useMessengerTranslate'
 
 export function InterviewPage() {
   const { t } = useI18n()
@@ -74,8 +77,9 @@ export function InterviewPage() {
 
 function InterviewRoomView({ room }: { room: InterviewRoom }) {
   const { t } = useI18n()
-  const [body, setBody] = useState('')
   const [tab, setTab] = useState<'chat' | 'schedule' | 'video'>('chat')
+  const threadKey = interviewThreadKey(room.id)
+  const { prefs: translatePrefs } = useMessengerTranslatePrefs(threadKey)
   const [stream, setStream] = useState<MediaStream | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
 
@@ -97,12 +101,6 @@ function InterviewRoomView({ room }: { room: InterviewRoom }) {
     } catch {
       setStream(null)
     }
-  }
-
-  const send = (e: React.FormEvent) => {
-    e.preventDefault()
-    sendInterviewMessage(room.id, body)
-    setBody('')
   }
 
   return (
@@ -137,30 +135,34 @@ function InterviewRoomView({ room }: { room: InterviewRoom }) {
       {tab === 'chat' && (
         <section className="flex min-h-[50vh] flex-col rounded-2xl border border-border bg-surface-2">
           <div className="flex-1 space-y-2 overflow-y-auto p-4">
-            {room.messages.map((m) => (
-              <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div
-                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
-                    m.role === 'user' ? 'bg-[var(--theme-accent)] text-black' : 'bg-surface-3'
-                  }`}
-                >
-                  <div>{m.body}</div>
-                  <div className="mt-1 text-xs opacity-70">{formatDateTime(m.at)}</div>
+            {room.messages.map((m) => {
+              const mine = m.role === 'user'
+              return (
+                <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
+                  <TranslatedMessageBubble
+                    messageId={m.id}
+                    body={m.body}
+                    mine={mine}
+                    enabled={translatePrefs.enabled}
+                    myLang={translatePrefs.myLang}
+                    partnerLang={translatePrefs.partnerLang}
+                    autoDetect={translatePrefs.autoDetectIncoming}
+                    ttsIncoming={translatePrefs.ttsIncoming}
+                    bubbleClass={
+                      mine ? 'bg-[var(--theme-accent)] text-black' : 'bg-surface-3 text-neutral-200'
+                    }
+                    timestamp={<div className="mt-1 text-xs opacity-70">{formatDateTime(m.at)}</div>}
+                  />
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
-          <form onSubmit={send} className="border-t border-border p-3">
-            <Textarea
-              label="Antwort"
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              rows={2}
-            />
-            <Button className="mt-2 w-full" type="submit">
-              Senden
-            </Button>
-          </form>
+          <MessengerComposer
+            threadKey={threadKey}
+            placeholder={t('chat.compose')}
+            sendLabel={t('chat.send')}
+            onSend={(text) => sendInterviewMessage(room.id, text)}
+          />
         </section>
       )}
 

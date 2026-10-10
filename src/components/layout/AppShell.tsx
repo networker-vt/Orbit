@@ -7,8 +7,10 @@ import { useI18n } from '../../lib/i18n'
 import { themeForPath } from '../../lib/theme'
 import { PwaInstallBanner } from './PwaInstallBanner'
 import { DemoStoreBanner } from './DemoStoreBanner'
+import { PreReleaseBetaBanner } from './PreReleaseBetaBanner'
 import { CreateSheet } from './CreateSheet'
 import { BrandIcon, BrandMark } from '../brand/BrandMark'
+import { UserProfileMark } from '../profile/UserProfileMark'
 import { SkipLink } from '../a11y/SkipLink'
 import { copyrightLine } from '../../lib/legal'
 import { getPrefs, subscribePrefs } from '../../lib/prefs'
@@ -16,8 +18,9 @@ import { touchResume } from '../../lib/resume'
 import { SchemeToggle } from '../theme/SchemeToggle'
 import { KidsBanner } from '../kids/KidsBanner'
 import { ParentalGateHost } from '../kids/ParentalGate'
-import { isFlagOn } from '../../lib/flags'
 import { isKidsMode, subscribeKids } from '../../lib/kids'
+import { kidsSurfaceEnabled } from '../../lib/registrationFlags'
+import { OnboardingGate } from '../onboarding/OnboardingGate'
 import { cueOrbiNavRun } from '../../lib/orbiMotion'
 import { recordWidgetVisit } from '../../lib/widgetUsage'
 
@@ -57,10 +60,12 @@ function documentTitleFor(pathname: string, t: (key: string) => string) {
 }
 
 export function AppShell() {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const { t, stub } = useI18n()
   const navigate = useNavigate()
   const location = useLocation()
+  const onHome = location.pathname === '/' || location.pathname === ''
+  const profileName = user?.name?.trim() || t('home.guestName')
   const [seenPath, setSeenPath] = useState(location.pathname)
   if (seenPath !== location.pathname) {
     setSeenPath(location.pathname)
@@ -93,8 +98,9 @@ export function AppShell() {
       className="theme-shell mx-auto flex min-h-dvh max-w-6xl flex-col overflow-x-hidden"
     >
       <SkipLink />
+      <PreReleaseBetaBanner />
       <DemoStoreBanner />
-      {isFlagOn('kids') && kids && <KidsBanner />}
+      {kidsSurfaceEnabled() && kids && <KidsBanner />}
       {import.meta.env.DEV && stub && location.pathname !== '/' && (
         <p className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 text-center text-xs text-amber-100">
           {t('stub.banner')}
@@ -105,17 +111,23 @@ export function AppShell() {
         <div className="flex items-center gap-3 px-4 py-3 lg:px-6">
           <button
             type="button"
-            onClick={() => navigate('/')}
+            onClick={() => navigate(onHome ? '/mein' : '/')}
             className="mr-2 flex shrink-0 items-center gap-2 text-left"
-            aria-label="Orbit Start"
+            aria-label={onHome ? profileName : 'Orbit Start'}
           >
-            <BrandIcon size={36} />
-            <div className="leading-tight">
-              <div className="font-bold tracking-tight text-ink">Orbit</div>
-              <div className="text-xs uppercase tracking-wider text-[var(--theme-accent)]">
-                {t('brand.tagline')}
-              </div>
-            </div>
+            {onHome ? (
+              <UserProfileMark name={profileName} avatarUrl={profile?.avatarUrl} />
+            ) : (
+              <>
+                <BrandIcon size={36} />
+                <div className="leading-tight">
+                  <div className="font-bold tracking-tight text-ink">Orbit</div>
+                  <div className="text-xs uppercase tracking-wider text-[var(--theme-accent)]">
+                    {t('brand.tagline')}
+                  </div>
+                </div>
+              </>
+            )}
           </button>
 
           <nav className="flex min-w-0 flex-1 flex-wrap items-center gap-0.5" aria-label="Primary">
@@ -169,8 +181,16 @@ export function AppShell() {
       </header>
 
       <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-surface/90 px-4 py-3 backdrop-blur safe-pt md:hidden">
-        <button type="button" onClick={() => navigate('/')} className="flex min-h-11 items-center gap-2">
-          <BrandMark compact />
+        <button
+          type="button"
+          onClick={() => navigate(onHome ? '/mein' : '/')}
+          className="flex min-h-11 min-w-0 max-w-[55%] items-center gap-2"
+        >
+          {onHome ? (
+            <UserProfileMark name={profileName} avatarUrl={profile?.avatarUrl} compact className="min-w-0" />
+          ) : (
+            <BrandMark compact />
+          )}
         </button>
         <div className="flex items-center gap-2">
           <SchemeToggle compact />
@@ -207,7 +227,9 @@ export function AppShell() {
       <div className="flex min-w-0 flex-1 flex-col pb-app-chrome">
         <main id="main-content" tabIndex={-1} className="flex-1 px-4 py-4 outline-none md:px-6 md:py-6 max-md:pb-2">
           <div key={location.pathname + location.search} className="page-enter">
-            <Outlet />
+            <OnboardingGate>
+              <Outlet />
+            </OnboardingGate>
           </div>
           <footer className="mt-16 space-y-2 border-t border-border/80 pt-6 text-xs text-muted">
             <nav className="flex flex-wrap gap-x-4 gap-y-2" aria-label="Legal">
@@ -234,7 +256,7 @@ export function AppShell() {
 
       <CreateSheet open={createOpen} onClose={() => setCreateOpen(false)} />
       <PwaInstallBanner />
-      {isFlagOn('kids') && <ParentalGateHost />}
+      {kidsSurfaceEnabled() && <ParentalGateHost />}
 
       <nav
         className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-border bg-surface/95 safe-pb backdrop-blur md:hidden"

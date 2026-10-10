@@ -5,7 +5,7 @@
 Forks are welcome if they improve **Orbit** — the global job-matching OS.
 
 1. Fork the repo, create a branch, open a PR against `main`.
-2. Keep the default Vite `base` as `/eventlogistik-event-os/` for GitHub Pages. Native iOS builds set `CAPACITOR=1` (`npm run build:ios`) and must not change that Pages default.
+2. Keep the default Vite `base` as `/orbit/` for GitHub Pages. Native iOS builds set `CAPACITOR=1` (`npm run build:ios`) and must not change that Pages default.
 3. Prefer preference-first matching, honest aggregators (no unofficial scrapes), and clear demos for payments/Credits.
 4. Do not add LinkedIn/Indeed/etc. scrapers. Partner/API stubs only.
 5. Keep impressum attribution to Mirco Küßner unless legal ownership changes.
@@ -43,7 +43,7 @@ Ledger rules unchanged: RPC-first in prod, local demo ledger, `MAX_SUPPLY` 21M. 
 Forks sind willkommen, wenn sie **Orbit** verbessern.
 
 1. Fork → Branch → PR gegen `main`.
-2. Vite-`base` bleibt standardmäßig `/eventlogistik-event-os/` (GitHub Pages). Der iOS-Build setzt `CAPACITOR=1` (`npm run build:ios`) und ändert diesen Pages-Default nicht.
+2. Vite-`base` bleibt standardmäßig `/orbit/` (GitHub Pages). Der iOS-Build setzt `CAPACITOR=1` (`npm run build:ios`) und ändert diesen Pages-Default nicht.
 3. Preference-first Matching, ehrliche Aggregatoren (keine inoffiziellen Scrapes), klare Demo-Hinweise für Zahlungen/Credits.
 4. Keine Scrapes von LinkedIn/Indeed & Co. — nur API/Partner-Stubs.
 5. Impressum: Mirco Küßner belassen, solange die Betreiberrolle so bleibt.

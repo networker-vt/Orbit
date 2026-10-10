@@ -359,8 +359,13 @@ export function mergeDeepScan(items: TravelOffer[], enabled: boolean): TravelOff
   return sortCheapest([...extra, ...items])
 }
 
+/** Optional UI demo catalog (`VITE_TRAVEL_DEMO_CATALOG=1`). Booking still opens partner URLs. */
+export function listDemoTravelCatalog(): TravelOffer[] {
+  return [...OFFERS, ...TRAVEL_DEEP_SCAN_OFFERS]
+}
+
 export const TRAVEL_DISCLAIMER_DE =
-  'Bahn: Link zu bahn.de. Flüge, Hotels, Mietwagen und Packages sind nur ausgefüllte Suchlinks. Orbit bucht nicht und erfindet keine Preise.'
+  'Zug: Live-Fahrplan über transport.rest (Open Data), wenn erreichbar — sonst bahn.de. Flug/Hotel: Skyscanner & Booking — Buchung beim Partner. Orbit nimmt kein Geld entgegen.'
 
 export const TRAVEL_DISCLAIMER_EN =
-  'Rail: a bahn.de link. Flights, hotels, cars and packages are filled search links only. Orbit does not book and does not invent prices.'
+  'Rail: live timetable via transport.rest when available — otherwise bahn.de. Flights/hotels: Skyscanner & Booking — you book with the partner. Orbit does not take payment.'

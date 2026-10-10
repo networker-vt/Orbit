@@ -70,10 +70,14 @@ describe('first screen for a new visitor', () => {
       node.getAttribute('data-home-preset'),
     )
     expect(presets).toEqual(['essen', 'money', 'reise'])
+    const daily = [...host.querySelectorAll('[data-home-daily-preset]')].map((node) =>
+      node.getAttribute('data-home-daily-preset'),
+    )
+    expect(daily).toEqual(['outfit', 'tanken', 'kalender', 'einkauf'])
     expect(host.textContent).toContain("Was gibt's heute zu essen")
     expect(host.textContent).toContain('I need money')
     expect(host.textContent).toContain('plane meine Reise')
-    expect(host.textContent).toMatch(/Essen, Geld verdienen oder Abflug/)
+    expect(host.textContent).toMatch(/Was machen wir jetzt/)
     expect(host.querySelector('[data-home-presets]')?.className).not.toContain('grid')
     expect(host.querySelectorAll('textarea')).toHaveLength(1)
     expect(host.querySelector('textarea')?.getAttribute('placeholder') ?? '').not.toMatch(/Berlin|billigst|cheapest|Flug/i)
