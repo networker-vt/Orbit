@@ -40,6 +40,11 @@ import {
   kidsHideWallet,
   subscribeKids,
 } from '../lib/kids'
+import {
+  getPinnedIds,
+  resolvePinnedShortcuts,
+  subscribePins,
+} from '../lib/pinnedShortcuts'
 
 export function HomePage() {
   useStoreVersion()
@@ -64,6 +69,7 @@ export function HomePage() {
   const [kids, setKids] = useState(isKidsMode)
   const [tripVoicePick, setTripVoicePick] = useState<1 | 2 | 3 | null>(null)
   const [widgetTaps, setWidgetTaps] = useState(getWidgetTaps)
+  const [pinIds, setPinIds] = useState(getPinnedIds)
   const companyView = isCompanySide(prefs.side) && prefs.side !== 'both'
   const daily = useMemo(() => pickTageskarte(new Date(), { kids }), [kids])
   const hideWallet = kidsHideWallet()
@@ -93,6 +99,7 @@ export function HomePage() {
     const u8 = subscribeReminders(() => setReminders(dueReminders()))
     const u9 = subscribeKids(() => setKids(isKidsMode()))
     const u10 = subscribeWidgetTaps(() => setWidgetTaps(getWidgetTaps()))
+    const u11 = subscribePins(() => setPinIds(getPinnedIds()))
     return () => {
       u1()
       u2()
@@ -103,6 +110,7 @@ export function HomePage() {
       u8()
       u9()
       u10()
+      u11()
       abortRef.current?.abort()
     }
   }, [])
@@ -111,6 +119,11 @@ export function HomePage() {
   const widgets = useMemo(
     () => splitAdaptiveHome({ kids, hideTravel: kidsHideTravel(), hideWallet }, widgetTaps, t),
     [kids, hideWallet, widgetTaps, t],
+  )
+  const homePins = useMemo(
+    () =>
+      resolvePinnedShortcuts(t, { kids, hideTravel: kidsHideTravel(), hideWallet }, pinIds),
+    [kids, hideWallet, pinIds, t],
   )
 
   const first = companyView && company.firmName ? company.firmName : user?.name.split(' ')[0]
@@ -348,6 +361,33 @@ export function HomePage() {
       </div>
 
       <NewsStrip items={newsItems} />
+
+      {homePins.length > 0 && (
+        <section className="space-y-2 pt-1" aria-labelledby="home-pins" data-home-pins={homePins.length}>
+          <div className="flex items-baseline justify-between gap-2">
+            <h2 id="home-pins" className="text-xs font-medium uppercase tracking-wider text-muted">
+              {t('home.pins')}
+            </h2>
+            <Link to="/mein" className="text-xs text-muted hover:text-ink">
+              {t('home.pinsEdit')}
+            </Link>
+          </div>
+          <ul className="flex flex-wrap gap-2" aria-label={t('home.pins')}>
+            {homePins.map((pin) => (
+              <li key={pin.id}>
+                <Link
+                  to={pin.to}
+                  data-home-pin={pin.id}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border bg-surface-2 px-3 py-2 text-sm text-ink hover:border-[var(--theme-accent)]/40"
+                >
+                  <span aria-hidden>{pin.emoji}</span>
+                  <span>{pin.label}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="space-y-3 pt-2" aria-labelledby="mehr-entdecken">
         <h2 id="mehr-entdecken" className="text-xs font-medium uppercase tracking-wider text-muted">

@@ -41,17 +41,15 @@ describe('Orbit 2.8.1 hub split', () => {
     expect(tiles.some((t) => t.to === '/marktplatz')).toBe(true)
   })
 
-  it('Mein hub is account-only and sorted money → identity → create → connect → tools', () => {
+  it('Mein account catalog is slim — Einstellung first, no sprawled prefs/language tiles', () => {
     const tiles = meinAccountTiles((k) => tStatic(k, 'de'), adult)
     const ids = tiles.map((t) => t.id)
-    expect(ids).toEqual(['profile', 'prefs', 'create', 'offer', 'language', 'dashboard', 'refer'])
+    expect(ids[0]).toBe('einstellung')
+    expect(ids).toEqual(['einstellung', 'profile', 'create', 'offer', 'refer'])
+    expect(tiles.find((t) => t.id === 'einstellung')?.to).toBe('/einstellung')
     expect(meinHasDiscoverLinks(tiles)).toBe(false)
-    expect(tiles.some((t) => t.to === '/ideen')).toBe(false)
-    expect(tiles.some((t) => t.to === '/channels')).toBe(false)
-    expect(tiles.some((t) => t.to === '/wallet')).toBe(false)
+    expect(tiles.some((t) => t.id === 'language' || t.id === 'prefs' || t.id === 'dashboard')).toBe(false)
     expect(tiles.some((t) => t.to === '/listings/new')).toBe(true)
-    expect(tiles.find((t) => t.id === 'create')?.demo).toBeFalsy()
-    expect(tiles.find((t) => t.id === 'offer')?.demo).toBeFalsy()
     const refer = tiles.find((t) => t.id === 'refer')
     expect(refer?.emoji).not.toBe('🎁')
     expect(refer?.icon).toBe('share')
