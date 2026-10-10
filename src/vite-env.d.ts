@@ -46,6 +46,8 @@ interface ImportMetaEnv {
   readonly VITE_TRANSLATE_DEEPL_KEY?: string
   /** libretranslate | mymemory | deepl | auto | none */
   readonly VITE_TRANSLATE_PROVIDER?: string
+  /** Tankerkönig DE fuel prices — https://creativecommons.tankerkoenig.de/ */
+  readonly VITE_TANKERKOENIG_API_KEY?: string
 }
 
 interface ImportMeta {

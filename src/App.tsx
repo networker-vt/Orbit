@@ -93,6 +93,12 @@ const CampusPage = lazy(() => import('./pages/CampusPage').then((m) => ({ defaul
 const KidsPage = lazy(() => import('./pages/KidsPage').then((m) => ({ default: m.KidsPage })))
 const EntdeckerPage = lazy(() => import('./pages/EntdeckerPage').then((m) => ({ default: m.EntdeckerPage })))
 const ParkmerkePage = lazy(() => import('./pages/ParkmerkePage').then((m) => ({ default: m.ParkmerkePage })))
+const OutfitPage = lazy(() => import('./pages/OutfitPage').then((m) => ({ default: m.OutfitPage })))
+const TankenPage = lazy(() => import('./pages/TankenPage').then((m) => ({ default: m.TankenPage })))
+const KalenderPage = lazy(() => import('./pages/KalenderPage').then((m) => ({ default: m.KalenderPage })))
+const EinkaufszettelPage = lazy(() =>
+  import('./pages/EinkaufszettelPage').then((m) => ({ default: m.EinkaufszettelPage })),
+)
 
 function MessagesToSocial() {
   const { threadId } = useParams()
@@ -173,6 +179,10 @@ function AppReady() {
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="mehr" element={<MehrPage />} />
               <Route path="parkmerke" element={<ParkmerkePage />} />
+              <Route path="outfit" element={<OutfitPage />} />
+              <Route path="tanken" element={<TankenPage />} />
+              <Route path="kalender" element={<KalenderPage />} />
+              <Route path="einkauf" element={<EinkaufszettelPage />} />
               <Route path="campus" element={<CampusSurfaceRoute><CampusPage /></CampusSurfaceRoute>} />
               <Route path="lernen" element={<Navigate to={campusSurfaceEnabled() ? '/campus' : '/'} replace />} />
               <Route path="kids" element={<KidsSurfaceRoute><KidsHubPage /></KidsSurfaceRoute>} />
