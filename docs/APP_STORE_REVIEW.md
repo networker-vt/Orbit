@@ -17,8 +17,8 @@ Orbit is a marketplace companion (jobs, learning, social stubs, travel search li
 **Report content:** Use “Report content” on a listing/profile/message. The report is stored on-device; optionally open the mailto to the operator.
 
 **Privacy / Support:**  
-https://networker-vt.github.io/eventlogistik-event-os/privacy  
-https://networker-vt.github.io/eventlogistik-event-os/support  
+https://networker-vt.github.io/orbit/privacy  
+https://networker-vt.github.io/orbit/support  
 
 Publisher: Mirco Küßner (private individual) — same as Impressum.
 

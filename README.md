@@ -4,12 +4,12 @@
 
 Marketplace for everything (v2.8.1): Reise, Kabine, Lernen, Services, Jobs, B2B und Social. Home leads with Orbi, then a greeting, a compact news strip of real articles, and at most three quiet discover links. Kabine / Gift / Channels stay stubs. **Orbit Kids** and **Campus** live under Mehr.
 
-- **Live (GitHub Pages):** https://networker-vt.github.io/eventlogistik-event-os/
+- **Live (GitHub Pages):** https://networker-vt.github.io/orbit/
 - **Repo:** https://github.com/networker-vt/eventlogistik-event-os
 - **License:** MIT — forks welcome if they improve Orbit (see [CONTRIBUTING.md](./CONTRIBUTING.md))
 - **A11y notes:** [A11Y.md](./A11Y.md) · **2.8.1:** [RELEASE_NOTES_2.8.1.md](./RELEASE_NOTES_2.8.1.md) · **2.8.0:** [RELEASE_NOTES_2.8.0.md](./RELEASE_NOTES_2.8.0.md) · **Credits:** [CREDITS.md](./CREDITS.md)
 
-> Vite `base` **MUST** stay `/eventlogistik-event-os/` for GitHub Pages (`npm run build`, `deploy:pages`). Capacitor / TestFlight uses `base: /` via `CAPACITOR=1` (`npm run build:ios`).
+> Vite `base` **MUST** stay `/orbit/` for GitHub Pages (`npm run build`, `deploy:pages`). Capacitor / TestFlight uses `base: /` via `CAPACITOR=1` (`npm run build:ios`).
 
 ## IA (v2.8.1)
 
@@ -75,7 +75,7 @@ Capacitor shell for Apple only (no Play project). Bundle ID `app.orbit.companion
 
 No Mac. After the four repository secrets in [docs/TESTFLIGHT.md](./docs/TESTFLIGHT.md) are set, open **Actions → iOS TestFlight → Run workflow**. The macOS runner runs `npm ci` and `npm run cap:sync` (Vite base `/`), archives the Capacitor app, and uploads an **Internal Testing** build. A tag named `ios-*` (for example `ios-2.9.0`) does the same. The workflow does not deploy GitHub Pages.
 
-Pages stays `npm run build` with base `/eventlogistik-event-os/`.
+Pages stays `npm run build` with base `/orbit/`.
 
 ## Open Source
 

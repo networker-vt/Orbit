@@ -4,19 +4,19 @@
 PWA ist installierbar. Native App Store / Play-Einreichung braucht **morgen (und danach)** Klicks **vom Operator** in Apple Developer + Play Console. Dieses Dokument ist die Checkliste dafür — keine Fake-Submission.
 
 Privacy-URL (Pflicht für Stores):  
-https://networker-vt.github.io/eventlogistik-event-os/privacy  
+https://networker-vt.github.io/orbit/privacy  
 (dieselbe Seite: `/datenschutz`)
 
 Support-URL:  
-https://networker-vt.github.io/eventlogistik-event-os/support
+https://networker-vt.github.io/orbit/support
 
 Impressum (unverändert, Mirco Küßner, Privatperson):  
-https://networker-vt.github.io/eventlogistik-event-os/impressum
+https://networker-vt.github.io/orbit/impressum
 
 HTTP-Status: erst nach Merge **und** `deploy:pages`. Verzeichnis-Indexe (`privacy/index.html` usw.) liefern 200; `curl -sI` auf die URL **mit** Slash. Ohne Slash: 301, `curl -sI -L` endet bei 200. Siehe LAUNCH.md §4.
 
-Live PWA: https://networker-vt.github.io/eventlogistik-event-os/  
-Pages `base` **muss** `/eventlogistik-event-os/` bleiben. Store-Webview braucht `base: /`.
+Live PWA: https://networker-vt.github.io/orbit/  
+Pages `base` **muss** `/orbit/` bleiben. Store-Webview braucht `base: /`.
 
 ## Was ihr morgen braucht (Operator, nicht das Repo)
 
@@ -40,7 +40,7 @@ npm run cap:sync    # CAPACITOR=1, Vite base /, danach cap sync ios
 npx cap open ios    # nur macOS
 ```
 
-GitHub Pages bleibt `npm run build` mit `base: /eventlogistik-event-os/`. Kein Play-Scaffold in diesem Stand.
+GitHub Pages bleibt `npm run build` mit `base: /orbit/`. Kein Play-Scaffold in diesem Stand.
 
 ## Jugendschutz / Age rating (Orbit Kids in 2.6.0)
 

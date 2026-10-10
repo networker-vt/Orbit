@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Build + force-push production dist to gh-pages (GitHub Pages).
-# Vite base MUST stay /eventlogistik-event-os/
+# Vite base MUST stay /orbit/ (see docs/PAGES_BASE.md)
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
@@ -44,7 +44,7 @@ REMOTE="$(git remote get-url origin)"
 echo "==> force-push $BRANCH → $REMOTE"
 git -C "$TMP" push -f "$REMOTE" "$BRANCH:$BRANCH"
 
-PAGES_URL="https://networker-vt.github.io/eventlogistik-event-os/"
+PAGES_URL="https://networker-vt.github.io/orbit/"
 echo ""
 echo "✅ Pages deployed: $PAGES_URL"
 echo "   (Custom domain: set in GitHub → Settings → Pages, then DNS CNAME)"

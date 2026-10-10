@@ -66,9 +66,15 @@ export function getReferral(): ReferralState {
 }
 
 export function shareUrl() {
+  const configured = (import.meta.env.VITE_APP_URL as string | undefined)?.trim()
+  if (configured) {
+    const root = configured.endsWith('/') ? configured : `${configured}/`
+    return `${root}?ref=${encodeURIComponent(get().code)}`
+  }
   const origin = typeof window !== 'undefined' ? window.location.origin : ''
-  const base = import.meta.env.BASE_URL || '/'
-  return `${origin}${base}?ref=${encodeURIComponent(get().code)}`
+  const base = import.meta.env.BASE_URL || '/orbit/'
+  const path = base.startsWith('/') ? base : `/${base}`
+  return `${origin}${path}?ref=${encodeURIComponent(get().code)}`
 }
 
 export function captureRefFromSearch(search = typeof window !== 'undefined' ? window.location.search : '') {
@@ -117,7 +123,8 @@ export const REFERRAL_RULES_DE = [
   'Jeder Account erhält einen persönlichen Code (lokal auf diesem Gerät).',
   'Link teilen: ?ref=CODE — der Code wird beim ersten Besuch gespeichert.',
   'Bei Registrierung oder Demo-Login wird der Code dem neuen Account zugeordnet.',
-  'Belohnung (Demo): 40 Orbit Credits pro geworbenem Signup — aus dem Rewards-Pool innerhalb der 21M, nicht neu gemintet.',
+  'Referrer (Demo): +40 Orbit Credits pro geworbenem Signup — aus dem Rewards-Pool innerhalb der 21M.',
+  'Geworbene Person: Willkommens-Credits beim Signup (Welcome-Pool) — getrennt vom Referral-Bonus.',
   'Credits sind Orbit Credits für Boosts (Match, Listing, Pins, Social, Orbit+, Chat) — kein Auszahlungsanspruch.',
   'Jede Gutschrift und jeder Spend erzeugt einen Ledger-Beleg (txn_id) auf diesem Gerät.',
   'Eigenen Code auf dem eigenen Gerät zu nutzen, bringt keine Extra-Credits.',

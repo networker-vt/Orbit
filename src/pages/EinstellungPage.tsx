@@ -116,6 +116,42 @@ export function EinstellungPage() {
         </div>
       </header>
 
+      {creditsOn && (
+        <section
+          className="space-y-3 rounded-2xl border-2 border-[var(--theme-accent)]/35 bg-surface-2 p-4 shadow-sm"
+          id="credits"
+          data-einstellung-credits="1"
+        >
+          <h2 className="text-lg font-semibold">Orbit Credits & Referral</h2>
+          <p className="text-xs text-muted">
+            Treuepunkte mit 21M Cap — Boosts in Orbit, kein Auszahlungsanspruch, kein Crypto-Marketing.
+          </p>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted">Guthaben (Wallet)</p>
+              <p className="text-2xl font-bold tabular-nums text-[var(--theme-accent)]">{creditsBal}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted">Ref-Code</p>
+              <p className="font-mono text-sm">{referral.code}</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link to="/empfehlen">
+              <Button size="sm" variant="secondary">
+                Empfehlen
+              </Button>
+            </Link>
+            <Link to="/wallet#credits">
+              <Button size="sm">Wallet & Boosts</Button>
+            </Link>
+          </div>
+          <p className="break-all text-[10px] text-muted">{shareUrl()}</p>
+          <h3 className="text-sm font-semibold">Belege (Ledger)</h3>
+          <CreditsBelegList limit={8} />
+        </section>
+      )}
+
       {isFlagOn('verifyId') && (
         <div id="verify">
           <VerifyPanel />
@@ -399,37 +435,6 @@ export function EinstellungPage() {
           ))}
         </ul>
       </section>
-
-      {creditsOn && (
-        <section className="space-y-3 rounded-2xl border border-border bg-surface-2 p-4" id="credits">
-          <h2 className="text-lg font-semibold">Orbit Credits & Referral</h2>
-          <p className="text-xs text-muted">
-            Treuepunkte mit 21M Cap — Boosts in Orbit, kein Auszahlungsanspruch, kein Crypto-Marketing.
-          </p>
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-wider text-muted">Guthaben</p>
-              <p className="text-2xl font-bold tabular-nums text-[var(--theme-accent)]">{creditsBal}</p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-wider text-muted">Ref-Code</p>
-              <p className="font-mono text-sm">{referral.code}</p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link to="/empfehlen">
-              <Button size="sm" variant="secondary">
-                Empfehlen
-              </Button>
-            </Link>
-            <Link to="/wallet#credits">
-              <Button size="sm">Wallet & Boosts</Button>
-            </Link>
-          </div>
-          <p className="break-all text-[10px] text-muted">{shareUrl()}</p>
-          <CreditsBelegList limit={8} />
-        </section>
-      )}
 
       <section className="space-y-3 rounded-2xl border border-border bg-surface-2 p-4" id="kalender">
         <h2 className="text-lg font-semibold">{t('mein.calendar')}</h2>

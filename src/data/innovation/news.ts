@@ -189,7 +189,7 @@ export const innovationNews: InnovationCard[] = [
     tags: ['KI'],
     company: 'Orbit / Plattform-Trend',
     date: '2026-01-10',
-    sourceUrl: 'https://networker-vt.github.io/eventlogistik-event-os/',
+    sourceUrl: 'https://networker-vt.github.io/orbit/',
     sourceName: 'Orbit editorial',
     imageEmoji: '⚡',
     editorial: true,
