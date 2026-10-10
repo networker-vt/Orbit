@@ -34,8 +34,12 @@ export function SupportPage() {
       <h2>Was Support nicht ist</h2>
       <ul>
         <li>Kein Reisebüro, keine Airline, keine Bahn, kein Hotel.</li>
-        <li>Keine Zahlungsstelle. Orbit bewegt kein echtes Geld.</li>
+        <li>Keine Zahlungsstelle. Orbit bewegt kein echtes Geld; Wallet und Credits sind Demo.</li>
         <li>Kein Anspruch auf eine Frist. Antwort nach Kapazität einer Privatperson.</li>
+        <li>
+          Orbit Kids (wenn eingeschaltet): Fragen zur Eltern-PIN und zum Altersband — keine
+          zertifizierte Kinderschutz-Hotline.
+        </li>
       </ul>
 
       <h2>Kontaktstelle für Nutzer und Behörden</h2>
@@ -61,7 +65,9 @@ export function SupportPage() {
       <p>
         Write to <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a> ({LEGAL_ADDRESS_LINE}, Germany)
         about the Orbit app, a bug, or a privacy request. Local data stays in the browser until
-        you clear site data. Orbit does not sell tickets and does not take payment.
+        you clear site data. Orbit does not sell tickets and does not take payment — wallet and
+        credits are demo stubs. Orbit Kids (when enabled) is a parental-PIN mode, not a certified
+        safety hotline.
       </p>
       <p>
         Contact point for users and authorities (German and English):{' '}

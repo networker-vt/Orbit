@@ -56,7 +56,7 @@ describe('ios testflight ci', () => {
     assert.equal(pkg.scripts['deploy:pages'], 'bash scripts/deploy-pages.sh')
     assert.match(pkg.scripts.test, /vitest run/)
     assert.match(pkg.scripts.test, /emit-pages-legal\.test\.mjs/)
-    assert.equal(pkg.version, '2.9.0')
+    assert.equal(pkg.version, '2.9.1')
 
     const vite = read('../vite.config.ts')
     assert.match(vite, /\/eventlogistik-event-os\//)
@@ -67,7 +67,7 @@ describe('ios testflight ci', () => {
 
     const project = read('../ios/App/App.xcodeproj/project.pbxproj')
     assert.match(project, /PRODUCT_BUNDLE_IDENTIFIER = app\.orbit\.companion;/)
-    assert.match(project, /MARKETING_VERSION = 2\.9\.0;/)
+    assert.match(project, /MARKETING_VERSION = 2\.9\.1;/)
     assert.match(read('../ios/App/App/Info.plist'), /<key>ITSAppUsesNonExemptEncryption<\/key>\s*<false\/>/)
 
     const scheme = read('../ios/App/App.xcodeproj/xcshareddata/xcschemes/App.xcscheme')

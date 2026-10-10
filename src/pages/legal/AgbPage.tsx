@@ -24,8 +24,15 @@ export function AgbPage() {
 
       <h2>§ 2 Wer mitmachen darf</h2>
       <p>
-        Die Nutzung ist Personen ab 18 Jahren vorbehalten. Mit der Anmeldung bestätigst du das.
-        Konten für Kinder gibt es nicht.
+        Marktplatz-Konten (Inserate, Chat, Jobs, Wallet) sind Personen ab 18 Jahren vorbehalten.
+        Mit der Anmeldung bestätigst du das. Es gibt keine vollwertigen Kinder-Konten mit Credits
+        oder Adult-Funktionen.
+      </p>
+      <p>
+        <strong>Orbit Kids</strong> (wenn in der App eingeschaltet) ist ein eingeschränkter Modus
+        hinter einer Eltern-PIN: Campus und Assist ohne Wallet, ohne öffentlichen Chat und ohne
+        Adult-Buchung. Eltern richten PIN und Altersband auf dem Gerät ein. Das ersetzt keine
+        zertifizierte Jugendschutz- oder Elternkontroll-Software.
       </p>
 
       <h2>§ 3 Nutzung und verbotene Inhalte</h2>

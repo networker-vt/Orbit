@@ -49,6 +49,7 @@ export function SoftPaywall({
         <Button size="sm" className="w-full" onClick={onBuy}>
           {t('paywall.buy')} · {cost} Credits
         </Button>
+        <p className="text-center text-[11px] text-muted">{t('demo.bannerBody')}</p>
         <ButtonLink to={walletTo} size="sm" variant="secondary" className="w-full">
           {t('paywall.wallet')}
         </ButtonLink>

@@ -6,6 +6,7 @@ import { useAuth } from '../../lib/auth'
 import { useI18n } from '../../lib/i18n'
 import { themeForPath } from '../../lib/theme'
 import { PwaInstallBanner } from './PwaInstallBanner'
+import { DemoStoreBanner } from './DemoStoreBanner'
 import { CreateSheet } from './CreateSheet'
 import { BrandIcon, BrandMark } from '../brand/BrandMark'
 import { SkipLink } from '../a11y/SkipLink'
@@ -85,6 +86,7 @@ export function AppShell() {
       className="theme-shell mx-auto flex min-h-dvh max-w-6xl flex-col overflow-x-hidden"
     >
       <SkipLink />
+      <DemoStoreBanner />
       {isFlagOn('kids') && kids && <KidsBanner />}
       {import.meta.env.DEV && stub && location.pathname !== '/' && (
         <p className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 text-center text-xs text-amber-100">

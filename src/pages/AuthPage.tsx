@@ -187,6 +187,14 @@ export function AuthPage() {
         <span>{t('auth.adult')}</span>
       </label>
       {!adult && <p className="text-sm text-amber-200">{t('auth.adultHint')}</p>}
+      {isFlagOn('kids') && (
+        <p className="text-xs text-muted">
+          {t('auth.kidsNote')}{' '}
+          <Link to="/kids" className="text-cyan">
+            {t('kids.title')}
+          </Link>
+        </p>
+      )}
       <p className="text-sm text-muted">
         {t('auth.acceptBefore')}
         <Link to="/agb" className="text-cyan">

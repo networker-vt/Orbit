@@ -61,8 +61,13 @@ export function DatenschutzPage() {
       <ul>
         <li>Anmelde-Stub, Profil, Inserate, Nachrichten, Favoriten: bis du den Speicher leerst.</li>
         <li>
-          Altersbestätigung (mindestens 18 Jahre): Zeitpunkt der Bestätigung im localStorage, bis
-          du den Speicher leerst. Es gibt kein eigenes Server-Feld dafür.
+          Altersbestätigung für den Erwachsenen-Marktplatz (mindestens 18 Jahre): Zeitpunkt der
+          Bestätigung im localStorage, bis du den Speicher leerst. Es gibt kein eigenes
+          Server-Feld dafür.
+        </li>
+        <li>
+          Orbit Kids (wenn eingeschaltet): Altersband und Hash der Eltern-PIN auf dem Gerät — nie
+          die PIN im Klartext. Zweck: eingeschränkte Kinder-Oberfläche nach Eltern-Freigabe.
         </li>
         <li>
           Inhaltsmeldungen: Grund, Beschreibung, optional Name und E-Mail, bis du den Speicher
@@ -85,8 +90,15 @@ export function DatenschutzPage() {
 
       <h2>Alter</h2>
       <p>
-        Orbit richtet sich an Personen ab 18 Jahren. Bei der Anmeldung bestätigst du das. Die
-        Bestätigung liegt nur auf diesem Gerät.
+        Der Orbit-Marktplatz (Konten, Chat, Jobs, Wallet) richtet sich an Personen ab 18 Jahren.
+        Bei der Anmeldung bestätigst du das; die Bestätigung liegt nur auf diesem Gerät.
+      </p>
+      <p>
+        <strong>Orbit Kids</strong> ist kein eigenes Kinder-Konto und kein voller Marktplatz.
+        Wenn die Funktion eingeschaltet ist, richtet ein Elternteil zuerst eine PIN ein und wählt
+        ein Altersband. Danach sehen Minderjährige eine eingeschränkte Oberfläche (u. a. Campus und
+        Assist; keine Credits, kein Wallet, kein öffentlicher Chat, keine Adult-Buchung). Das ist
+        eine gerätebezogene Eltern-Sperre, keine zertifizierte Kinderschutzlösung.
       </p>
 
       <h2>Deine Rechte</h2>
@@ -115,9 +127,11 @@ export function DatenschutzPage() {
         Company directory (Art. 14 GDPR): name, city and a website or dry-hire link from public
         business sources. No company phone numbers or emails are stored in the app. Legal basis:
         legitimate interest in a directory of public business data. Deletion:{' '}
-        <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. Orbit is for people aged 18 or over.
-        You confirm that at sign-up; the confirmation stays on this device until you clear site
-        data.
+        <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. The Orbit marketplace (accounts, chat,
+        jobs, wallet) is for people aged 18 or over. You confirm that at sign-up; the confirmation
+        stays on this device. <strong>Orbit Kids</strong> (when enabled) is a parental-PIN gate
+        with a restricted UI for minors — not a full marketplace account and not a certified
+        parental-control product. Age band and a PIN hash may be stored on the device.
       </p>
 
       <nav className="flex flex-wrap gap-3 text-sm">
