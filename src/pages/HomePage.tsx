@@ -195,27 +195,27 @@ export function HomePage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-5 pb-scroll-chrome pt-6 md:pt-10">
-      <header className="space-y-4">
-        <div className="flex flex-col items-center px-2 text-center" data-orbi-primary="1" data-orbi-hero="above-greeting">
-          <OrbitWordmarkHero />
-          {orbiBubble && (
-            <p
-              className="mt-2 max-w-xs rounded-2xl border border-border bg-surface-2 px-3 py-2 text-sm text-ink"
-              role="status"
-              data-orbi-bubble="1"
+      <header className="relative space-y-4 overflow-hidden">
+        <OrbitWordmarkHero />
+        {orbiBubble && (
+          <p
+            className="relative z-[1] max-w-xs rounded-2xl border border-border bg-surface-2 px-3 py-2 text-sm text-ink"
+            role="status"
+            data-orbi-bubble="1"
+            data-orbi-primary="1"
+            data-orbi-hero="above-greeting"
+          >
+            {t('home.orbiOnce')}
+            <button
+              type="button"
+              className="ml-2 text-xs text-muted hover:text-ink"
+              onClick={() => setOrbiBubble(false)}
             >
-              {t('home.orbiOnce')}
-              <button
-                type="button"
-                className="ml-2 text-xs text-muted hover:text-ink"
-                onClick={() => setOrbiBubble(false)}
-              >
-                {t('home.robotDismiss')}
-              </button>
-            </p>
-          )}
-        </div>
-        <div>
+              {t('home.robotDismiss')}
+            </button>
+          </p>
+        )}
+        <div className="relative z-[1]" data-orbi-primary="1" data-orbi-hero="greeting">
           <p className="text-xs font-medium uppercase tracking-wider text-muted">
             Orbit{isDemo ? ` · ${t('home.demoBadge')}` : ''}
           </p>
