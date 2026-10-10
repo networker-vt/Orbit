@@ -88,7 +88,7 @@ export const MEIN_ACCOUNT_DEFS: HubTileDef[] = [
   { id: 'prefs', to: '/prefs', labelKey: 'match.tweakPrefs', emoji: '⚙️', tone: 'amber', surface: 'account' },
   { id: 'create', to: '/listings/new', labelKey: 'nav.create', emoji: '➕', tone: 'slate', surface: 'account', hide: (c) => c.kids },
   { id: 'offer', to: '/listings/new?kind=offer', labelKey: 'mein.offer', emoji: '📣', tone: 'orange', surface: 'account', hide: (c) => c.kids },
-  { id: 'channels', to: '/channels', labelKey: 'channels.nav', emoji: '📡', tone: 'violet', surface: 'account', hide: () => !isFlagOn('channels') },
+  { id: 'channels', to: '/channels', labelKey: 'channels.nav', emoji: '📡', tone: 'violet', surface: 'account', demo: true, hide: () => !isFlagOn('channels') },
   { id: 'ideas', to: '/ideen', labelKey: 'mehr.ideas', emoji: '💡', tone: 'orange', surface: 'account', hide: () => !isFlagOn('ideas') },
   { id: 'language', to: '/mein#sprache', labelKey: 'mein.language', emoji: '🌐', tone: 'amber', surface: 'account' },
   { id: 'dashboard', to: '/dashboard', labelKey: 'mein.dashboard', emoji: '📊', tone: 'sky', surface: 'account' },

@@ -1,0 +1,36 @@
+# PR / main quality gate. Does not upload to TestFlight (see ios-testflight.yml).
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install, test, Pages build, iOS web bundle
+        run: |
+          set -euo pipefail
+          npm ci
+          npm test
+          npm run build
+          npm run build:ios
+          bash scripts/check-ios-web-base.sh dist

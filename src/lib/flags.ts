@@ -53,7 +53,7 @@ export const FEATURE_FLAG_DEFS = [
   {
     id: 'kids',
     default: false,
-    reason: 'Die AGB gelten ab 18. Der Eltern-PIN ist nur ein Hash im localStorage und keine echte Kindersicherung.',
+    reason: 'Marktplatz-Konten ab 18; Kids ist Eltern-PIN-Modus (Hash im localStorage), keine zertifizierte Kindersicherung.',
   },
   {
     id: 'channels',
