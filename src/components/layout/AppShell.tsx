@@ -9,6 +9,7 @@ import { PwaInstallBanner } from './PwaInstallBanner'
 import { DemoStoreBanner } from './DemoStoreBanner'
 import { CreateSheet } from './CreateSheet'
 import { BrandIcon, BrandMark } from '../brand/BrandMark'
+import { UserProfileMark } from '../profile/UserProfileMark'
 import { SkipLink } from '../a11y/SkipLink'
 import { copyrightLine } from '../../lib/legal'
 import { getPrefs, subscribePrefs } from '../../lib/prefs'
@@ -57,10 +58,12 @@ function documentTitleFor(pathname: string, t: (key: string) => string) {
 }
 
 export function AppShell() {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const { t, stub } = useI18n()
   const navigate = useNavigate()
   const location = useLocation()
+  const onHome = location.pathname === '/' || location.pathname === ''
+  const profileName = user?.name?.trim() || t('home.guestName')
   const [seenPath, setSeenPath] = useState(location.pathname)
   if (seenPath !== location.pathname) {
     setSeenPath(location.pathname)
@@ -105,17 +108,23 @@ export function AppShell() {
         <div className="flex items-center gap-3 px-4 py-3 lg:px-6">
           <button
             type="button"
-            onClick={() => navigate('/')}
+            onClick={() => navigate(onHome ? '/mein' : '/')}
             className="mr-2 flex shrink-0 items-center gap-2 text-left"
-            aria-label="Orbit Start"
+            aria-label={onHome ? profileName : 'Orbit Start'}
           >
-            <BrandIcon size={36} />
-            <div className="leading-tight">
-              <div className="font-bold tracking-tight text-ink">Orbit</div>
-              <div className="text-xs uppercase tracking-wider text-[var(--theme-accent)]">
-                {t('brand.tagline')}
-              </div>
-            </div>
+            {onHome ? (
+              <UserProfileMark name={profileName} avatarUrl={profile?.avatarUrl} />
+            ) : (
+              <>
+                <BrandIcon size={36} />
+                <div className="leading-tight">
+                  <div className="font-bold tracking-tight text-ink">Orbit</div>
+                  <div className="text-xs uppercase tracking-wider text-[var(--theme-accent)]">
+                    {t('brand.tagline')}
+                  </div>
+                </div>
+              </>
+            )}
           </button>
 
           <nav className="flex min-w-0 flex-1 flex-wrap items-center gap-0.5" aria-label="Primary">
@@ -169,8 +178,16 @@ export function AppShell() {
       </header>
 
       <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-surface/90 px-4 py-3 backdrop-blur safe-pt md:hidden">
-        <button type="button" onClick={() => navigate('/')} className="flex min-h-11 items-center gap-2">
-          <BrandMark compact />
+        <button
+          type="button"
+          onClick={() => navigate(onHome ? '/mein' : '/')}
+          className="flex min-h-11 min-w-0 max-w-[55%] items-center gap-2"
+        >
+          {onHome ? (
+            <UserProfileMark name={profileName} avatarUrl={profile?.avatarUrl} compact className="min-w-0" />
+          ) : (
+            <BrandMark compact />
+          )}
         </button>
         <div className="flex items-center gap-2">
           <SchemeToggle compact />

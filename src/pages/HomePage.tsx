@@ -110,8 +110,9 @@ export function HomePage() {
     [kids, hideTravel, hideWallet, widgetTaps, t],
   )
 
-  const first = companyView && company.firmName ? company.firmName : user?.name.split(' ')[0]
-  const greeting = first ? `${t('home.hello')}, ${first}.` : `${t('home.hello')}.`
+  const greetingFirst =
+    companyView && company.firmName ? company.firmName : user?.name?.trim().split(/\s+/)[0] || t('home.guestName')
+  const greeting = `${t('home.hello')}, ${greetingFirst}.`
   const placeholder = t('home.phSeek')
 
   const fillPrompt = (prompt: string) => {
@@ -195,31 +196,31 @@ export function HomePage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-5 pb-scroll-chrome pt-6 md:pt-10">
-      <header className="space-y-4">
-        <div className="flex flex-col items-center px-2 text-center" data-orbi-primary="1" data-orbi-hero="above-greeting">
-          <OrbitWordmarkHero />
-          {orbiBubble && (
-            <p
-              className="mt-2 max-w-xs rounded-2xl border border-border bg-surface-2 px-3 py-2 text-sm text-ink"
-              role="status"
-              data-orbi-bubble="1"
+      <header className="relative space-y-4 overflow-hidden pb-1">
+        <OrbitWordmarkHero />
+        {orbiBubble && (
+          <p
+            className="relative z-[1] max-w-xs rounded-2xl border border-border bg-surface-2 px-3 py-2 text-sm text-ink"
+            role="status"
+            data-orbi-bubble="1"
+            data-orbi-primary="1"
+            data-orbi-hero="above-greeting"
+          >
+            {t('home.orbiOnce')}
+            <button
+              type="button"
+              className="ml-2 text-xs text-muted hover:text-ink"
+              onClick={() => setOrbiBubble(false)}
             >
-              {t('home.orbiOnce')}
-              <button
-                type="button"
-                className="ml-2 text-xs text-muted hover:text-ink"
-                onClick={() => setOrbiBubble(false)}
-              >
-                {t('home.robotDismiss')}
-              </button>
-            </p>
-          )}
-        </div>
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-muted">
-            Orbit{isDemo ? ` · ${t('home.demoBadge')}` : ''}
+              {t('home.robotDismiss')}
+            </button>
           </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-ink md:text-[2rem]">{greeting}</h1>
+        )}
+        <div className="relative z-[1]" data-orbi-primary="1" data-orbi-hero="greeting">
+          {isDemo && (
+            <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">{t('home.demoBadge')}</p>
+          )}
+          <h1 className="text-3xl font-bold tracking-tight text-ink md:text-[2rem]">{greeting}</h1>
           <p className="mt-1 max-w-sm text-sm text-muted">{t('home.need')}</p>
         </div>
 
@@ -298,7 +299,13 @@ export function HomePage() {
       </header>
 
       <div className={plan ? 'assist-result space-y-6' : undefined} data-assist-result={plan ? '1' : undefined}>
-        <Tageskarte item={daily.item} slot={daily.slot} plan={plan} onUsePrompt={fillPrompt} />
+        <Tageskarte
+          item={daily.item}
+          slot={daily.slot}
+          plan={plan}
+          resume={resume}
+          onUsePrompt={fillPrompt}
+        />
         {plan?.tripOptions && plan.tripOptions.length > 0 && (
           <TripOptionCards
             options={plan.tripOptions}
