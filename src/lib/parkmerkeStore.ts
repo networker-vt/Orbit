@@ -61,7 +61,7 @@ function fromRecord(record: SpotRecord | undefined): ParkingSpot | null {
 }
 
 const DB_NAME = 'orbit-parkmerke'
-const DB_VERSION = 1
+const DB_VERSION = 2
 const SPOT_KEY = 'active'
 
 function requireDb(): IDBFactory {
@@ -76,7 +76,7 @@ function openDb(): Promise<IDBDatabase> {
     req.onupgradeneeded = () => {
       const db = req.result
       if (!db.objectStoreNames.contains('spot')) db.createObjectStore('spot')
-      if (!db.objectStoreNames.contains('tiles')) db.createObjectStore('tiles')
+      if (db.objectStoreNames.contains('tiles')) db.deleteObjectStore('tiles')
     }
     req.onsuccess = () => resolve(req.result)
     req.onerror = () => reject(req.error)
@@ -127,36 +127,6 @@ async function putSpot(spot: ParkingSpot): Promise<void> {
   })
 }
 
-export async function clearParkingTiles(): Promise<void> {
-  await withDb(async (db) => {
-    const tx = db.transaction('tiles', 'readwrite')
-    const done = txDone(tx)
-    tx.objectStore('tiles').clear()
-    await done
-  })
-}
-
-export async function readParkingTile(key: string): Promise<Blob | null> {
-  return withDb(async (db) => {
-    const tx = db.transaction('tiles', 'readonly')
-    const done = txDone(tx)
-    const value = await requestDone(tx.objectStore('tiles').get(key) as IDBRequest<string | undefined>)
-    await done
-    if (typeof value !== 'string' || value.length === 0) return null
-    return new Blob([Uint8Array.from(decodeBytes(value))], { type: 'image/png' })
-  })
-}
-
-export async function writeParkingTile(key: string, blob: Blob): Promise<void> {
-  const encoded = encodeBytes(new Uint8Array(await blob.arrayBuffer()))
-  await withDb(async (db) => {
-    const tx = db.transaction('tiles', 'readwrite')
-    const done = txDone(tx)
-    tx.objectStore('tiles').put(encoded, key)
-    await done
-  })
-}
-
 export type SaveResult =
   | { ok: true; spot: ParkingSpot; replaced: boolean }
   | { ok: false; reason: 'confirm' | 'photo' | 'pin' | 'time' }
@@ -170,7 +140,6 @@ export async function saveParkingSpot(draft: SpotDraft, confirmed: boolean, now 
   const decision = decideSave(current, draft, confirmed, now)
   if (decision.action === 'needs-confirm') return { ok: false, reason: 'confirm' }
   if (decision.action === 'reject') return { ok: false, reason: decision.reason }
-  if (decision.replaced) await clearParkingTiles()
   await putSpot(decision.spot)
   return { ok: true, spot: decision.spot, replaced: decision.replaced }
 }
@@ -181,13 +150,12 @@ export async function markParkingWarned(): Promise<void> {
   await putSpot({ ...spot, warned: true })
 }
 
-/** Removes the photo, the pin, and the timer, plus cached map images of that pin. */
+/** Removes the photo, the pin, and the timer. Map images are not stored. */
 export async function deleteParkingSpot(): Promise<void> {
   await withDb(async (db) => {
-    const tx = db.transaction(['spot', 'tiles'], 'readwrite')
+    const tx = db.transaction('spot', 'readwrite')
     const done = txDone(tx)
     tx.objectStore('spot').delete(SPOT_KEY)
-    tx.objectStore('tiles').clear()
     await done
   })
 }

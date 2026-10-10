@@ -22,6 +22,7 @@ test('Parkmerke copy and modules stay local and out of the eager graph', () => {
   const mehr = read('src/pages/MehrPage.tsx')
   const app = read('src/App.tsx')
   const main = read('src/main.tsx')
+  const privacy = read('src/pages/legal/DatenschutzPage.tsx')
 
   for (const text of [store, intent, tiles, rules, mehr]) {
     assert.doesNotMatch(text, banned)
@@ -29,9 +30,18 @@ test('Parkmerke copy and modules stay local and out of the eager graph', () => {
   assert.doesNotMatch(page, pageBanned)
   assert.match(page, /Bitte kein fremdes Kennzeichen ins Bild nehmen\./)
   assert.doesNotMatch(page.replace('Bitte kein fremdes Kennzeichen ins Bild nehmen.', ''), /kennzeichen/i)
-  assert.match(page, /Die Kartenbilder kommen von OpenStreetMap\. An ihnen ist die Kartenstelle erkennbar\./)
+  assert.match(
+    page,
+    /Die Kartenbilder lädt Ihr Browser von der OpenStreetMap Foundation \(Großbritannien\)\. Dabei erhält sie Ihre IP-Adresse und erkennt den Kartenausschnitt\./,
+  )
   assert.match(page, /© OpenStreetMap-Mitwirkende/)
+  assert.match(page, /https:\/\/www\.openstreetmap\.org\/copyright/)
   assert.match(page, /noticeIsVisible/)
+  assert.match(
+    privacy,
+    /Die Kartenbilder lädt Ihr Browser von der OpenStreetMap Foundation \(Großbritannien\)\. Dabei erhält sie Ihre IP-Adresse und erkennt den Kartenausschnitt\./,
+  )
+  assert.match(privacy, /https:\/\/osmfoundation\.org\/wiki\/Privacy_Policy/)
   assert.doesNotMatch(store, /\bfetch\s*\(/)
   assert.doesNotMatch(intent, /\bfetch\s*\(|indexedDB|setInterval|geolocation/)
   assert.doesNotMatch(page, /\bfetch\s*\(/)
@@ -44,4 +54,8 @@ test('Parkmerke copy and modules stay local and out of the eager graph', () => {
   assert.doesNotMatch(app, /parkmerkeStore|parkmerkeTiles|lib\/parkmerke'/)
   assert.doesNotMatch(main, /parkmerke/)
   assert.match(tiles, /credentials: 'omit'/)
+  assert.match(tiles, /referrerPolicy: 'strict-origin'/)
+  assert.match(tiles, /cache: 'no-store'/)
+  assert.doesNotMatch(tiles, /no-referrer|readParkingTile|writeParkingTile|indexedDB/)
+  assert.doesNotMatch(store, /readParkingTile|writeParkingTile|objectStore\('tiles'\)/)
 })

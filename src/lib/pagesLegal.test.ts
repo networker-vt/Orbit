@@ -62,6 +62,10 @@ describe('legal routes', () => {
     expect(privacy.host.textContent).toContain('Verantwortlich')
     expect(privacy.host.textContent).toContain('TDDDG')
     expect(privacy.host.textContent).toContain('Art. 14')
+    expect(privacy.host.textContent).toContain(
+      'Die Kartenbilder lädt Ihr Browser von der OpenStreetMap Foundation (Großbritannien). Dabei erhält sie Ihre IP-Adresse und erkennt den Kartenausschnitt.',
+    )
+    expect(privacy.host.querySelector('a[href="https://osmfoundation.org/wiki/Privacy_Policy"]')).toBeTruthy()
     expect(privacy.host.textContent).not.toContain('Startklar')
     expect(privacy.host.textContent).not.toContain('BITTE AUSFÜLLEN')
     expect(privacy.host.textContent).not.toMatch(/Telefon:|Phone:/)
