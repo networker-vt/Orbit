@@ -4,7 +4,8 @@ import { fileURLToPath } from 'node:url'
 
 const root = new URL('..', import.meta.url)
 const EMAIL = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
-const ALLOWED_EMAIL = /^(mirco\.kuessner@gmail\.com|[^@\s]+@example\.invalid)$/i
+const ALLOWED_EMAIL = /^(mirco\.kuessner@gmail\.com|[^@\s]+@example\.invalid|[^@\s]+@orbit\.local)$/i
+const ALLOWED_PHONE = /\+49 221 00000[01]/
 
 function walk(dir, out = []) {
   if (!existsSync(dir)) return out
