@@ -32,6 +32,7 @@ import {
 import { getPrefs, savePrefs, subscribePrefs } from '../lib/prefs'
 import { formatDate, cn } from '../lib/utils'
 import { CreditsBelegList } from '../components/credits/CreditsBelegList'
+import { MessengerTranslateSettings } from '../components/messenger/MessengerTranslateSettings'
 import { getCredits, subscribeCredits } from '../lib/credits'
 import { getReferral, shareUrl, subscribeReferral } from '../lib/referral'
 import { getRegistration, requestSwitchToKids, requestSwitchToOrbit } from '../lib/registration'
@@ -237,6 +238,8 @@ export function EinstellungPage() {
         <p className="mb-3 text-xs text-muted">{t('mein.languageHint')}</p>
         <LanguageSwitcher />
       </section>
+
+      <MessengerTranslateSettings />
 
       <section
         className="rounded-2xl border border-[var(--theme-accent)]/30 bg-[var(--theme-accent)]/10 p-4"
