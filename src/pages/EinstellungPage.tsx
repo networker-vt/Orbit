@@ -12,6 +12,7 @@ import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { StarRating } from '../components/ui/StarRating'
 import { CalendarExport } from '../components/calendar/CalendarExport'
+import { NewsFeedEditor } from '../components/home/NewsFeedEditor'
 import { OccupationField } from '../components/prefs/OccupationField'
 import { INDUSTRIES, JOB_TYPES, type Industry } from '../data/industries'
 import { listLocalCalendar, removeLocalCalendarItem, type LocalCalItem } from '../lib/calendar'
@@ -185,6 +186,8 @@ export function EinstellungPage() {
           <span>{t('beta.settingsShowBanner')}</span>
         </label>
       </section>
+
+      <NewsFeedEditor variant="settings" />
 
       <section id="mitentwickeln" className="space-y-2 rounded-2xl border border-border bg-surface-2 p-4">
         <h2 className="text-lg font-semibold">{t('mitentwickeln.title')}</h2>
