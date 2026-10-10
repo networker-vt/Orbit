@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Heart } from 'lucide-react'
 import { Button } from '../ui/Button'
+import { AnschreibenButton } from '../chat/AnschreibenButton'
 import { useAuth } from '../../lib/auth'
 import { applyInterest, alreadyApplied } from '../../lib/apply'
+import { chatHref } from '../../lib/chatPath'
 import { useI18n } from '../../lib/i18n'
 import { isFlagOn } from '../../lib/flags'
 import type { Listing } from '../../types'
@@ -46,7 +48,7 @@ export function InteresseButton({ listing }: { listing: Listing }) {
         <p className="text-sm text-neutral-300">{t('apply.sentHint')}</p>
         <div className="flex flex-wrap gap-2">
           {done?.threadId && (
-            <Button onClick={() => navigate(`/messages/${done.threadId}`)}>{t('apply.chat')}</Button>
+            <Button onClick={() => navigate(chatHref(done.threadId))}>{t('chat.anschreiben')}</Button>
           )}
           {isFlagOn('interview') && (
           <Button
@@ -65,9 +67,12 @@ export function InteresseButton({ listing }: { listing: Listing }) {
     <div className="space-y-2 rounded-2xl border border-border bg-surface-2 p-4">
       <h2 className="font-semibold">{t('apply.oneTap')}</h2>
       <p className="text-sm text-muted">{t('apply.shares')}</p>
-      <Button className="w-full md:w-auto" size="lg" onClick={run}>
-        <Heart size={18} fill="currentColor" /> {t('apply.interest')}
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button className="w-full md:w-auto" size="lg" onClick={run}>
+          <Heart size={18} fill="currentColor" /> {t('apply.interest')}
+        </Button>
+        <AnschreibenButton listing={listing} source="job" variant="secondary" size="lg" />
+      </div>
     </div>
   )
 }

@@ -9,6 +9,7 @@ import { Button } from '../components/ui/Button'
 import { Select, Textarea } from '../components/ui/Input'
 import { SpeakButton } from '../components/a11y/SpeakButton'
 import { InteresseButton } from '../components/apply/InteresseButton'
+import { AnschreibenButton } from '../components/chat/AnschreibenButton'
 import { ExperienceList } from '../components/reviews/ExperienceList'
 import { BOOKING_STATUS_LABELS, VERTICAL_META } from '../data/constants'
 import { DEMO_USER_ID, seedProfiles } from '../data/seed'
@@ -366,6 +367,7 @@ export function ListingDetailPage() {
       ) : (
         <div className="space-y-3 rounded-2xl border border-border bg-surface-2 p-5">
           <h2 className="font-semibold">Kurze Anfrage</h2>
+          <AnschreibenButton listing={listing} source="listing" fullWidth size="lg" />
           <Textarea
             label="Nachricht (optional, kein Anschreiben nötig)"
             value={note}

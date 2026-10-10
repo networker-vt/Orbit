@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { Camera, ImageIcon } from 'lucide-react'
 import { ListingCard } from '../components/listings/ListingCard'
+import { AnschreibenButton } from '../components/chat/AnschreibenButton'
 import { Button } from '../components/ui/Button'
 import { SpeakButton } from '../components/a11y/SpeakButton'
 import { useListings } from '../hooks/useStore'
@@ -94,7 +95,10 @@ export function PhotoJobsPage() {
           <h3 className="pt-2 text-sm font-semibold">{t('photo.jobs')}</h3>
           <div className="grid gap-3">
             {nearby.map((l) => (
-              <ListingCard key={l.id} listing={l} highlightRate />
+              <div key={l.id} className="space-y-2">
+                <ListingCard listing={l} highlightRate />
+                <AnschreibenButton listing={l} source="foto" variant="secondary" fullWidth />
+              </div>
             ))}
             {nearby.length === 0 && <p className="text-sm text-muted">Keine Demo-Jobs in der Nähe.</p>}
           </div>
