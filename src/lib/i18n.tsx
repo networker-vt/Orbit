@@ -639,6 +639,8 @@ const deDict: Dict = {
   'social.chatsStart': 'Öffnen',
   'social.chatsContinue': 'Weiter',
   'social.chatsCount': '{n} Suchbegriff-Chats auf diesem Gerät',
+  'social.dmConsent':
+    '1:1-Chats nur nach Anfrage und Annahme (Orbit Chat). Suchbegriff-Räume brauchen keine Genehmigung.',
   'auth.title': 'Willkommen bei Orbit',
   'auth.lead': 'Magic Link per E-Mail. Jobs finden oder anbieten.',
   'auth.backendLive': 'Supabase Auth bereit — echter Magic Link.',
@@ -1396,6 +1398,8 @@ const enDict: Dict = {
   'social.chatsStart': 'Open',
   'social.chatsContinue': 'Continue',
   'social.chatsCount': '{n} search-term chats on this device',
+  'social.dmConsent':
+    '1:1 chats only after request and accept (Orbit Chat). Search-term rooms need no consent.',
   'auth.title': 'Welcome to Orbit',
   'auth.lead': 'Magic link by email. Find or offer jobs.',
   'auth.backendLive': 'Supabase Auth ready — real magic link.',

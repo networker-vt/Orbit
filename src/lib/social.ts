@@ -1,5 +1,6 @@
 import { store } from './store'
 import { getPrefs, type OrbitPrefs } from './prefs'
+import { requestSocialDm } from './socialDmConsent'
 import { uid } from './utils'
 import type { Thread } from '../types'
 
@@ -405,22 +406,45 @@ export function listSearchTermChats(userId: string): Thread[] {
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
 }
 
+/**
+ * 1:1 Social DM — request only. Recipient must accept; Orbit Chat binds `threadId`.
+ * Does **not** create a chat thread (avoids racing the Telegram-like Orbit Chat model).
+ * Topic / Suchbegriff rooms use `openSearchTermChat` and stay consent-free.
+ *
+ * @see `src/lib/socialDmConsent.ts` and internal contract `orbit-social-dm-consent.md`
+ */
 export function startSocialDm(input: {
   meId: string
   meName: string
   otherId: string
   otherName: string
+  note?: string
 }) {
-  return store.createDirectThread({
-    participantIds: [input.meId, input.otherId],
-    participantNames: [input.meName, input.otherName],
-    listingTitle: input.otherName,
-    senderId: input.meId,
-    senderName: input.meName,
-    body: 'Orbit Social — kurzer DM (Demo).',
-    kind: 'social',
+  return requestSocialDm({
+    fromId: input.meId,
+    fromName: input.meName,
+    toId: input.otherId,
+    toName: input.otherName,
+    note: input.note,
   })
 }
+
+export {
+  acceptSocialDmRequest,
+  attachSocialDmThreadId,
+  canOpenSocialDm,
+  declineSocialDmRequest,
+  findSocialDmRequestBetween,
+  getAcceptedSocialDmThreadId,
+  getSocialDmRequest,
+  listSocialDmRequests,
+  registerSocialDmThreadBinder,
+  requestSocialDm,
+  subscribeSocialDmRequests,
+  type SocialDmRequest,
+  type SocialDmRequestStatus,
+  type SocialDmThreadBinder,
+} from './socialDmConsent'
 
 /** Test helper — clears in-memory cache so the next read reloads from localStorage. */
 export function __resetSocialCacheForTests() {

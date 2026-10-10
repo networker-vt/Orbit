@@ -180,6 +180,9 @@ export function SocialPage() {
       <p className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
         {t('social.demo')}
       </p>
+      <p className="rounded-2xl border border-border bg-surface-2 px-3 py-2 text-xs text-muted" data-social-dm-consent>
+        {t('social.dmConsent')}
+      </p>
       {shareNote && (
         <p className="text-xs text-[var(--theme-accent)]" role="status">
           {shareNote}
