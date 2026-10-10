@@ -10,6 +10,8 @@
 	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>Orbit verwendet die Kamera für Foto-Upload, Foto-Verkauf (Artikel fotografieren), Kabine, Entdecker und die lokale Interview-Vorschau.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Orbit nutzt deinen Standort für Wetter & Outfit, günstige Tankstellen in der Nähe, Essenstipps Nearby, Parkmerke und Supermarkt-Links auf der Karte — nur wenn du es erlaubst.</string>
 	<key>CFBundleDisplayName</key>
         <string>Orbit</string>
 	<key>CFBundleExecutable</key>

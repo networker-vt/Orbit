@@ -27,6 +27,8 @@ interface ImportMetaEnv {
   /** Sell-by-photo vision endpoint (FormData image). Falls back to demo stub when unset. */
   readonly VITE_VISION_API_URL?: string
   readonly VITE_SELL_VISION_URL?: string
+  /** Tankerkönig DE fuel prices — https://creativecommons.tankerkoenig.de/ */
+  readonly VITE_TANKERKOENIG_API_KEY?: string
 }
 
 interface ImportMeta {
