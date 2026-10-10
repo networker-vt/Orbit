@@ -10,6 +10,8 @@
 	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>Orbit verwendet die Kamera für Foto-Upload, Foto-Verkauf (Artikel fotografieren), Kabine, Entdecker und die lokale Interview-Vorschau.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Orbit nutzt Face ID, um dein Konto auf diesem Gerät schnell und sicher zu entsperren — nach deinem Passwort-Login.</string>
 	<key>CFBundleDisplayName</key>
         <string>Orbit</string>
 	<key>CFBundleExecutable</key>

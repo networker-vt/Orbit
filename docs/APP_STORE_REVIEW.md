@@ -12,6 +12,8 @@ Orbit is a marketplace companion (jobs, learning, social stubs, travel search li
 
 **Sign-in for review:** On Auth, check “I am at least 18”, then use “Start as demo agency” (or Magic Link → “Open demo link”).
 
+**Password / Face ID / 2FA (local demo):** Settings → **Sicherheit** — optional password (PBKDF2 on-device), TOTP authenticator (QR + backup codes), Face ID / Touch ID unlock in the native app only (`NSFaceIDUsageDescription` in Info.plist). No server sync; review can create an account on the **Account** tab with password, enable 2FA, then sign out and use the **Password** tab. Biometrics require a physical device build, not Mobile Safari.
+
 **Orbit Kids (feature flag):** When enabled under Mein → Orbit Kids, a parent sets a 4-digit PIN first. Minors get a restricted UI (Campus/Assist; no wallet, no public chat, no adult booking). Kids is not a full marketplace account.
 
 **Report content:** Use “Report content” on a listing/profile/message. The report is stored on-device; optionally open the mailto to the operator.
@@ -26,4 +28,4 @@ Publisher: Mirco Küßner (private individual) — same as Impressum.
 
 ## Deutsch (Kurzfassung)
 
-Orbit ist ein Marktplatz-Companion. Standard-Build = Demo: kein echtes Geld, keine IAP, Reise nur Suchlinks. Review: 18+ bestätigen → „Demo als Agentur“. Orbit Kids (falls Flag an): Eltern-PIN zuerst, eingeschränkte UI. Melden bleibt in der App; E-Mail optional. Privacy/Support-URLs wie oben.
+Orbit ist ein Marktplatz-Companion. Standard-Build = Demo: kein echtes Geld, keine IAP, Reise nur Suchlinks. Review: 18+ bestätigen → „Demo als Agentur“. Optional: Einstellung → Sicherheit (Passwort, 2FA, Face ID nur native App, alles lokal). Orbit Kids (falls Flag an): Eltern-PIN zuerst, eingeschränkte UI. Melden bleibt in der App; E-Mail optional. Privacy/Support-URLs wie oben.

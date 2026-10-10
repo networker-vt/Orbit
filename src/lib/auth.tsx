@@ -15,6 +15,15 @@ import { consumePendingReferral } from './referral'
 import { isSupabaseConfigured, supabase } from './supabase'
 import { markDemoPhoneVerified, markEmailVerified } from './verify'
 import { hydrateCreditsLedger } from './credits'
+import {
+  clearAppUnlock,
+  hasLocalPassword,
+  isTotpEnabled,
+  markAppUnlocked,
+  setUserPassword,
+  verifySecondFactor,
+  verifyUserPassword,
+} from './accountSecurity'
 
 const AUTH_KEY = 'el_auth_user'
 const MAGIC_PENDING_KEY = 'orbit_magic_pending_v1'
@@ -30,6 +39,19 @@ interface AuthContextValue {
   register: (email: string, name: string, role: Role, city: string) => Profile
   requestMagicLink: (email: string, name?: string) => Promise<{ ok: boolean; backend: 'supabase' | 'demo' }>
   confirmDemoMagic: () => void
+  loginWithPassword: (
+    email: string,
+    password: string,
+  ) => Promise<{ ok: boolean; needsTotp?: boolean; reason?: 'unknown' | 'wrong' }>
+  completePasswordLoginWithTotp: (code: string) => boolean
+  registerWithPassword: (
+    email: string,
+    name: string,
+    role: Role,
+    city: string,
+    password: string,
+  ) => Promise<{ ok: boolean; reason?: 'weak' }>
+  pendingTotpUserId: string | null
   logout: () => void
   updateProfile: (patch: Partial<Profile>) => void
 }
@@ -69,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [pendingTotpUserId, setPendingTotpUserId] = useState<string | null>(null)
   const [magicPending, setMagicPending] = useState<string | null>(() => {
     try {
       return localStorage.getItem(MAGIC_PENDING_KEY)
@@ -265,7 +288,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login(email, name, 'freelancer')
   }, [login, magicPending])
 
+  const finishLogin = useCallback(
+    (p: Profile) => {
+      persist({ id: p.id, email: p.email, name: p.name, role: p.role }, p)
+      consumePendingReferral(p.id)
+      void import('./rewards').then((m) => m.grantWelcomeOnSignup()).catch(() => undefined)
+      if (hasLocalPassword(p.id)) markAppUnlocked(p.id)
+    },
+    [persist],
+  )
+
+  const loginWithPassword = useCallback(
+    async (email: string, password: string) => {
+      const trimmed = email.trim().toLowerCase()
+      const profile = store.listProfiles().find((p) => p.email.trim().toLowerCase() === trimmed)
+      if (!profile || !hasLocalPassword(profile.id)) return { ok: false, reason: 'unknown' as const }
+      if (!(await verifyUserPassword(profile.id, password))) return { ok: false, reason: 'wrong' as const }
+      if (isTotpEnabled(profile.id)) {
+        setPendingTotpUserId(profile.id)
+        return { ok: true, needsTotp: true }
+      }
+      finishLogin(profile)
+      return { ok: true, needsTotp: false }
+    },
+    [finishLogin],
+  )
+
+  const completePasswordLoginWithTotp = useCallback(
+    (code: string) => {
+      if (!pendingTotpUserId) return false
+      if (!verifySecondFactor(pendingTotpUserId, code)) return false
+      const profile = store.getProfile(pendingTotpUserId)
+      if (!profile) return false
+      setPendingTotpUserId(null)
+      finishLogin(profile)
+      return true
+    },
+    [finishLogin, pendingTotpUserId],
+  )
+
+  const registerWithPassword = useCallback(
+    async (email: string, name: string, role: Role, city: string, password: string) => {
+      const p = register(email, name, role, city)
+      const res = await setUserPassword(p.id, password)
+      if (!res.ok) return { ok: false, reason: 'weak' as const }
+      markAppUnlocked(p.id)
+      return { ok: true }
+    },
+    [register],
+  )
+
   const logout = useCallback(() => {
+    setPendingTotpUserId(null)
+    clearAppUnlock()
     persist(null, null)
     if (supabase) void supabase.auth.signOut()
   }, [persist])
@@ -293,6 +368,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       register,
       requestMagicLink,
       confirmDemoMagic,
+      loginWithPassword,
+      completePasswordLoginWithTotp,
+      registerWithPassword,
+      pendingTotpUserId,
       logout,
       updateProfile,
     }),
@@ -302,11 +381,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       authBackend,
       magicPending,
+      pendingTotpUserId,
       loginDemo,
       login,
       register,
       requestMagicLink,
       confirmDemoMagic,
+      loginWithPassword,
+      completePasswordLoginWithTotp,
+      registerWithPassword,
       logout,
       updateProfile,
     ],

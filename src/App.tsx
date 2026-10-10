@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom'
 import { AppShell } from './components/layout/AppShell'
 import { AuthProvider } from './lib/auth'
+import { AppUnlockGate } from './components/security/AppUnlockGate'
 import { I18nProvider, useI18n } from './lib/i18n'
 import { initRewards } from './lib/rewards'
 import { initStore } from './lib/store'
@@ -113,6 +114,7 @@ function AppReady() {
 
   return (
     <AuthProvider>
+      <AppUnlockGate>
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route element={<AppShell />}>
@@ -197,6 +199,7 @@ function AppReady() {
           </Route>
         </Routes>
       </BrowserRouter>
+      </AppUnlockGate>
     </AuthProvider>
   )
 }

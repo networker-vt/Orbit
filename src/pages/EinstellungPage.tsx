@@ -5,6 +5,7 @@ import { LanguageSwitcher } from '../components/i18n/LanguageSwitcher'
 import { RoleSwitcher } from '../components/role/RoleSwitcher'
 import { ChannelLinks } from '../components/mein/ChannelLinks'
 import { VerifyPanel } from '../components/verify/VerifyPanel'
+import { SecuritySettingsPanel } from '../components/security/SecuritySettingsPanel'
 import { ReminderOptIn } from '../components/reminders/ReminderOptIn'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
@@ -111,6 +112,8 @@ export function EinstellungPage() {
           <VerifyPanel />
         </div>
       )}
+
+      <SecuritySettingsPanel />
 
       <div id="erinnerungen">
         <ReminderOptIn />
