@@ -7,6 +7,7 @@ import { useI18n } from '../../lib/i18n'
 import { themeForPath } from '../../lib/theme'
 import { PwaInstallBanner } from './PwaInstallBanner'
 import { DemoStoreBanner } from './DemoStoreBanner'
+import { PreReleaseBetaBanner } from './PreReleaseBetaBanner'
 import { CreateSheet } from './CreateSheet'
 import { BrandIcon, BrandMark } from '../brand/BrandMark'
 import { SkipLink } from '../a11y/SkipLink'
@@ -94,6 +95,7 @@ export function AppShell() {
       className="theme-shell mx-auto flex min-h-dvh max-w-6xl flex-col overflow-x-hidden"
     >
       <SkipLink />
+      <PreReleaseBetaBanner />
       <DemoStoreBanner />
       {kidsSurfaceEnabled() && kids && <KidsBanner />}
       {import.meta.env.DEV && stub && location.pathname !== '/' && (

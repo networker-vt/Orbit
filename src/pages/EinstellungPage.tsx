@@ -31,6 +31,7 @@ import {
 import { getPrefs, savePrefs, subscribePrefs } from '../lib/prefs'
 import { formatDate, cn } from '../lib/utils'
 import { getRegistration, requestSwitchToKids, requestSwitchToOrbit } from '../lib/registration'
+import { isBetaNoticeEnabled, setBetaNoticeEnabled } from '../lib/betaNotice'
 
 const DOC_KINDS: { id: HubDocKind; key: 'mein.qual' | 'mein.cert' | 'mein.train' }[] = [
   { id: 'qualification', key: 'mein.qual' },
@@ -42,6 +43,7 @@ export function EinstellungPage() {
   const { t } = useI18n()
   const navigate = useNavigate()
   const reg = getRegistration()
+  const [betaNotice, setBetaNotice] = useState(isBetaNoticeEnabled)
   const { hash } = useLocation()
   const [cal, setCal] = useState<LocalCalItem[]>(() => listLocalCalendar())
   const [hub, setHub] = useState(getHub)
@@ -117,6 +119,22 @@ export function EinstellungPage() {
       <div id="erinnerungen">
         <ReminderOptIn />
       </div>
+
+      <section id="beta-hinweis" className="space-y-2 rounded-2xl border border-sky-500/25 bg-sky-500/5 p-4">
+        <h2 className="text-lg font-semibold">{t('beta.settingsTitle')}</h2>
+        <p className="text-xs text-muted">{t('beta.settingsLead')}</p>
+        <label className="flex items-start gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={betaNotice}
+            onChange={(e) => {
+              setBetaNoticeEnabled(e.target.checked)
+              setBetaNotice(e.target.checked)
+            }}
+          />
+          <span>{t('beta.settingsShowBanner')}</span>
+        </label>
+      </section>
 
       <section id="mitentwickeln" className="space-y-2 rounded-2xl border border-border bg-surface-2 p-4">
         <h2 className="text-lg font-semibold">{t('mitentwickeln.title')}</h2>

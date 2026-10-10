@@ -34,6 +34,7 @@ const page = await ctx.newPage()
 await mkdir(outDir, { recursive: true })
 
 const shots = [
+  { file: 'orbit-beta-prerelease-banner.png', path: '', clear: true },
   { file: 'orbit-onboarding-chooser.png', path: 'willkommen', clear: true },
   { file: 'orbit-kids-consent.png', path: 'willkommen/kids', clear: false },
   { file: 'orbit-registration-tour.png', path: 'willkommen/orbit', clear: false },
