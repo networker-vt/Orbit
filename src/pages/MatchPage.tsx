@@ -129,7 +129,7 @@ export function MatchPage() {
   const [checklist, setChecklist] = useState<string[] | null>(null)
   const [explain, setExplain] = useState(false)
   const [capOpen, setCapOpen] = useState(false)
-  const [budget, setBudget] = useState(getSwipeBudget)
+  const [, setBudget] = useState(getSwipeBudget)
   const [sellOpen, setSellOpen] = useState(
     () => searchParams.get('sell') === '1' || searchParams.get('photo') === '1',
   )
