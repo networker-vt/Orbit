@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button'
 import { BOOKING_STATUS_LABELS } from '../data/constants'
 import { useStoreVersion } from '../hooks/useStore'
 import { useAuth } from '../lib/auth'
+import { chatHref } from '../lib/chatPath'
 import { store } from '../lib/store'
 import { cn, formatPrice, verificationLabel } from '../lib/utils'
 
@@ -151,7 +152,7 @@ export function CompareOffersPage() {
                     <Button
                       size="sm"
                       variant="secondary"
-                      onClick={() => navigate(`/messages/${b.threadId}`)}
+                      onClick={() => navigate(chatHref(b.threadId))}
                     >
                       Chat
                     </Button>
@@ -230,7 +231,7 @@ export function CompareOffersPage() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => navigate(`/messages/${b.threadId}`)}
+                            onClick={() => navigate(chatHref(b.threadId))}
                           >
                             Chat
                           </Button>

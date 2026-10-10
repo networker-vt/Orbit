@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Heart, SkipForward, MessageSquare, Plane } from 'lucide-react'
 import { rankPersonalizedMatch, type PersonalizedItem } from '../lib/personalizedMatch'
 import { chatHref } from '../lib/chatPath'
+import { openMutualMatchChat, chatSourceForListing } from '../lib/contextualChat'
+import { AnschreibenButton } from '../components/chat/AnschreibenButton'
 import type { TravelOffer } from '../lib/travel'
 import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
@@ -399,6 +401,16 @@ export function MatchPage() {
     return actor
   }
 
+  const goMutualChat = (mutual: MutualMatch) => {
+    const actor = ensureActor()
+    const thread = openMutualMatchChat({
+      meId: actor.id,
+      meName: actor.name,
+      mutual,
+    })
+    navigate(chatHref(thread.id))
+  }
+
   const swipe = (action: 'interested' | 'skip') => {
     if (!current) return
     if (!consumeSwipe()) {
@@ -662,12 +674,13 @@ export function MatchPage() {
             {mutuals.slice(0, 5).map((m) => (
               <li key={m.id} className="flex items-center justify-between gap-2 text-sm">
                 <span className="truncate text-neutral-200">{m.title}</span>
-                <Link
-                  to={m.listingId ? `/listings/${m.listingId}` : chatHref()}
+                <button
+                  type="button"
+                  onClick={() => goMutualChat(m)}
                   className="shrink-0 text-cyan hover:underline"
                 >
-                  {t('apply.chat')}
-                </Link>
+                  {t('chat.anschreiben')}
+                </button>
               </li>
             ))}
           </ul>
@@ -692,12 +705,9 @@ export function MatchPage() {
         <div className="fixed inset-x-4 bottom-28 z-40 mx-auto max-w-sm rounded-2xl border border-cyan/40 bg-surface-2 p-4 shadow-xl md:bottom-8">
           <p className="text-sm font-semibold text-[var(--theme-accent)]">✨ {t('match.mutual')}</p>
           <p className="mt-1 text-sm text-neutral-200">{toast.title}</p>
-          <Button
-            size="sm"
-            className="mt-3 w-full"
-            onClick={() => navigate(toast.listingId ? `/listings/${toast.listingId}` : chatHref())}
-          >
-            {t('apply.chat')}
+          <p className="mt-1 text-xs text-muted">{t('apply.sentHint')}</p>
+          <Button size="sm" className="mt-3 w-full" onClick={() => goMutualChat(toast)}>
+            {t('chat.anschreiben')}
           </Button>
         </div>
       )}
@@ -892,6 +902,15 @@ function JobCard({
         />
       </div>
       <Breakdown score={score} open={explain} hidden={[listing.city, listing.venue ?? '']} />
+      <div className="relative z-10 mt-3">
+        <AnschreibenButton
+          listing={listing}
+          source={chatSourceForListing(listing, 'match')}
+          variant="secondary"
+          size="sm"
+          fullWidth
+        />
+      </div>
       <div className="pointer-events-none absolute -right-8 -top-8 text-7xl opacity-20">
         {listing.imageEmoji || '💼'}
       </div>

@@ -9,6 +9,7 @@ import { BOOKING_STATUS_LABELS, VERTICAL_META } from '../data/constants'
 import { useStoreVersion } from '../hooks/useStore'
 import { useAuth } from '../lib/auth'
 import { isFlagOn } from '../lib/flags'
+import { chatHref } from '../lib/chatPath'
 import { store } from '../lib/store'
 import type { BookingStatus } from '../types'
 import { formatDate, formatPrice } from '../lib/utils'
@@ -178,7 +179,7 @@ export function BookingPage() {
             Anhängen
           </Button>
           {booking.threadId && (
-            <Button variant="ghost" onClick={() => navigate(`/messages/${booking.threadId}`)}>
+            <Button variant="ghost" onClick={() => navigate(chatHref(booking.threadId))}>
               Zum Chat
             </Button>
           )}
