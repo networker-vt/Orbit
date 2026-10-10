@@ -47,7 +47,13 @@ describe('Orbit 2.8.1 surface', () => {
   it('Home discover copy no longer lists Mein / Social / Wallet', () => {
     for (const locale of ['de', 'en'] as const) {
       expect(tStatic('home.mehrHint', locale)).not.toMatch(/Social|Wallet|Mein/)
-      expect(tStatic('mein.lead', locale)).toMatch(/Wallet|Prefs|prefs|Kanäle|channels/)
     }
+  })
+
+  it('Mein Orbit title and Einstellung entry are renamed', () => {
+    expect(tStatic('mein.title', 'de')).toBe('Mein Orbit')
+    expect(tStatic('mein.kicker', 'de')).toBe('Mein Orbit')
+    expect(tStatic('einstellung.title', 'de')).toBe('Einstellung')
+    expect(tStatic('mein.lead', 'de')).toMatch(/Schnellzugriffe|Startseite/)
   })
 })

@@ -33,6 +33,7 @@ export type HubTileId =
   | 'refer'
   | 'match'
   | 'jobs'
+  | 'einstellung'
 
 export type HubTileDef = {
   id: HubTileId
@@ -80,20 +81,15 @@ export const MEHR_DISCOVER_DEFS: HubTileDef[] = [
 ]
 
 /**
- * Mein hub — account tools only, sorted: money → identity → create → connect → tools.
- * Discover destinations (Campus, Entdecker, Kabine, Firma, Crew, Abflug) stay off this grid.
+ * Slim account catalog (Einstellung holds prefs/language/role/reminders).
+ * Discover destinations stay off this grid — users pin them as Schnellzugriffe instead.
  */
 export const MEIN_ACCOUNT_DEFS: HubTileDef[] = [
+  { id: 'einstellung', to: '/einstellung', labelKey: 'einstellung.title', emoji: '⚙️', tone: 'amber', surface: 'account' },
   { id: 'wallet', to: '/wallet', labelKey: 'nav.wallet', emoji: '👛', tone: 'teal', surface: 'account', hide: (c) => c.hideWallet || !isFlagOn('credits') },
   { id: 'profile', to: '/profile', labelKey: 'nav.mein', emoji: '👤', tone: 'slate', surface: 'account' },
-  { id: 'verify', to: '/mein#verify', labelKey: 'verify.title', emoji: '🛡️', tone: 'lime', surface: 'account', hide: () => !isFlagOn('verifyId') },
-  { id: 'prefs', to: '/prefs', labelKey: 'match.tweakPrefs', emoji: '⚙️', tone: 'amber', surface: 'account' },
   { id: 'create', to: '/listings/new', labelKey: 'nav.create', emoji: '➕', tone: 'slate', surface: 'account', hide: (c) => c.kids },
   { id: 'offer', to: '/listings/new?kind=offer', labelKey: 'mein.offer', emoji: '📣', tone: 'orange', surface: 'account', hide: (c) => c.kids },
-  { id: 'channels', to: '/channels', labelKey: 'channels.nav', emoji: '📡', tone: 'violet', surface: 'account', demo: true, hide: () => !isFlagOn('channels') },
-  { id: 'ideas', to: '/ideen', labelKey: 'mehr.ideas', emoji: '💡', tone: 'orange', surface: 'account', hide: () => !isFlagOn('ideas') },
-  { id: 'language', to: '/mein#sprache', labelKey: 'mein.language', emoji: '🌐', tone: 'amber', surface: 'account' },
-  { id: 'dashboard', to: '/dashboard', labelKey: 'mein.dashboard', emoji: '📊', tone: 'sky', surface: 'account' },
   { id: 'kids', to: '/kids', labelKey: 'kids.title', emoji: '🧒', tone: 'orange', surface: 'account', hide: () => !isFlagOn('kids') },
   { id: 'refer', to: '/empfehlen', labelKey: 'mehr.refer', emoji: '🎁', tone: 'sky', surface: 'account', hide: (c) => c.hideWallet },
 ]

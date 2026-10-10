@@ -45,6 +45,9 @@ const CreateListingPage = lazy(() =>
   import('./pages/CreateListingPage').then((m) => ({ default: m.CreateListingPage })),
 )
 const MeinPage = lazy(() => import('./pages/MeinPage').then((m) => ({ default: m.MeinPage })))
+const EinstellungPage = lazy(() =>
+  import('./pages/EinstellungPage').then((m) => ({ default: m.EinstellungPage })),
+)
 const InterviewPage = lazy(() => import('./pages/InterviewPage').then((m) => ({ default: m.InterviewPage })))
 const PhotoJobsPage = lazy(() => import('./pages/PhotoJobsPage').then((m) => ({ default: m.PhotoJobsPage })))
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage })))
@@ -154,6 +157,7 @@ function AppReady() {
               <Route path="look" element={<FlagRoute flag="kabine"><LookPage /></FlagRoute>} />
               <Route path="kabine" element={<FlagRoute flag="kabine"><LookPage /></FlagRoute>} />
               <Route path="mein" element={<MeinPage />} />
+              <Route path="einstellung" element={<EinstellungPage />} />
               <Route path="foto" element={<FlagRoute flag="photoJobs"><PhotoJobsPage /></FlagRoute>} />
               <Route path="interview" element={<FlagRoute flag="interview"><InterviewPage /></FlagRoute>} />
               <Route path="interview/:roomId" element={<FlagRoute flag="interview"><InterviewPage /></FlagRoute>} />
