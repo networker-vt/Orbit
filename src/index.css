@@ -481,6 +481,45 @@ textarea:focus-visible,
 
 }
 
+/* Orbit Social — hero atmosphere (search-term feed page) */
+.orbit-social-hero {
+  min-height: 220px;
+  background:
+    radial-gradient(120% 80% at 20% 0%, color-mix(in oklab, var(--theme-accent) 35%, #0f172a), transparent 55%),
+    linear-gradient(160deg, #0f766e 0%, #134e4a 45%, #1c1917 100%);
+}
+.orbit-social-hero__img {
+  opacity: 0;
+  transform: scale(1.06);
+  transition: opacity 700ms ease, transform 1.2s ease;
+}
+.orbit-social-hero--ready .orbit-social-hero__img {
+  opacity: 1;
+  transform: scale(1);
+}
+.orbit-social-hero__wash {
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.15) 0%, rgba(15, 23, 42, 0.55) 45%, rgba(15, 23, 42, 0.88) 100%),
+    radial-gradient(80% 60% at 70% 20%, color-mix(in oklab, var(--theme-accent-2) 35%, transparent), transparent 70%);
+}
+.orbit-social-hero__brand {
+  animation: orbit-social-rise 560ms ease both;
+}
+.orbit-social-hero__title {
+  animation: orbit-social-rise 700ms 80ms ease both;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+}
+@keyframes orbit-social-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .motion-orb,
   .motion-orb-delay,
@@ -493,9 +532,16 @@ textarea:focus-visible,
   .stagger-in > *,
   .orbi-kind-img,
   .orbi-tap,
-  .orbi-tap:active {
+  .orbi-tap:active,
+  .orbit-social-hero__brand,
+  .orbit-social-hero__title,
+  .orbit-social-hero__img {
     animation: none !important;
     transform: none;
+  }
+  .orbit-social-hero__img {
+    opacity: 1;
+    transition: none;
   }
   .text-shimmer {
     background: linear-gradient(135deg, #00f0ff, #14b8a6);
