@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Heart, SkipForward, MessageSquare, Plane } from 'lucide-react'
 import { rankPersonalizedMatch, type PersonalizedItem } from '../lib/personalizedMatch'
 import { chatHref } from '../lib/chatPath'
