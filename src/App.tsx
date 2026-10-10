@@ -83,6 +83,11 @@ function MessagesToSocial() {
   return <Navigate to={threadId ? `/social/chat/${threadId}` : '/social/chat'} replace />
 }
 
+function ChatAlias() {
+  const { threadId } = useParams()
+  return <Navigate to={threadId ? `/social/chat/${threadId}` : '/social/chat'} replace />
+}
+
 export default function App() {
   return (
     <I18nProvider>
@@ -136,6 +141,8 @@ function AppReady() {
               <Route path="social" element={<SocialPage />} />
               <Route path="social/chat" element={<MessagesPage />} />
               <Route path="social/chat/:threadId" element={<MessagesPage />} />
+              <Route path="chat" element={<ChatAlias />} />
+              <Route path="chat/:threadId" element={<ChatAlias />} />
               <Route path="entdecker" element={<FlagRoute flag="entdecker"><EntdeckerPage /></FlagRoute>} />
               <Route path="quellen" element={<QuellenPage />} />
               <Route path="jobs/compare/:listingId" element={<CompareOffersPage />} />

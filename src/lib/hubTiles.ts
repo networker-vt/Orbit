@@ -33,6 +33,7 @@ export type HubTileId =
   | 'refer'
   | 'match'
   | 'jobs'
+  | 'chat'
 
 export type HubTileDef = {
   id: HubTileId
@@ -86,6 +87,7 @@ export const MEIN_ACCOUNT_DEFS: HubTileDef[] = [
   { id: 'profile', to: '/profile', labelKey: 'nav.mein', emoji: '👤', tone: 'slate', surface: 'account' },
   { id: 'verify', to: '/mein#verify', labelKey: 'verify.title', emoji: '🛡️', tone: 'lime', surface: 'account', hide: () => !isFlagOn('verifyId') },
   { id: 'prefs', to: '/prefs', labelKey: 'match.tweakPrefs', emoji: '⚙️', tone: 'amber', surface: 'account' },
+  { id: 'chat', to: '/social/chat', labelKey: 'chat.brand', emoji: '💬', tone: 'sky', surface: 'account', hide: (c) => c.kids },
   { id: 'create', to: '/listings/new', labelKey: 'nav.create', emoji: '➕', tone: 'slate', surface: 'account', hide: (c) => c.kids },
   { id: 'offer', to: '/listings/new?kind=offer', labelKey: 'mein.offer', emoji: '📣', tone: 'orange', surface: 'account', hide: (c) => c.kids },
   { id: 'channels', to: '/channels', labelKey: 'channels.nav', emoji: '📡', tone: 'violet', surface: 'account', demo: true, hide: () => !isFlagOn('channels') },
