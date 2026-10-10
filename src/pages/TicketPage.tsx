@@ -3,6 +3,7 @@ import { QrStub } from '../components/travel/QrStub'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Empty } from '../components/ui/Empty'
+import { chatHref } from '../lib/chatPath'
 import { useI18n } from '../lib/i18n'
 import { cancelTicket, getTicket, subscribeTickets } from '../lib/tickets'
 import { formatDateTime, formatPrice } from '../lib/utils'
@@ -69,7 +70,7 @@ export function TicketPage() {
 
       <div className="flex flex-wrap gap-2">
         {ticket.threadId && (
-          <Button variant="secondary" onClick={() => navigate(`/messages/${ticket.threadId}`)}>
+          <Button variant="secondary" onClick={() => navigate(chatHref(ticket.threadId))}>
             {t('ticket.chat')}
           </Button>
         )}

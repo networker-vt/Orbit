@@ -355,7 +355,7 @@ export function ListingDetailPage() {
             (Angebot → Annahme → Buchung).
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button onClick={() => navigate(`/messages/${done.threadId}`)}>Zum Chat</Button>
+            <Button onClick={() => navigate(chatHref(done.threadId))}>{t('chat.anschreiben')}</Button>
             <Button variant="secondary" onClick={() => navigate(`/bookings/${done.bookingId}`)}>
               Status öffnen
             </Button>
@@ -367,7 +367,7 @@ export function ListingDetailPage() {
       ) : (
         <div className="space-y-3 rounded-2xl border border-border bg-surface-2 p-5">
           <h2 className="font-semibold">Kurze Anfrage</h2>
-          <AnschreibenButton listing={listing} source="listing" fullWidth size="lg" />
+          <AnschreibenButton listing={listing} source="listing" note={note} fullWidth size="lg" />
           <Textarea
             label="Nachricht (optional, kein Anschreiben nötig)"
             value={note}

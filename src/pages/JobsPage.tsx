@@ -20,6 +20,7 @@ import { Empty } from '../components/ui/Empty'
 import { BOOKING_STATUS_LABELS } from '../data/constants'
 import { useListings, useStoreVersion } from '../hooks/useStore'
 import { useAuth } from '../lib/auth'
+import { chatHref } from '../lib/chatPath'
 import { store } from '../lib/store'
 import { formatPrice } from '../lib/utils'
 import type { ListingFilters } from '../types'
@@ -350,7 +351,7 @@ export function JobsPage() {
                               variant="secondary"
                               onClick={(e) => {
                                 e.preventDefault()
-                                navigate(`/messages/${b.threadId}`)
+                                navigate(chatHref(b.threadId))
                               }}
                             >
                               Chat
