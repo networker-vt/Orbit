@@ -64,8 +64,8 @@ export function hubLaneLegalNote(lane: MatchHubLane): LaneLegalNote {
     case 'minijob':
       return {
         tone: 'warn',
-        de: 'Demo-Vermittlung: Orbit meldet keinen Minijob an und zahlt keinen Lohn. SV/Steuer bleiben bei Auftraggeber und Beschäftigten. Kein Rechtsrat.',
-        en: 'Demo brokerage: Orbit does not register minijobs or pay wages. Social security/tax stay with employer and worker. Not legal advice.',
+        de: 'Demo-Vermittlung: Allda meldet keinen Minijob an und zahlt keinen Lohn. SV/Steuer bleiben bei Auftraggeber und Beschäftigten. Kein Rechtsrat.',
+        en: 'Demo brokerage: Allda does not register minijobs or pay wages. Social security/tax stay with employer and worker. Not legal advice.',
       }
     case 'courier':
       return {
@@ -94,20 +94,20 @@ export function hubLaneLegalNote(lane: MatchHubLane): LaneLegalNote {
     case 'service':
       return {
         tone: 'info',
-        de: 'Lokale Services: Orbit vermittelt Kontakt. Leistung und Haftung beim Anbieter. Zahlung vorerst offline / Demo.',
-        en: 'Local services: Orbit connects people. Delivery and liability sit with the provider. Payment offline / demo for now.',
+        de: 'Lokale Services: Allda vermittelt Kontakt. Leistung und Haftung beim Anbieter. Zahlung vorerst offline / Demo.',
+        en: 'Local services: Allda connects people. Delivery and liability sit with the provider. Payment offline / demo for now.',
       }
     case 'job':
       return {
         tone: 'info',
-        de: 'Job-Board: Interesse = Bewerbung (Demo). Orbit ist nicht Arbeitgeber und ersetzt keinen Arbeitsvertrag.',
-        en: 'Job board: interest = apply (demo). Orbit is not the employer and does not replace a contract.',
+        de: 'Job-Board: Interesse = Bewerbung (Demo). Allda ist nicht Arbeitgeber und ersetzt keinen Arbeitsvertrag.',
+        en: 'Job board: interest = apply (demo). Allda is not the employer and does not replace a contract.',
       }
     default:
       return {
         tone: 'info',
-        de: 'Match-Hub: Rubriken + per Foto verkaufen/tauschen. Orbit vermittelt — kein Lohn, kein echtes EUR in-app, Credits nur Demo/Boost.',
-        en: 'Match hub: rubrics + sell/barter by photo. Orbit brokers — no wages, no real in-app EUR, Credits are demo/boost only.',
+        de: 'Match-Hub: Rubriken + per Foto verkaufen/tauschen. Allda vermittelt — kein Lohn, kein echtes EUR in-app, Credits nur Demo/Boost.',
+        en: 'Match hub: rubrics + sell/barter by photo. Allda brokers — no wages, no real in-app EUR, Credits are demo/boost only.',
       }
   }
 }
@@ -117,14 +117,14 @@ export function interestChecklist(lane: MarketType): { de: string[]; en: string[
     case 'minijob':
       return {
         de: [
-          'Auftraggeber prüft Minijob-Meldung (nicht Orbit).',
+          'Auftraggeber prüft Minijob-Meldung (nicht Allda).',
           'Kein Gewerbe nötig nur weil du dich bewirbst — Anstellung ≠ Selbstständigkeit.',
-          'Orbit Credits sind kein Lohnersatz.',
+          'Allda Credits sind kein Lohnersatz.',
         ],
         en: [
-          'Employer handles minijob registration (not Orbit).',
+          'Employer handles minijob registration (not Allda).',
           'Applying does not require a trade licence — employment ≠ self-employment.',
-          'Orbit Credits are not a wage substitute.',
+          'Allda Credits are not a wage substitute.',
         ],
       }
     case 'courier':
@@ -173,8 +173,8 @@ export function interestChecklist(lane: MarketType): { de: string[]; en: string[
       }
     default:
       return {
-        de: ['Orbit vermittelt Kontakt.', 'Vertrag zwischen euch.', 'Kein echtes In-App-Geld in dieser Demo.'],
-        en: ['Orbit connects you.', 'Contract is between you.', 'No real in-app money in this demo.'],
+        de: ['Allda vermittelt Kontakt.', 'Vertrag zwischen euch.', 'Kein echtes In-App-Geld in dieser Demo.'],
+        en: ['Allda connects you.', 'Contract is between you.', 'No real in-app money in this demo.'],
       }
   }
 }

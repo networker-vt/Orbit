@@ -139,7 +139,7 @@ function uniqueTerms(terms: string[]): string[] {
   return out
 }
 
-/** Pull interest terms from Orbit prefs (occupations, life, skills). */
+/** Pull interest terms from Allda prefs (occupations, life, skills). */
 export function interestTermsFromPrefs(prefs: OrbitPrefs = getPrefs()): string[] {
   const bag: string[] = [
     ...prefs.seeker.occupationTerms,
@@ -211,7 +211,7 @@ export function getSocial(): SocialState {
   return structuredClone(get())
 }
 
-/** Active chips: stored prefs, else soft-seed from Orbit prefs once into the return value (not persisted until toggled). */
+/** Active chips: stored prefs, else soft-seed from Allda prefs once into the return value (not persisted until toggled). */
 export function getActiveSearchPrefs(prefs: OrbitPrefs = getPrefs()): string[] {
   const stored = get().searchPrefs
   if (stored.length) return [...stored]
@@ -366,7 +366,7 @@ export function isTopicThread(thread: Thread): boolean {
 
 export function topicLabelFromThread(thread: Thread): string | null {
   if (!isTopicThread(thread)) return null
-  const fromTitle = thread.listingTitle?.replace(/\s*·\s*Orbit Social$/i, '').trim()
+  const fromTitle = thread.listingTitle?.replace(/\s*·\s*(?:Allda|Orbit) Social$/i, '').trim()
   if (fromTitle) return fromTitle
   const name = thread.participantNames.find((n) => n.startsWith('#'))
   return name ? name.replace(/^#/, '') : null
@@ -380,12 +380,13 @@ export function openSearchTermChat(input: {
 }): Thread {
   const term = normalizeTerm(input.term)
   const topicId = topicParticipantId(term)
-  const title = `${term} · Orbit Social`
+  const title = `${term} · Allda Social`
+  const legacyTitle = `${term} · Orbit Social`
   const existing = store.listThreads(input.meId).find(
     (t) =>
       (t.kind ?? 'match') === 'social' &&
       t.participantIds.includes(topicId) &&
-      (t.listingTitle || '') === title,
+      ((t.listingTitle || '') === title || (t.listingTitle || '') === legacyTitle),
   )
   if (existing) return existing
   return store.createDirectThread({
@@ -394,7 +395,7 @@ export function openSearchTermChat(input: {
     listingTitle: title,
     senderId: input.meId,
     senderName: input.meName,
-    body: `Orbit Social — Chat zu „${term}“ (Demo, localStorage). Teile Tipps oder Fragen rund um diesen Suchbegriff.`,
+    body: `Allda Social — Chat zu „${term}“ (Demo, localStorage). Teile Tipps oder Fragen rund um diesen Suchbegriff.`,
     kind: 'social',
   })
 }
@@ -407,8 +408,8 @@ export function listSearchTermChats(userId: string): Thread[] {
 }
 
 /**
- * 1:1 Social DM — request only. Recipient must accept; Orbit Chat binds `threadId`.
- * Does **not** create a chat thread (avoids racing the Telegram-like Orbit Chat model).
+ * 1:1 Social DM — request only. Recipient must accept; Allda Chat binds `threadId`.
+ * Does **not** create a chat thread (avoids racing the Telegram-like Allda Chat model).
  * Topic / Suchbegriff rooms use `openSearchTermChat` and stay consent-free.
  *
  * @see `src/lib/socialDm.ts`

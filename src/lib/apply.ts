@@ -17,7 +17,7 @@ export function buildInterestNote(input: { name: string; city?: string }): strin
   const docs = formatDocsLine()
   const radius = prefs.seeker.radiusKm
   const lines = [
-    `Orbit 1-Tap Interesse von ${input.name}${input.city ? ` (${input.city})` : ''}.`,
+    `Allda 1-Tap Interesse von ${input.name}${input.city ? ` (${input.city})` : ''}.`,
     `Suchradius: ${radius} km.`,
     `Skills: ${skills}.`,
     docs ? `Nachweise: ${docs}.` : 'Keine Nachweise hochgeladen.',

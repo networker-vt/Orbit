@@ -1,4 +1,4 @@
-# Launch-Checkliste — Orbit
+# Launch-Checkliste — Allda
 
 Deutsche Go-Live-Checkliste. Haken setzen, bevor Traffic / Presse / Ads.
 
@@ -19,7 +19,7 @@ Lokal / CI / Hosting:
 VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJ...   # nur anon/public key — nie service_role im Frontend
 VITE_USE_MOCK=false
-VITE_APP_NAME=Orbit
+VITE_APP_NAME=Allda
 VITE_APP_URL=https://networker-vt.github.io/orbit/
 ```
 
@@ -57,6 +57,8 @@ curl -sI https://networker-vt.github.io/orbit/datenschutz/
 ```
 
 Erwartung: `HTTP/2 200`. Ohne abschließenden Slash antwortet Pages mit `301` auf die Slash-URL; `curl -sI -L` endet bei `200`. In-App-Links (`/privacy`, `/support`, `/impressum`) bleiben Client-Routing.
+
+`https://networker-vt.github.io/eventlogistik-event-os/privacy/` ist HTTP 404 („Site not found“), weil Pages am aktuellen Repo-Namen `orbit` hängt. Fix: [`docs/PAGES_BASE.md`](./docs/PAGES_BASE.md). Nicht deployen, um die alte URL zu erzwingen.
 
 - [ ] https://networker-vt.github.io/orbit/ lädt
 - [ ] Deep Links (z. B. `/jobs`) über 404.html SPA-Fallback

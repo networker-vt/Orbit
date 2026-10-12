@@ -57,7 +57,7 @@ export function KidsPage() {
   return (
     <div className="mx-auto max-w-lg space-y-5 pb-scroll-chrome">
       <header className="space-y-1">
-        <p className="text-xs font-medium uppercase tracking-wider text-[var(--theme-accent)]">Orbit Kids</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-[var(--theme-accent)]">Allda Kids</p>
         <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
           <Shield size={22} /> {t('kids.title')}
         </h1>

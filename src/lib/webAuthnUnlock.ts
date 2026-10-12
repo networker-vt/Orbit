@@ -1,6 +1,6 @@
 /** Web/PWA unlock via platform authenticator (Touch ID, Windows Hello, Android screen lock). */
 
-const RP_NAME = 'Orbit'
+const RP_NAME = 'Allda'
 
 function rpId(): string {
   return window.location.hostname || 'localhost'

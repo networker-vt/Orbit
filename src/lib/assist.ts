@@ -427,12 +427,12 @@ export function heuristicPlan(intent: ParsedIntent, locale: 'de' | 'en'): Omit<A
       ),
       step(
         de ? 'Weiterlernen' : 'Resume learning',
-        de ? 'Orbit merkt den letzten Kurs auf diesem Gerät.' : 'Orbit remembers the last course on this device.',
+        de ? 'Allda merkt den letzten Kurs auf diesem Gerät.' : 'Allda remembers the last course on this device.',
         { actionTo: '/campus', actionLabel: de ? 'Weiterlernen' : 'Resume' },
       ),
     )
     tips.push({
-      title: de ? 'Orbit berät (Campus)' : 'Orbit advises (Campus)',
+      title: de ? 'Allda berät (Campus)' : 'Allda advises (Campus)',
       body: de
         ? 'Demo-Katalog, keine echten Schulabschlüsse. Premium-Unlock kommt später über SoftPaywall — Entdecken bleibt frei.'
         : 'Demo catalog, no real diplomas. Premium unlock comes later via SoftPaywall — discovery stays free.',
@@ -441,8 +441,8 @@ export function heuristicPlan(intent: ParsedIntent, locale: 'de' | 'en'): Omit<A
     const look = intent.lookIntent || 'kleidung'
     const qs = new URLSearchParams({ intent: look })
     summary = de
-      ? `Kabine (${look}): Foto oder kurzes Video — Orbit schlägt Varianten, Shops und Nearby vor.`
-      : `Kabine (${look}): photo or short video — Orbit suggests variants, shops and nearby.`
+      ? `Kabine (${look}): Foto oder kurzes Video — Allda schlägt Varianten, Shops und Nearby vor.`
+      : `Kabine (${look}): photo or short video — Allda suggests variants, shops and nearby.`
     steps.push(
       step(
         de ? 'Foto aufnehmen' : 'Take a photo',
@@ -471,7 +471,7 @@ export function heuristicPlan(intent: ParsedIntent, locale: 'de' | 'en'): Omit<A
       ),
     )
     tips.push({
-      title: de ? 'Orbit berät (Kabine)' : 'Orbit advises (Kabine)',
+      title: de ? 'Allda berät (Kabine)' : 'Allda advises (Kabine)',
       body: de
         ? isFlagOn('credits')
           ? 'Kein echtes Virtual-Try-on-ML auf dem Gerät. Filter + Labels + Seed-Shops. Featured Nearby kostet Credits, mintet nicht über 21M.'
@@ -514,20 +514,20 @@ export function heuristicPlan(intent: ParsedIntent, locale: 'de' | 'en'): Omit<A
       step(
         de ? 'Beim Anbieter suchen' : 'Search with the provider',
         de
-          ? 'Flüge und Hotels verlassen Orbit. Kein Ticket, kein Geld.'
-          : 'Flights and hotels leave Orbit. No ticket, no money.',
+          ? 'Flüge und Hotels verlassen Allda. Kein Ticket, kein Geld.'
+          : 'Flights and hotels leave Allda. No ticket, no money.',
         { actionTo: `/abflug?${qs.toString()}`, actionLabel: de ? 'Suche öffnen' : 'Open search' },
       ),
       step(
-        de ? 'Kein Ticket in Orbit' : 'No ticket inside Orbit',
+        de ? 'Kein Ticket in Allda' : 'No ticket inside Allda',
         de
-          ? 'Orbit speichert keine Buchung. Der QR-Stub ist keine Fahrkarte.'
-          : 'Orbit does not store a booking. A QR stub is not a ticket.',
+          ? 'Allda speichert keine Buchung. Der QR-Stub ist keine Fahrkarte.'
+          : 'Allda does not store a booking. A QR stub is not a ticket.',
         { actionTo: `/abflug?${qs.toString()}`, actionLabel: de ? 'Abflug' : 'Abflug' },
       ),
     )
     tips.push({
-      title: de ? 'Orbit berät (Reise)' : 'Orbit advises (travel)',
+      title: de ? 'Allda berät (Reise)' : 'Allda advises (travel)',
       body: de
         ? 'Stub ≠ Live. Tippen oder Stimme 1/2/3 wählt eine Skizze. Der nächste Schritt ist die öffentliche Suche, keine Buchung.'
         : 'Stub ≠ live. Tap or say 1/2/3 to pick a sketch. The next step is a public search, not a booking.',
@@ -540,8 +540,8 @@ export function heuristicPlan(intent: ParsedIntent, locale: 'de' | 'en'): Omit<A
       step(
         de ? 'Liste klären' : 'Clarify the list',
         de
-          ? `Bedarf: ${intent.items.join(', ')}. Orbit sucht Angebote statt Katalog-Spam.`
-          : `Need: ${intent.items.join(', ')}. Orbit matches offers instead of dumping a catalogue.`,
+          ? `Bedarf: ${intent.items.join(', ')}. Allda sucht Angebote statt Katalog-Spam.`
+          : `Need: ${intent.items.join(', ')}. Allda matches offers instead of dumping a catalogue.`,
         { actionTo: '/marktplatz?type=asset', actionLabel: de ? 'Marktplatz' : 'Marketplace', remindable: false },
       ),
       step(
@@ -555,7 +555,7 @@ export function heuristicPlan(intent: ParsedIntent, locale: 'de' | 'en'): Omit<A
       ),
     )
     tips.push({
-      title: de ? 'Orbit berät' : 'Orbit advises',
+      title: de ? 'Allda berät' : 'Allda advises',
       body: de
         ? 'Alltagsbedarf: erst Liste, dann 1–2 Anbieter, dann Erinnerung. Kein Same-Day-Amazon-Feed.'
         : 'Everyday needs: list first, then 1–2 providers, then a reminder. No same-day Amazon feed.',
@@ -640,7 +640,7 @@ export function heuristicPlan(intent: ParsedIntent, locale: 'de' | 'en'): Omit<A
       ),
     )
     tips.push({
-      title: de ? 'Orbit berät (B2B)' : 'Orbit advises (B2B)',
+      title: de ? 'Allda berät (B2B)' : 'Allda advises (B2B)',
       body: de
         ? 'Rollen + Must-haves in Prefs. Partner über Angebot↔Bedarf matchen, nicht über Kataloge.'
         : 'Roles + must-haves in prefs. Match partners via offer↔need, not catalogues.',
@@ -687,7 +687,7 @@ export function heuristicPlan(intent: ParsedIntent, locale: 'de' | 'en'): Omit<A
       }),
     )
     tips.push({
-      title: de ? 'Orbit berät' : 'Orbit advises',
+      title: de ? 'Allda berät' : 'Allda advises',
       body: de
         ? 'Preference-first: ohne Prefs kein Spam-Feed. 1-Tap Interesse statt Anschreiben.'
         : 'Preference-first: no prefs, no spam feed. 1-tap Interest instead of a cover letter.',
@@ -695,8 +695,8 @@ export function heuristicPlan(intent: ParsedIntent, locale: 'de' | 'en'): Omit<A
   }
 
   const disclaimer = de
-    ? 'Orbit Assist ist ein lokaler Planer (Heuristik). Live-Recherche nur mit optionalem VITE_LLM_API_KEY — sonst Demo-Recherche. Keine echten Zahlungen.'
-    : 'Orbit Assist is a local planner (heuristics). Live research only with optional VITE_LLM_API_KEY — otherwise demo research. No real payments.'
+    ? 'Allda Assist ist ein lokaler Planer (Heuristik). Live-Recherche nur mit optionalem VITE_LLM_API_KEY — sonst Demo-Recherche. Keine echten Zahlungen.'
+    : 'Allda Assist is a local planner (heuristics). Live research only with optional VITE_LLM_API_KEY — otherwise demo research. No real payments.'
 
   return { intent, summary, steps, tips, disclaimer }
 }
@@ -748,8 +748,8 @@ async function tryLlmEnrich(
   const model = import.meta.env.VITE_LLM_MODEL?.trim() || 'gpt-4o-mini'
   const prompt =
     locale === 'de'
-        ? `Du bist Orbit, ein klarer Job-/Marktplatz-Concierge. Gib 2 kurze Tipps (je max 220 Zeichen) als JSON {"tips":[{"title":"...","body":"..."}]} ohne Katalog-Spam. Anfrage: ${intent.text}`
-        : `You are Orbit, a clear job/marketplace concierge. Return 2 short tips (max 220 chars each) as JSON {"tips":[{"title":"...","body":"..."}]} with no catalogue spam. Ask: ${intent.text}`
+        ? `Du bist Allda, ein klarer Job-/Marktplatz-Concierge. Gib 2 kurze Tipps (je max 220 Zeichen) als JSON {"tips":[{"title":"...","body":"..."}]} ohne Katalog-Spam. Anfrage: ${intent.text}`
+        : `You are Allda, a clear job/marketplace concierge. Return 2 short tips (max 220 chars each) as JSON {"tips":[{"title":"...","body":"..."}]} with no catalogue spam. Ask: ${intent.text}`
   try {
     const ctrl = new AbortController()
     const t = window.setTimeout(() => ctrl.abort(), 8000)

@@ -7,7 +7,7 @@ import { useI18n } from '../lib/i18n'
 const COMMUNITY = [
   {
     id: 'general',
-    title: 'Orbit General',
+    title: 'Allda General',
     hint: 'Alles-App, Ankündigungen, Hilfe',
     icon: Hash,
     to: '/',

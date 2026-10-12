@@ -40,13 +40,13 @@ export function OrbitPlusThemes() {
   return (
     <section className="space-y-3 rounded-2xl border border-border bg-surface-2 p-4" data-orbit-plus-themes="1">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-lg font-semibold">Orbit+</h2>
+        <h2 className="text-lg font-semibold">Allda+</h2>
         <Badge tone="teal">{balance} Credits</Badge>
       </div>
       <p className="text-xs text-muted">
         {de
-          ? 'Kosmetische Profil-/Accent-Themes — Orbit Credits, kein Auszahlungsanspruch.'
-          : 'Cosmetic profile/accent themes — Orbit Credits, no cash-out.'}
+          ? 'Kosmetische Profil-/Accent-Themes — Allda Credits, kein Auszahlungsanspruch.'
+          : 'Cosmetic profile/accent themes — Allda Credits, no cash-out.'}
       </p>
       {flash && <p className="text-xs text-[var(--theme-accent)]">{flash}</p>}
       <ul className="grid gap-2 sm:grid-cols-3">

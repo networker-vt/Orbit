@@ -129,9 +129,9 @@ export function EinstellungPage() {
           id="credits"
           data-einstellung-credits="1"
         >
-          <h2 className="text-lg font-semibold">Orbit Credits & Referral</h2>
+          <h2 className="text-lg font-semibold">Allda Credits & Referral</h2>
           <p className="text-xs text-muted">
-            Treuepunkte mit 21M Cap — Boosts in Orbit, kein Auszahlungsanspruch, kein Crypto-Marketing.
+            Treuepunkte mit 21M Cap — Boosts in Allda, kein Auszahlungsanspruch, kein Crypto-Marketing.
           </p>
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
@@ -201,7 +201,7 @@ export function EinstellungPage() {
         <h2 className="text-lg font-semibold">{t('einstellung.orbitMode')}</h2>
         <p className="text-xs text-muted">{t('einstellung.orbitModeLead')}</p>
         <p className="text-xs text-muted">
-          {reg.productMode === 'kids' ? 'Orbit Kids' : reg.productMode === 'orbit' ? 'Orbit' : '—'}
+          {reg.productMode === 'kids' ? 'Allda Kids' : reg.productMode === 'orbit' ? 'Allda' : '—'}
         </p>
         <div className="flex flex-wrap gap-2">
           <Button

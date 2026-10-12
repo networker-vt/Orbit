@@ -1,5 +1,5 @@
 /**
- * Orbit Kabine — demo photo/video try-on.
+ * Allda Kabine — demo photo/video try-on.
  * Base (photo + 1–2 variants) is free. Credits only on extra variants / nearby shop boosts.
  * No on-device ML. Filters + labeled variants + seeded shops / nearby services.
  */
@@ -162,7 +162,7 @@ export const LOOK_PRODUCTS: LookProduct[] = [
     id: 'lp-1',
     intent: 'kleidung',
     title: 'Overshirt Sand — Demo',
-    shop: 'Orbit Marktplatz',
+    shop: 'Allda Marktplatz',
     priceLabel: '89 €',
     href: '/marktplatz?type=asset',
     internal: true,
@@ -179,7 +179,7 @@ export const LOOK_PRODUCTS: LookProduct[] = [
     id: 'lp-3',
     intent: 'schuhe',
     title: 'Court Sneaker Weiß',
-    shop: 'Orbit Marktplatz',
+    shop: 'Allda Marktplatz',
     priceLabel: '110 €',
     href: '/marktplatz?q=sneaker',
     internal: true,
@@ -221,7 +221,7 @@ export const LOOK_PRODUCTS: LookProduct[] = [
     id: 'lp-8',
     intent: 'kids',
     title: 'Kids-Sneaker 28',
-    shop: 'Orbit Marktplatz',
+    shop: 'Allda Marktplatz',
     priceLabel: '39 €',
     href: '/marktplatz?type=asset',
     internal: true,

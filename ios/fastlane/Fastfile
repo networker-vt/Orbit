@@ -1,4 +1,4 @@
-# Orbit Internal TestFlight.
+# Allda Internal TestFlight.
 # Secrets and the one-time Apple clicks: docs/TESTFLIGHT.md
 # This lane does not deploy GitHub Pages.
 
@@ -25,7 +25,7 @@ platform :ios do
 
       marketing_version = marketing_version_from_package(repo_root)
       build_number = next_build_number(key_path, key_id, issuer_id)
-      UI.message("Uploading Orbit #{marketing_version} (#{build_number}) as #{BUNDLE_ID}")
+      UI.message("Uploading Allda #{marketing_version} (#{build_number}) as #{BUNDLE_ID}")
 
       ipa = archive_and_export(
         fastlane_dir: fastlane_dir,
@@ -55,9 +55,9 @@ platform :ios do
       upload_args[:changelog] = notes unless notes.empty?
       upload_to_testflight(upload_args)
 
-      UI.success("Uploaded Orbit #{marketing_version} (#{build_number}) to App Store Connect.")
+      UI.success("Uploaded Allda #{marketing_version} (#{build_number}) to App Store Connect.")
       UI.success("Apple still processes the build. It then shows under TestFlight → Internal Testing.")
-      UI.success("Install TestFlight on the iPhone and open Orbit. This lane did not deploy GitHub Pages.")
+      UI.success("Install TestFlight on the iPhone and open Allda. This lane did not deploy GitHub Pages.")
     ensure
       shred_api_key(key_path)
     end

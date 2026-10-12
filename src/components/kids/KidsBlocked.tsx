@@ -15,7 +15,7 @@ export function KidsBlocked({
   return (
     <div className="rounded-2xl border border-border bg-surface-2/70 p-5" data-kids-blocked="1">
       <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-[var(--theme-accent)]">
-        <Shield size={14} /> Orbit Kids
+        <Shield size={14} /> Allda Kids
       </p>
       <h2 className="mt-2 text-lg font-semibold text-ink">{title || t('kids.blockedTitle')}</h2>
       <p className="mt-1 text-sm text-muted">{hint || t('kids.blockedHint')}</p>

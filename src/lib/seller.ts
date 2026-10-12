@@ -35,13 +35,13 @@ export function resolveSeller(listing: Pick<Listing, 'sellerKind' | 'trader'>): 
 
 export const SELLER_HINT_DE = {
   commercial:
-    'Gewerblich: Schließt du als Verbraucherin oder Verbraucher einen Vertrag mit diesem Anbieter, können die Informationspflichten nach § 312l BGB gelten. Orbit ist nicht Vertragspartner.',
+    'Gewerblich: Schließt du als Verbraucherin oder Verbraucher einen Vertrag mit diesem Anbieter, können die Informationspflichten nach § 312l BGB gelten. Allda ist nicht Vertragspartner.',
   private:
     'Privat: Gesetzliche Verbraucherrechte gegenüber Unternehmern gelten hier in der Regel nicht.',
 } as const
 
 export const SELLER_HINT_EN = {
   commercial:
-    'Commercial: if you contract as a consumer, the information duties in § 312l BGB may apply. Orbit is not the contracting party.',
+    'Commercial: if you contract as a consumer, the information duties in § 312l BGB may apply. Allda is not the contracting party.',
   private: 'Private: consumer rights against a business usually do not apply here.',
 } as const

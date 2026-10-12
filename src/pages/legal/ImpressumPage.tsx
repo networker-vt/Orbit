@@ -12,7 +12,7 @@ export function ImpressumPage() {
     const message = String(data.get('message') || '').trim()
     const name = String(data.get('name') || '').trim()
     if (!message) return
-    const subject = encodeURIComponent('Orbit Kontaktformular')
+    const subject = encodeURIComponent('Allda Kontaktformular')
     const body = encodeURIComponent(`${name ? `Name: ${name}\n\n` : ''}${message}`)
     setSent(true)
     window.location.href = `mailto:${LEGAL.email}?subject=${subject}&body=${body}`
@@ -78,7 +78,7 @@ export function ImpressumPage() {
         <>
           <h2>Gewerbe</h2>
           <p>
-            {LEGAL.tradeStatus} Solange Orbit ohne Gewinnabsicht privat betrieben wird, bleibt der Hinweis
+            {LEGAL.tradeStatus} Solange Allda ohne Gewinnabsicht privat betrieben wird, bleibt der Hinweis
             „privat betrieben“ stehen. Sobald eine Gewinnabsicht besteht, diesen Hinweis entfernen und die
             Gewerbeangaben nachtragen.
           </p>

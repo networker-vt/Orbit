@@ -61,7 +61,7 @@ EXPORT_OPTIONS="$OUT/ExportOptions.plist"
 rm -rf "$ARCHIVE" "$EXPORT" "$DERIVED"
 mkdir -p "$OUT" "$EXPORT"
 
-echo "Archiving Orbit ${ORBIT_MARKETING_VERSION} (${ORBIT_BUILD_NUMBER}) unsigned."
+echo "Archiving Allda ${ORBIT_MARKETING_VERSION} (${ORBIT_BUILD_NUMBER}) unsigned."
 xcodebuild archive \
   -project "$PROJECT" \
   -scheme "$SCHEME" \

@@ -2,7 +2,7 @@
  * Flüge / Bahn connectors.
  * Bahn is a bahn.de search link the user opens. No timetable API.
  * Flights have no free keyless inventory API — filled search links only.
- * Nothing here creates a booking or a price Orbit did not receive.
+ * Nothing here creates a booking or a price Allda did not receive.
  */
 
 const AFFILIATE_KEYS = ['aid', 'affiliate', 'aff', 'aff_id', 'partner_id', 'partnerid', 'partner']
@@ -112,7 +112,7 @@ export function packageSearchUrl(from: string, to: string, dateIso?: string, loc
   return stripAffiliateParams(`https://www.google.com/travel/flights?hl=${hl}&q=${encodeURIComponent(q)}`)
 }
 
-/** Public search for an old demo offer id. Never a fare Orbit received. */
+/** Public search for an old demo offer id. Never a fare Allda received. */
 export function offerOutboundHref(
   offer: { kind: TravelLinkKind; from?: string; to: string; dateFrom?: string },
   locale: 'de' | 'en' = 'de',

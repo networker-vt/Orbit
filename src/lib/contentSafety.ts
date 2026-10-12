@@ -1,5 +1,5 @@
 /**
- * Shared outbound text safety for messenger + voice (minimal gate; aligns with Orbit Free AI).
+ * Shared outbound text safety for messenger + voice (minimal gate; aligns with Allda Free AI).
  */
 
 export type SafetyBlockReason = 'hate' | 'discrimination' | 'illegal' | 'kids'
@@ -128,5 +128,5 @@ export function assessInputSafety(text: string, opts?: { kids?: boolean }): Safe
   return { ok: true }
 }
 
-export const MESSENGER_BLOCKED_DE = 'Das kann Orbit nicht senden.'
-export const MESSENGER_BLOCKED_EN = 'Orbit cannot send that.'
+export const MESSENGER_BLOCKED_DE = 'Das kann Allda nicht senden.'
+export const MESSENGER_BLOCKED_EN = 'Allda cannot send that.'

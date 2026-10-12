@@ -11,7 +11,7 @@ import {
 } from './channels'
 import { __resetKidsForTests, enableKids } from './kids'
 
-describe('Orbit 2.8.1 channel opt-in stubs', () => {
+describe('Allda 2.8.1 channel opt-in stubs', () => {
   afterEach(() => {
     __resetChannelsForTests()
     __resetKidsForTests()

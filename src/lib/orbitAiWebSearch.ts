@@ -107,7 +107,7 @@ function isUncertainLlmReply(reply: string): boolean {
   return UNCERTAIN_LLM.test(reply)
 }
 
-/** When Orbit AI could not answer in-app — offer legal search deep-links (never for blocked input). */
+/** When Allda AI could not answer in-app — offer legal search deep-links (never for blocked input). */
 export function shouldOfferWebSearch(outcome: OrbitAiOutcome, userText: string, locale: 'de' | 'en'): boolean {
   if (outcome.kind === 'blocked' || outcome.kind === 'navigate') return false
   if (!assessInputSafety(userText).ok) return false

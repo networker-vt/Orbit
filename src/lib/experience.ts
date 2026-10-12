@@ -18,7 +18,7 @@ export interface ExperienceReview {
 }
 
 export const EXPERIENCE_LABEL_DE: Record<ExperienceTarget, string> = {
-  app: 'Orbit App',
+  app: 'Allda App',
   company: 'Firma',
   job: 'Job',
   agency_client: 'Agentur ↔ Auftraggeber',
@@ -109,7 +109,7 @@ export function addExperience(input: {
     rating: Math.min(5, Math.max(1, Math.round(input.rating))),
     comment: input.comment.trim().slice(0, 280),
     createdAt: new Date().toISOString(),
-    fromName: input.fromName || 'Orbit User',
+    fromName: input.fromName || 'Allda User',
   }
   const next = [review, ...get().filter((r) => !(r.target === review.target && r.targetId === review.targetId && r.fromName === review.fromName))]
   commit(next)

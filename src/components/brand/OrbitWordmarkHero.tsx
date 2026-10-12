@@ -2,7 +2,7 @@ import { cn } from '../../lib/utils'
 
 const base = () => import.meta.env.BASE_URL
 
-/** Home background watermark — full-area Orbit mark, readable content stays on top. */
+/** Home background watermark — full-area Allda mark, readable content stays on top. */
 export function OrbitWordmarkHero({ className }: { className?: string }) {
   const logo = `${base()}icons/orbit-logo.png`
 

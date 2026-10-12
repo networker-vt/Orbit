@@ -25,38 +25,38 @@ import { cueOrbiNavRun } from '../../lib/orbiMotion'
 import { recordWidgetVisit } from '../../lib/widgetUsage'
 
 function documentTitleFor(pathname: string, t: (key: string) => string) {
-  if (pathname === '/' || pathname === '') return `Orbit — ${t('brand.tagline')}`
-  if (pathname.startsWith('/kabine') || pathname.startsWith('/look')) return `${t('look.title')} · Orbit`
-  if (pathname.startsWith('/abflug') || pathname.startsWith('/reise')) return `${t('travel.title')} · Orbit`
-  if (pathname.startsWith('/crew')) return `${t('nav.crew')} · Orbit`
-  if (pathname.startsWith('/treffer')) return `${t('match.kicker')} · Orbit`
-  if (pathname.startsWith('/match')) return `${t('nav.match')} · Orbit`
-  if (pathname.startsWith('/wallet')) return `${t('nav.wallet')} · Orbit`
+  if (pathname === '/' || pathname === '') return `Allda — ${t('brand.tagline')}`
+  if (pathname.startsWith('/kabine') || pathname.startsWith('/look')) return `${t('look.title')} · Allda`
+  if (pathname.startsWith('/abflug') || pathname.startsWith('/reise')) return `${t('travel.title')} · Allda`
+  if (pathname.startsWith('/crew')) return `${t('nav.crew')} · Allda`
+  if (pathname.startsWith('/treffer')) return `${t('match.kicker')} · Allda`
+  if (pathname.startsWith('/match')) return `${t('nav.match')} · Allda`
+  if (pathname.startsWith('/wallet')) return `${t('nav.wallet')} · Allda`
   if (
     pathname.startsWith('/social/chat') ||
     pathname.startsWith('/messages') ||
     pathname === '/chat' ||
     pathname.startsWith('/chat/')
   )
-    return `${t('chat.brand')} · Orbit`
-  if (pathname.startsWith('/social')) return `${t('social.title')} · Orbit`
-  if (pathname.startsWith('/einstellung')) return `${t('einstellung.title')} · Orbit`
-  if (pathname.startsWith('/mein')) return `${t('mein.title')} · Orbit`
-  if (pathname.startsWith('/entdecker')) return `${t('tile.entdecker')} · Orbit`
-  if (pathname.startsWith('/campus') || pathname.startsWith('/lernen')) return `${t('campus.title')} · Orbit`
-  if (pathname.startsWith('/kids')) return `${t('kids.title')} · Orbit`
-  if (pathname.startsWith('/mehr')) return `${t('mehr.title')} · Orbit`
-  if (pathname.startsWith('/essen')) return `${t('essen.title')} · Orbit`
-  if (pathname.startsWith('/parkmerke')) return 'Parkmerke · Orbit'
-  if (pathname.startsWith('/impressum')) return `${t('footer.impressum')} · Orbit`
+    return `${t('chat.brand')} · Allda`
+  if (pathname.startsWith('/social')) return `${t('social.title')} · Allda`
+  if (pathname.startsWith('/einstellung')) return `${t('einstellung.title')} · Allda`
+  if (pathname.startsWith('/mein')) return `${t('mein.title')} · Allda`
+  if (pathname.startsWith('/entdecker')) return `${t('tile.entdecker')} · Allda`
+  if (pathname.startsWith('/campus') || pathname.startsWith('/lernen')) return `${t('campus.title')} · Allda`
+  if (pathname.startsWith('/kids')) return `${t('kids.title')} · Allda`
+  if (pathname.startsWith('/mehr')) return `${t('mehr.title')} · Allda`
+  if (pathname.startsWith('/essen')) return `${t('essen.title')} · Allda`
+  if (pathname.startsWith('/parkmerke')) return 'Parkmerke · Allda'
+  if (pathname.startsWith('/impressum')) return `${t('footer.impressum')} · Allda`
   if (pathname.startsWith('/datenschutz') || pathname.startsWith('/privacy'))
-    return `${t('footer.privacy')} · Orbit`
-  if (pathname.startsWith('/support')) return `${t('footer.support')} · Orbit`
-  if (pathname.startsWith('/news')) return `${t('archive.newsTitle')} · Orbit`
-  if (pathname.startsWith('/innovation')) return `${t('archive.innovationTitle')} · Orbit`
-  if (pathname.startsWith('/wissen')) return `${t('archive.wissenTitle')} · Orbit`
-  if (pathname.startsWith('/katalog')) return `${t('archive.katalogTitle')} · Orbit`
-  return `Orbit — ${t('brand.tagline')}`
+    return `${t('footer.privacy')} · Allda`
+  if (pathname.startsWith('/support')) return `${t('footer.support')} · Allda`
+  if (pathname.startsWith('/news')) return `${t('archive.newsTitle')} · Allda`
+  if (pathname.startsWith('/innovation')) return `${t('archive.innovationTitle')} · Allda`
+  if (pathname.startsWith('/wissen')) return `${t('archive.wissenTitle')} · Allda`
+  if (pathname.startsWith('/katalog')) return `${t('archive.katalogTitle')} · Allda`
+  return `Allda — ${t('brand.tagline')}`
 }
 
 export function AppShell() {
@@ -113,7 +113,7 @@ export function AppShell() {
             type="button"
             onClick={() => navigate(onHome ? '/mein' : '/')}
             className="mr-2 flex shrink-0 items-center gap-2 text-left"
-            aria-label={onHome ? profileName : 'Orbit Start'}
+            aria-label={onHome ? profileName : 'Allda Start'}
           >
             {onHome ? (
               <UserProfileMark name={profileName} avatarUrl={profile?.avatarUrl} />
@@ -121,7 +121,7 @@ export function AppShell() {
               <>
                 <BrandIcon size={36} />
                 <div className="leading-tight">
-                  <div className="font-bold tracking-tight text-ink">Orbit</div>
+                  <div className="font-bold tracking-tight text-ink">Allda</div>
                   <div className="text-xs uppercase tracking-wider text-[var(--theme-accent)]">
                     {t('brand.tagline')}
                   </div>

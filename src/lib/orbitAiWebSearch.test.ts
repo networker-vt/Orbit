@@ -10,8 +10,8 @@ import {
 
 describe('orbitAiWebSearch', () => {
   it('builds DuckDuckGo deep link', () => {
-    expect(searchUrlForProvider('duckduckgo', 'Orbit Demo')).toBe(
-      'https://duckduckgo.com/?q=Orbit%20Demo',
+    expect(searchUrlForProvider('duckduckgo', 'Allda Demo')).toBe(
+      'https://duckduckgo.com/?q=Allda%20Demo',
     )
   })
 

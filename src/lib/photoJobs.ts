@@ -39,7 +39,7 @@ const POOL: Omit<VisionGuess, 'disclaimer'>[] = [
     listingIds: ['lst-g-mini-2'],
   },
   {
-    company: 'Orbit Direct · Remote Hub',
+    company: 'Allda Direct · Remote Hub',
     city: 'Amsterdam',
     country: 'Niederlande',
     confidence: 0.62,

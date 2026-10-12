@@ -152,11 +152,11 @@ export async function fetchSupabaseSnapshot(): Promise<{
     ])
 
     if (listingsRes.error) {
-      console.info('[Orbit] Supabase listings:', listingsRes.error.message)
+      console.info('[Allda] Supabase listings:', listingsRes.error.message)
       return null
     }
     if (!listingsRes.data?.length) {
-      console.info('[Orbit] Supabase listings leer — Demo-Store bleibt aktiv')
+      console.info('[Allda] Supabase listings leer — Demo-Store bleibt aktiv')
       return null
     }
 
@@ -219,7 +219,7 @@ export async function fetchSupabaseSnapshot(): Promise<{
 
     return { listings, profiles, bookings, threads, messages, projects }
   } catch (e) {
-    console.info('[Orbit] Supabase hydrate failed — Demo-Store:', e)
+    console.info('[Allda] Supabase hydrate failed — Demo-Store:', e)
     return null
   }
 }
@@ -229,7 +229,7 @@ export async function pushListingToSupabase(listing: Listing) {
   try {
     await supabase.from('listings').upsert(listingToRow(listing))
   } catch (e) {
-    console.info('[Orbit] listing sync skip:', e)
+    console.info('[Allda] listing sync skip:', e)
   }
 }
 
@@ -248,6 +248,6 @@ export async function pushBookingStatusToSupabase(
     if (extra?.note) patch.note = extra.note
     await supabase.from('bookings').update(patch).eq('id', id)
   } catch (e) {
-    console.info('[Orbit] booking sync skip:', e)
+    console.info('[Allda] booking sync skip:', e)
   }
 }

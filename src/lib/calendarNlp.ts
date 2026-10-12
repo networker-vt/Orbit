@@ -98,7 +98,7 @@ export function buildIcs(events: { id: string; title: string; start: string; end
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Orbit//Daily Calendar//DE',
+    'PRODID:-//Allda//Daily Calendar//DE',
     'CALSCALE:GREGORIAN',
   ]
   for (const ev of events) {

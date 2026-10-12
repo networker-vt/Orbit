@@ -18,7 +18,7 @@ import {
 const adult = { kids: false, hideTravel: false, hideWallet: false }
 const kids = { kids: true, hideTravel: true, hideWallet: true }
 
-describe('Orbit 2.8.1 hub split', () => {
+describe('Allda 2.8.1 hub split', () => {
   beforeEach(() => {
     __setFlagForTests(null)
   })
@@ -56,7 +56,7 @@ describe('Orbit 2.8.1 hub split', () => {
     const refer = tiles.find((t) => t.id === 'refer')
     expect(refer?.emoji).not.toBe('🎁')
     expect(refer?.icon).toBe('share')
-    expect(refer?.label).toBe('Orbit weiterempfehlen')
+    expect(refer?.label).toBe('Allda weiterempfehlen')
   })
 
   it('Kids hide Wallet / create / offer on Mein and travel / kabine / crew on Home', () => {

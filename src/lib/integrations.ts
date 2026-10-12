@@ -92,7 +92,7 @@ export const INTEGRATIONS: IntegrationDef[] = [
     connect: 'linkout',
     availability: 'linkout',
     sync: { projects: 'none', jobs: 'none', crew: 'none' },
-    notes: 'Kein Datensync. Doku/Community außerhalb von Orbit.',
+    notes: 'Kein Datensync. Doku/Community außerhalb von Allda.',
   },
 ]
 
@@ -160,7 +160,7 @@ export function mockDisconnect(id: string) {
 
 export function syncLabel(d: SyncDir) {
   if (d === 'both') return '↔ beide'
-  if (d === 'in') return '→ Orbit'
+  if (d === 'in') return '→ Allda'
   if (d === 'out') return '← Zielsystem'
   return '—'
 }

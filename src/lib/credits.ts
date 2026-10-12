@@ -1,5 +1,5 @@
 /**
- * Orbit Credits — user wallet on top of the 21M protocol (demo ledger).
+ * Allda Credits — user wallet on top of the 21M protocol (demo ledger).
  * Core discovery stays free. Credits buy boosts only.
  * All grants debit a pre-allocated pool or fail — never mint above MAX_SUPPLY.
  */
@@ -124,7 +124,7 @@ export interface CreditsState {
   chatPlusUntil?: string
   /** ISO timestamp — Match profile highlight (~24h demo). */
   matchHighlightUntil?: string
-  /** Pending Orbit+ theme unlock after spend (applied in buyBoost). */
+  /** Pending Allda+ theme unlock after spend (applied in buyBoost). */
   pendingOrbitTheme?: OrbitPlusThemeId
 }
 
@@ -621,7 +621,7 @@ export async function spendCredits(
 }
 
 /** Gift / sponsoring: peer transfer, no mint. Tiny fee burned. */
-export async function giftCredits(amount: number, toLabel = 'Orbit-Nutzer (Demo)'): Promise<CreditsState | null> {
+export async function giftCredits(amount: number, toLabel = 'Allda-Nutzer (Demo)'): Promise<CreditsState | null> {
   if (creditsClosed()) return null
   if (kidsCreditsFrozen()) return null
   const next = structuredClone(get())
@@ -932,7 +932,7 @@ export const CREDITS_COSTS: Record<CreditSpendKind, { credits: number; label: st
   look_shop: { credits: 20, label: 'Kabine: Nearby-Shop featuren (Demo)' },
   assist_priority: { credits: 8, label: 'Assist extra (nach 8 frei/Tag)' },
   home_pins_plus: { credits: 35, label: 'Home-Pins+ · +2 Schnellzugriffe' },
-  orbit_plus_theme: { credits: 28, label: 'Orbit+ Profil-Theme freischalten' },
+  orbit_plus_theme: { credits: 28, label: 'Allda+ Profil-Theme freischalten' },
   chat_plus: { credits: 18, label: 'Chat-Extras · längere Historie (heute)' },
   match_highlight: { credits: 22, label: 'Match-Boost · Profil hervorheben (24h Demo)' },
 }
@@ -956,9 +956,9 @@ export const CREDITS_FREE_EN = [
 ]
 
 export const CREDITS_DISCLAIMER_DE =
-  'Orbit Credits: hartes Cap 21.000.000. Nur Demo/Boost/Kosmetik — kein Lohnersatz und kein echtes EUR. Demo (VITE_APP_MODE=demo) nutzt localStorage (append-only, balance = Summe). Prod schreibt Intents erst nach Server-ok; ohne Supabase-Keys hard-fail (kein lokales Mint). Dieser Client mint nie über den Cap. Pack-Kauf ist ein Stub (kein Stripe/PayPal). Kern-Entdeckung bleibt kostenlos. Soft-Paywall nur an Geld-Momenten.'
+  'Allda Credits: hartes Cap 21.000.000. Nur Demo/Boost/Kosmetik — kein Lohnersatz und kein echtes EUR. Demo (VITE_APP_MODE=demo) nutzt localStorage (append-only, balance = Summe). Prod schreibt Intents erst nach Server-ok; ohne Supabase-Keys hard-fail (kein lokales Mint). Dieser Client mint nie über den Cap. Pack-Kauf ist ein Stub (kein Stripe/PayPal). Kern-Entdeckung bleibt kostenlos. Soft-Paywall nur an Geld-Momenten.'
 
 export const CREDITS_DISCLAIMER_EN =
-  'Orbit Credits: hard cap 21,000,000. Demo/boost/cosmetics only — not a wage substitute and not real EUR. Demo (VITE_APP_MODE=demo) uses localStorage (append-only, balance = sum). Prod writes intents only after server ok; missing Supabase keys hard-fail (no local mint). This client never mints above the cap. Pack purchase is a stub (no Stripe/PayPal). Core discovery stays free. Soft paywall only at money moments.'
+  'Allda Credits: hard cap 21,000,000. Demo/boost/cosmetics only — not a wage substitute and not real EUR. Demo (VITE_APP_MODE=demo) uses localStorage (append-only, balance = sum). Prod writes intents only after server ok; missing Supabase keys hard-fail (no local mint). This client never mints above the cap. Pack purchase is a stub (no Stripe/PayPal). Core discovery stays free. Soft paywall only at money moments.'
 
 export const EARLY_TESTER_COPY_DE = `Die ersten 50 Signups sind Early Testers (${EARLY_TESTER_GRANT.toLocaleString('de-DE')} Credits, 10× Welcome) plus −${Math.round(EARLY_BOOST_DISCOUNT * 100)} % Boost-Preis für immer. Ab Signup 51: ${WELCOME_GRANT} Credits.`

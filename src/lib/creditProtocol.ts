@@ -1,5 +1,5 @@
 /**
- * Orbit Credits protocol — Bitcoin-style hard cap (demo, client-side).
+ * Allda Credits protocol — Bitcoin-style hard cap (demo, client-side).
  *
  * MAX_SUPPLY = 21_000_000. The client ledger MUST never mint above this.
  * Real enforcement later needs a server or chain; this file still refuses

@@ -35,7 +35,7 @@ export function KidsHubPage() {
       <header className="flex flex-col items-center gap-3 text-center">
         <OrbitRobot motion="winken" size="hero" />
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-[var(--theme-accent)]">Orbit Kids</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-[var(--theme-accent)]">Allda Kids</p>
           <h1 className="text-2xl font-bold tracking-tight">{t('kids.hub.title')}</h1>
           <p className="mt-1 text-sm text-muted">{t('kids.hub.lead')}</p>
           {band && (

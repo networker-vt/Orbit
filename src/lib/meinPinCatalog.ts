@@ -1,5 +1,5 @@
 /**
- * Pinnable Schnellzugriffe catalog for Mein Orbit.
+ * Pinnable Schnellzugriffe catalog for Mein Allda.
  * Persistence lives in `homePins.ts` (`orbit_home_pins_v1`) — this file is UI catalog only.
  */
 import { isFlagOn } from './flags'

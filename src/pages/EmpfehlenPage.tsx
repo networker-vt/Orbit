@@ -35,17 +35,17 @@ export function EmpfehlenPage() {
       <header className="space-y-2">
         <p className="text-xs font-medium uppercase tracking-wider text-cyan">Netzwerk</p>
         <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
-          <Gift size={22} className="text-cyan" /> Orbit empfehlen
+          <Gift size={22} className="text-cyan" /> Allda empfehlen
         </h1>
         <p className="text-sm text-muted">
           Persönlicher Code und Share-Link.{' '}
-          <strong className="font-medium text-ink">Referrer:</strong> +40 Orbit Credits pro geworbenem
+          <strong className="font-medium text-ink">Referrer:</strong> +40 Allda Credits pro geworbenem
           Signup (Demo, Rewards-Pool, 21M Cap).{' '}
           <strong className="font-medium text-ink">Geworbene Person:</strong> Willkommens-Credits beim
           Signup aus dem Welcome-Pool — getrennt vom Referral-Bonus.
         </p>
         <p className="text-xs text-muted">
-          Orbit Credits sind Treuepunkte für Boosts in der App — kein echtes Geld, kein Auszahlungsanspruch,
+          Allda Credits sind Treuepunkte für Boosts in der App — kein echtes Geld, kein Auszahlungsanspruch,
           kein Crypto-Marketing.
         </p>
       </header>
@@ -64,8 +64,8 @@ export function EmpfehlenPage() {
               variant="secondary"
               onClick={() =>
                 void navigator.share?.({
-                  title: 'Orbit',
-                  text: 'Orbit — Matching statt Spam. Dein persönlicher Job-Orbit.',
+                  title: 'Allda',
+                  text: 'Allda — Matching statt Spam. Dein persönlicher Job-Allda.',
                   url,
                 })
               }
@@ -79,7 +79,7 @@ export function EmpfehlenPage() {
       <section className="card-elevated rounded-2xl border border-border p-5">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-xs uppercase tracking-wider text-muted">Orbit Credits (Treuepunkte)</p>
+            <p className="text-xs uppercase tracking-wider text-muted">Allda Credits (Treuepunkte)</p>
             <p className="text-3xl font-bold tabular-nums text-cyan">{creditsOn ? credits.balance : '—'}</p>
           </div>
           {creditsOn ? (

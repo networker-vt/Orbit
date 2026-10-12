@@ -20,7 +20,7 @@ export function SupplyMeter({ className }: { className?: string }) {
         aria-valuemin={0}
         aria-valuemax={MAX_SUPPLY}
         aria-valuenow={p.circulating}
-        aria-label="Orbit Credits im Umlauf"
+        aria-label="Allda Credits im Umlauf"
       >
         <div className="h-full rounded-full bg-violet-400" style={{ width: `${Math.max(pct, 0.4)}%` }} />
       </div>

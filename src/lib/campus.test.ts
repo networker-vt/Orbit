@@ -16,7 +16,7 @@ import {
 } from './campus'
 import { __resetKidsForTests, enableKids } from './kids'
 
-describe('Orbit Campus', () => {
+describe('Allda Campus', () => {
   afterEach(() => {
     __resetCampusForTests()
     __resetKidsForTests()

@@ -16,7 +16,7 @@ export function DatenschutzPage() {
         {!isLegalPlaceholder(LEGAL.phone) ? `. Telefon: ${LEGAL.phone}.` : '.'}
       </p>
       <p>
-        Orbit ist ein Marktplatz. Verträge über Jobs, Fahrten oder andere Leistungen kommen zwischen
+        Allda ist ein Marktplatz. Verträge über Jobs, Fahrten oder andere Leistungen kommen zwischen
         den Nutzerinnen und Nutzern zustande, nicht mit {LEGAL.operatorName}.
       </p>
 
@@ -51,10 +51,18 @@ export function DatenschutzPage() {
           </li>
         )}
       </ul>
+      <h2>Kartenbilder</h2>
+      <p>
+        Die Kartenbilder lädt dein Browser von der OpenStreetMap Foundation (Großbritannien). Dabei erhält sie deine IP-Adresse und erkennt den Kartenausschnitt.
+        Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; für Großbritannien besteht ein Angemessenheitsbeschluss der EU-Kommission.{' '}
+        <a href="https://osmfoundation.org/wiki/Privacy_Policy" referrerPolicy="strict-origin">
+          https://osmfoundation.org/wiki/Privacy_Policy
+        </a>
+      </p>
       <p>
         Es gibt kein Analyse-Werkzeug und keine Werbung von Dritten. Wenn du einen Suchlink
         (bahn.de, Google Flights, Booking, Kayak) selbst öffnest, gilt die Datenschutzerklärung
-        der jeweiligen Seite. Orbit ruft diese Seiten nicht im Hintergrund auf.
+        der jeweiligen Seite. Allda ruft diese Seiten nicht im Hintergrund auf.
       </p>
 
       <h2>Was auf dem Gerät liegt</h2>
@@ -66,7 +74,7 @@ export function DatenschutzPage() {
           Server-Feld dafür.
         </li>
         <li>
-          Orbit Kids (wenn eingeschaltet): Altersband und Hash der Eltern-PIN auf dem Gerät — nie
+          Allda Kids (wenn eingeschaltet): Altersband und Hash der Eltern-PIN auf dem Gerät — nie
           die PIN im Klartext. Zweck: eingeschränkte Kinder-Oberfläche nach Eltern-Freigabe.
         </li>
         <li>
@@ -90,11 +98,11 @@ export function DatenschutzPage() {
 
       <h2>Alter</h2>
       <p>
-        Der Orbit-Marktplatz (Konten, Chat, Jobs, Wallet) richtet sich an Personen ab 18 Jahren.
+        Der Allda-Marktplatz (Konten, Chat, Jobs, Wallet) richtet sich an Personen ab 18 Jahren.
         Bei der Anmeldung bestätigst du das; die Bestätigung liegt nur auf diesem Gerät.
       </p>
       <p>
-        <strong>Orbit Kids</strong> ist kein eigenes Kinder-Konto und kein voller Marktplatz.
+        <strong>Allda Kids</strong> ist kein eigenes Kinder-Konto und kein voller Marktplatz.
         Wenn die Funktion eingeschaltet ist, richtet ein Elternteil zuerst eine PIN ein und wählt
         ein Altersband. Danach sehen Minderjährige eine eingeschränkte Oberfläche (u. a. Campus und
         Assist; keine Credits, kein Wallet, kein öffentlicher Chat, keine Adult-Buchung). Das ist
@@ -119,17 +127,23 @@ export function DatenschutzPage() {
         Active services: GitHub Pages (hosting the web app), storage on your device (technically
         necessary under § 25 (2) TDDDG, no consent banner), and Apple when you use the iOS app.
         {isSupabaseConfigured ? ' Supabase stores the account when that connection is enabled.' : ''}{' '}
-        There is no analytics tool. Opening a search link (bahn.de, Google Flights, Booking, Kayak)
-        is your request; that site then applies its own policy. Orbit does not call those sites in
+        Map images are loaded by your browser from the OpenStreetMap Foundation (United Kingdom).
+        That request sends your IP address and identifies the map area. The legal basis is Art. 6
+        (1) (f) GDPR; an EU Commission adequacy decision covers the United Kingdom (
+        <a href="https://osmfoundation.org/wiki/Privacy_Policy" referrerPolicy="strict-origin">
+          https://osmfoundation.org/wiki/Privacy_Policy
+        </a>
+        ). There is no analytics tool. Opening a search link (bahn.de, Google Flights, Booking, Kayak)
+        is your request; that site then applies its own policy. Allda does not call those sites in
         the background.
       </p>
       <p>
         Company directory (Art. 14 GDPR): name, city and a website or dry-hire link from public
         business sources. No company phone numbers or emails are stored in the app. Legal basis:
         legitimate interest in a directory of public business data. Deletion:{' '}
-        <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. The Orbit marketplace (accounts, chat,
+        <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. The Allda marketplace (accounts, chat,
         jobs, wallet) is for people aged 18 or over. You confirm that at sign-up; the confirmation
-        stays on this device. <strong>Orbit Kids</strong> (when enabled) is a parental-PIN gate
+        stays on this device. <strong>Allda Kids</strong> (when enabled) is a parental-PIN gate
         with a restricted UI for minors — not a full marketplace account and not a certified
         parental-control product. Age band and a PIN hash may be stored on the device.
       </p>

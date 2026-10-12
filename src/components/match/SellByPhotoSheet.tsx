@@ -158,7 +158,7 @@ export function SellByPhotoSheet({ open, onClose, initialMode = 'sell' }: Props)
           imageEmoji: '🔁',
           industry: draft.category,
           itemCondition: draft.condition,
-          source: proposal?.source === 'vision' ? 'Orbit Vision' : 'Orbit Foto-Demo',
+          source: proposal?.source === 'vision' ? 'Allda Vision' : 'Allda Foto-Demo',
           sellerKind: 'private',
           matchReason: 'Foto-Tausch · user-confirmed',
         })
@@ -182,7 +182,7 @@ export function SellByPhotoSheet({ open, onClose, initialMode = 'sell' }: Props)
           imageEmoji: '📷',
           industry: draft.category,
           itemCondition: draft.condition,
-          source: proposal?.source === 'vision' ? 'Orbit Vision' : 'Orbit Foto-Demo',
+          source: proposal?.source === 'vision' ? 'Allda Vision' : 'Allda Foto-Demo',
           sellerKind: 'private',
           matchReason: 'Foto-Verkauf · user-confirmed',
         })

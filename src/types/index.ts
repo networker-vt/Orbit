@@ -123,7 +123,7 @@ export interface Listing {
   dayHours?: number
   /** Warum dieses Angebot gerankt / empfohlen wird */
   matchReason?: string
-  /** Orbit global job fields */
+  /** Allda global job fields */
   industry?: string
   jobType?: string
   workMode?: 'remote' | 'hybrid' | 'onsite'
@@ -141,7 +141,7 @@ export interface Listing {
   offerTags?: string[]
   /** What this post needs (chips). */
   needTags?: string[]
-  /** Jugendschutz: listing may appear in Orbit Kids Treffer. */
+  /** Jugendschutz: listing may appear in Allda Kids Treffer. */
   safeForKids?: boolean
   /** DSA: private or commercial seller. Missing means private. */
   sellerKind?: 'private' | 'commercial'

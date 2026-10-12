@@ -27,7 +27,7 @@ import {
 } from './credits'
 import { __setAppModeForTests, __setFlagForTests } from './flags'
 
-describe('Orbit Credits protocol', () => {
+describe('Allda Credits protocol', () => {
   beforeEach(() => {
     localStorage.clear()
     __setAppModeForTests(null)

@@ -149,10 +149,10 @@ function SimpleCreateListing() {
       jobType: draft.marketType === 'minijob' ? 'Minijob' : draft.marketType === 'job' ? 'Freelance' : undefined,
       country: city === 'Remote' ? 'Remote / Global' : undefined,
       languages: company.languages.length ? company.languages : undefined,
-      source: 'Orbit Direct',
+      source: 'Allda Direct',
       offerTags: draft.kind === 'offer' ? company.offers.slice(0, 4) : undefined,
       needTags: draft.kind === 'request' ? company.seeks.slice(0, 4) : undefined,
-      matchReason: featured ? 'Orbit Credits Boost (Demo)' : undefined,
+      matchReason: featured ? 'Allda Credits Boost (Demo)' : undefined,
       sellerKind,
       trader: sellerKind === 'commercial' ? trader : undefined,
     })

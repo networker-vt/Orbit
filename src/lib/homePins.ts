@@ -1,5 +1,5 @@
 /**
- * Shared Home Schnellzugriffe (user pins from Mein Orbit).
+ * Shared Home Schnellzugriffe (user pins from Mein Allda).
  *
  * One list for Home + Mein — do not invent a second key.
  * Storage: localStorage `orbit_home_pins_v1`

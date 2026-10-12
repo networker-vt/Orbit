@@ -1,4 +1,4 @@
-# Capacitor — iOS & Android (Orbit)
+# Capacitor — iOS & Android (Allda)
 
 **iOS:** Das Xcode-Projekt liegt unter `ios/`. TestFlight: [`docs/TESTFLIGHT.md`](../docs/TESTFLIGHT.md). Bundle-ID `app.orbit.companion` (Privatperson, keine Firmenbehauptung). `npm run cap:sync` baut mit Vite-Base `/`.
 
@@ -23,7 +23,7 @@ GitHub Pages bleibt `base: /orbit/` (`npm run build`, `npm run deploy:pages`).
 1. https://play.google.com/console/signup
 2. Einmalige Registrierung (~25 USD)
 3. Entwicklerprofil + D-U-N-S später, falls GmbH
-4. **App erstellen** → Name `Orbit` → App (nicht nur Spiel)
+4. **App erstellen** → Name `Allda` → App (nicht nur Spiel)
 5. Datenschutz-URL eintragen:  
    `https://networker-vt.github.io/orbit/datenschutz`
 

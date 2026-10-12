@@ -10,7 +10,7 @@ export const LEGAL = {
   phone: '[BITTE AUSFÜLLEN]',
   /** Remove the private-operation note once the project is run for profit. */
   tradeStatus: '[BITTE AUSFÜLLEN: Gewerbe ja/nein]',
-  brand: 'Orbit',
+  brand: 'Allda',
   form: 'natürliche Person / Privatperson',
   register: null as string | null,
   vatId: null as string | null,

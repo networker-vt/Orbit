@@ -235,7 +235,7 @@ function dealReason(
     case 'role':
       return de ? (detail ?? 'Passend zu deiner Rolle') : (detail ?? 'Fits your role')
     case 'featured':
-      return de ? 'Hervorgehoben in Orbit' : 'Featured on Orbit'
+      return de ? 'Hervorgehoben in Allda' : 'Featured on Allda'
     case 'travel':
       return de ? 'Günstige Reise — aus Prefs & Suchen' : 'Travel deal from prefs & searches'
     case 'city':

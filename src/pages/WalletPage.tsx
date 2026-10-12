@@ -272,7 +272,7 @@ export function WalletPage() {
 
       <section className="space-y-4 rounded-2xl border border-violet-500/35 bg-violet-500/10 p-5">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="text-lg font-semibold text-violet-200">Orbit Credits</h2>
+          <h2 className="text-lg font-semibold text-violet-200">Allda Credits</h2>
           <LaneBadge lane="credits" />
           {identity?.earlyTester && (
             <span className="rounded-full border border-amber-400/40 bg-amber-500/15 px-2 py-0.5 text-xs text-amber-100">
