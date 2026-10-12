@@ -47,9 +47,9 @@ export default defineConfig({
         'icons/splash-1290x2796.png',
       ],
       manifest: {
-        name: 'Orbit',
-        short_name: 'Orbit',
-        description: 'Orbit — Marktplatz für alles.',
+        name: 'Allda',
+        short_name: 'Allda',
+        description: 'Allda — Marktplatz für alles.',
         start_url: BASE,
         scope: BASE,
         id: BASE,

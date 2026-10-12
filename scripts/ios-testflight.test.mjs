@@ -63,10 +63,10 @@ describe('ios testflight ci', () => {
     assert.match(vite, /CAPACITOR === '1'/)
 
     const cap = JSON.parse(read('../capacitor.config.json'))
-    assert.equal(cap.appId, 'app.orbit.companion')
+    assert.equal(cap.appId, 'app.allda.companion')
 
     const project = read('../ios/App/App.xcodeproj/project.pbxproj')
-    assert.match(project, /PRODUCT_BUNDLE_IDENTIFIER = app\.orbit\.companion;/)
+    assert.match(project, /PRODUCT_BUNDLE_IDENTIFIER = app\.allda\.companion;/)
     assert.match(project, /MARKETING_VERSION = 2\.9\.1;/)
     assert.match(read('../ios/App/App/Info.plist'), /<key>ITSAppUsesNonExemptEncryption<\/key>\s*<false\/>/)
 

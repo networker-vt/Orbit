@@ -1,16 +1,16 @@
 # App Store Connect — Review Notes (paste)
 
-Copy into **App Review Information → Notes** when submitting Orbit (`app.orbit.companion`).
+Copy into **App Review Information → Notes** when submitting Allda (`app.allda.companion`).
 
 ---
 
 ## English (recommended for Apple)
 
-Orbit is a marketplace companion (jobs, learning, social stubs, travel search links).
+Allda is a marketplace companion (jobs, learning, social stubs, travel search links).
 
 **Demo mode (default build):** No real money moves. Wallet, credits, packs, and checkout are local stubs — not In-App Purchases and not Stripe/PayPal. Travel opens partner search links only; there is no live GDS booking.
 
-**First launch / registration:** App opens `/willkommen` — choose **Orbit (adult)** or **Orbit Kids (up to 18)**. Adults complete a guided tour (prefs, skills, role, demo compliance checklists, profile). Kids require **parental consent** + parent PIN before the Kids hub (`/kids`).
+**First launch / registration:** App opens `/willkommen` — choose **Allda (adult)** or **Orbit Kids (up to 18)**. Adults complete a guided tour (prefs, skills, role, demo compliance checklists, profile). Kids require **parental consent** + parent PIN before the Kids hub (`/kids`).
 
 **Sign-in for review (adult path):** Complete the tour or skip to Auth via nav; check “I am at least 18”, then “Start as demo agency” (or Magic Link → “Open demo link”).
 
@@ -34,4 +34,4 @@ Publisher: Mirco Küßner (private individual) — same as Impressum.
 
 ## Deutsch (Kurzfassung)
 
-Orbit ist ein Marktplatz-Companion. Erststart: Moduswahl Erwachsene vs. Kids (≤18, Einverständnis + PIN). Beta-Hinweis oben. Standard-Build = Demo: kein echtes Geld, keine IAP. Review Erwachsene: Tour oder Auth → 18+ → „Demo als Agentur“. Einstellung → Sicherheit (Passwort, 2FA, Biometrie in der App, WebAuthn im Browser — alles lokal). Android: `docs/PLAY_STORE_REVIEW.md`. Kids-Hub eingeschränkt. Mitentwickeln lokal; Merges nur über Haus. Privacy/Support wie oben.
+Allda ist ein Marktplatz-Companion. Erststart: Moduswahl Erwachsene vs. Kids (≤18, Einverständnis + PIN). Beta-Hinweis oben. Standard-Build = Demo: kein echtes Geld, keine IAP. Review Erwachsene: Tour oder Auth → 18+ → „Demo als Agentur“. Einstellung → Sicherheit (Passwort, 2FA, Biometrie in der App, WebAuthn im Browser — alles lokal). Android: `docs/PLAY_STORE_REVIEW.md`. Kids-Hub eingeschränkt. Mitentwickeln lokal; Merges nur über Haus. Privacy/Support wie oben.

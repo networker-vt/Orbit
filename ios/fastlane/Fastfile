@@ -4,7 +4,7 @@
 
 default_platform(:ios)
 
-BUNDLE_ID = "app.orbit.companion"
+BUNDLE_ID = "app.allda.companion"
 
 platform :ios do
   desc "Archive the Capacitor iOS app and upload it to TestFlight Internal Testing"

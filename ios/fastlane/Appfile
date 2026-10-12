@@ -1,5 +1,5 @@
 # Bundle id is fixed. Team id comes from the APPLE_TEAM_ID secret at runtime.
-app_identifier("app.orbit.companion")
+app_identifier("app.allda.companion")
 
 team = ENV["APPLE_TEAM_ID"].to_s.gsub(/\s+/, "")
 team_id(team) unless team.empty?

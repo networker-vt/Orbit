@@ -72,7 +72,7 @@ xcodebuild archive \
   -skipMacroValidation \
   -skipPackagePluginValidation \
   DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
-  PRODUCT_BUNDLE_IDENTIFIER="app.orbit.companion" \
+  PRODUCT_BUNDLE_IDENTIFIER="app.allda.companion" \
   MARKETING_VERSION="$ORBIT_MARKETING_VERSION" \
   CURRENT_PROJECT_VERSION="$ORBIT_BUILD_NUMBER" \
   CODE_SIGNING_ALLOWED=NO \
@@ -119,7 +119,7 @@ printf '%s\n' "$ipa" > "$OUT/ipa-path.txt"
 cat > "$OUT/build-info.txt" <<EOF
 marketing_version=${ORBIT_MARKETING_VERSION}
 build_number=${ORBIT_BUILD_NUMBER}
-bundle_id=app.orbit.companion
+bundle_id=app.allda.companion
 ipa=$(basename "$ipa")
 EOF
 

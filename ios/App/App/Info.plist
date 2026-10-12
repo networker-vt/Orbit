@@ -15,7 +15,7 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Orbit nutzt deinen Standort für Wetter & Outfit, günstige Tankstellen in der Nähe, Essenstipps Nearby, Parkmerke und Supermarkt-Links auf der Karte — nur wenn du es erlaubst.</string>
 	<key>CFBundleDisplayName</key>
-        <string>Orbit</string>
+	<string>Allda</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
