@@ -3,7 +3,7 @@ import { getPrefs } from '../prefs'
 import { searchJobProviders } from './jobProviders'
 
 describe('job providers', () => {
-  it('returns Orbit job listings without a query', async () => {
+  it('returns Allda job listings without a query', async () => {
     const hits = await searchJobProviders({ q: '', prefs: getPrefs(), locale: 'de' })
     const orbit = hits.filter((h) => h.mode === 'orbit')
     expect(orbit.length).toBeGreaterThan(0)

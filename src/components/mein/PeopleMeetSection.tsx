@@ -17,7 +17,7 @@ export function PeopleMeetSection() {
       </p>
       {open ? (
         <p className="text-sm text-muted">
-          Noch keine echten Treffen. Orbit zeigt hier keine Beispielpersonen. Melden bleibt auf Profilen
+          Noch keine echten Treffen. Allda zeigt hier keine Beispielpersonen. Melden bleibt auf Profilen
           möglich.
         </p>
       ) : (

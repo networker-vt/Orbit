@@ -1,5 +1,5 @@
 /**
- * Local tool router for Orbit AI — navigation and app actions without LLM.
+ * Local tool router for Allda AI — navigation and app actions without LLM.
  */
 
 export type OrbitAiToolName =
@@ -85,8 +85,8 @@ const NAV_RULES: RouteRule[] = [
   {
     re: /\b(mein\s*orbit|mein)\b/i,
     path: '/mein',
-    labelDe: 'Mein Orbit',
-    labelEn: 'My Orbit',
+    labelDe: 'Mein Allda',
+    labelEn: 'My Allda',
   },
   {
     re: /\b(social|community)\b/i,

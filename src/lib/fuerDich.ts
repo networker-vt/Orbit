@@ -119,8 +119,8 @@ export function rankFuerDich(
     title: de ? 'Neuer Look?' : 'New look?',
     kicker: de ? 'Style · Demo' : 'Style · demo',
     reason: de
-      ? 'Foto oder Video — Orbit schlägt Varianten + Shops vor.'
-      : 'Photo or video — Orbit suggests variants + shops.',
+      ? 'Foto oder Video — Allda schlägt Varianten + Shops vor.'
+      : 'Photo or video — Allda suggests variants + shops.',
     emoji: '🪞',
     to: '/kabine',
     action: 'look',

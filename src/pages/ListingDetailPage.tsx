@@ -223,7 +223,7 @@ export function ListingDetailPage() {
           compact
           kind="application"
           event={{
-            title: `Orbit Bewerbung: ${listing.title}`,
+            title: `Allda Bewerbung: ${listing.title}`,
             description: listing.description.slice(0, 280),
             location: [listing.city, listing.venue].filter(Boolean).join(' · '),
             startIso: `${listing.dateFrom}T09:00:00.000Z`,

@@ -31,7 +31,7 @@ export function QuellenPage() {
           <Cable size={22} className="text-cyan" /> Quellen
         </h1>
         <p className="text-sm text-muted">
-          Job-Boards & Partner — Status mock/geplant. Orbit imported Samples sind gekennzeichnet.
+          Job-Boards & Partner — Status mock/geplant. Allda imported Samples sind gekennzeichnet.
         </p>
       </header>
 
@@ -40,7 +40,7 @@ export function QuellenPage() {
         <div>
           <p className="font-semibold text-amber-200">Keine inoffiziellen Scrapes</p>
           <p className="mt-1 text-xs leading-relaxed text-amber-100/90">
-            Orbit scrapt nicht LinkedIn, StepStone, Indeed, Xing o. Ä. ohne Erlaubnis. Anbindung nur
+            Allda scrapt nicht LinkedIn, StepStone, Indeed, Xing o. Ä. ohne Erlaubnis. Anbindung nur
             über offizielle APIs / Partner-Import. Bis dahin: Demo-Samples mit Source-Tag und
             Status-Stubs.
           </p>

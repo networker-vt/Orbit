@@ -519,7 +519,7 @@ textarea:focus-visible,
   50% { filter: drop-shadow(0 0 12px color-mix(in oklab, var(--theme-accent) 35%, transparent)); }
 }
 
-/* Orbit Social — hero atmosphere (search-term feed page) */
+/* Allda Social — hero atmosphere (search-term feed page) */
 .orbit-social-hero {
   min-height: 220px;
   background:
@@ -622,7 +622,7 @@ html[data-scheme="dark"].tweak-contrast {
   --color-muted: #c4c4c4;
 }
 
-/* Orbit+ accent themes (Credits cosmetic unlock) */
+/* Allda+ accent themes (Credits cosmetic unlock) */
 html[data-orbit-plus="aurora"] {
   --theme-accent: #6366f1;
   --theme-accent-2: #818cf8;

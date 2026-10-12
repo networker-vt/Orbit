@@ -1,5 +1,5 @@
 /**
- * Orbit Chat — contextual openers for Match / Jobs / Marktplatz / Foto.
+ * Allda Chat — contextual openers for Match / Jobs / Marktplatz / Foto.
  * Transactional threads (not Social cold-DMs); no consent gate.
  */
 import { deriveMarketType } from './market'
@@ -55,7 +55,7 @@ export function openListingChat(input: {
   const label = labelForSource(source)
   const body =
     input.note?.trim() ||
-    `Orbit Chat — Anschreiben (${label}) zu „${input.listing.title}“.`
+    `Allda Chat — Anschreiben (${label}) zu „${input.listing.title}“.`
 
   return store.createDirectThread({
     participantIds: [input.meId, input.listing.ownerId],
@@ -69,7 +69,7 @@ export function openListingChat(input: {
   })
 }
 
-/** After mutual swipe interest — open Orbit Chat with listing context when possible. */
+/** After mutual swipe interest — open Allda Chat with listing context when possible. */
 export function openMutualMatchChat(input: {
   meId: string
   meName: string
@@ -94,7 +94,7 @@ export function openMutualMatchChat(input: {
     listingTitle: input.mutual.title,
     senderId: input.meId,
     senderName: input.meName,
-    body: `Orbit Chat — Anschreiben (Match) zu „${input.mutual.title}“.`,
+    body: `Allda Chat — Anschreiben (Match) zu „${input.mutual.title}“.`,
     kind: 'match',
   })
 }

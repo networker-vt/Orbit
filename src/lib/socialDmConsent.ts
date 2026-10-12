@@ -1,10 +1,10 @@
 /**
- * Orbit Social ↔ Orbit Chat — 1:1 DM consent hook.
+ * Allda Social ↔ Allda Chat — 1:1 DM consent hook.
  *
  * Topic / search-term rooms (Suchbegriff-Chats) stay open without consent.
- * Person-to-person DMs are request → recipient accepts → Orbit Chat binds a threadId.
+ * Person-to-person DMs are request → recipient accepts → Allda Chat binds a threadId.
  *
- * Do not invent a parallel chat store here. Orbit Chat owns Telegram-like threads;
+ * Do not invent a parallel chat store here. Allda Chat owns Telegram-like threads;
  * this module only tracks consent + the optional bound thread id.
  */
 
@@ -25,7 +25,7 @@ export interface SocialDmRequest {
   note?: string
   status: SocialDmRequestStatus
   /**
-   * Bound only after accept. Prefer Orbit Chat’s thread ids via
+   * Bound only after accept. Prefer Allda Chat’s thread ids via
    * `registerSocialDmThreadBinder` / `attachSocialDmThreadId`.
    * Null/undefined means consent exists but chat UI is not live yet.
    */
@@ -34,7 +34,7 @@ export interface SocialDmRequest {
   updatedAt: string
 }
 
-/** Orbit Chat may register this to create/reuse its thread when a request is accepted. */
+/** Allda Chat may register this to create/reuse its thread when a request is accepted. */
 export type SocialDmThreadBinder = (request: SocialDmRequest) => string | null | undefined
 
 let threadBinder: SocialDmThreadBinder | null = null
@@ -121,8 +121,8 @@ export function getAcceptedSocialDmThreadId(meId: string, otherId: string): stri
 }
 
 /**
- * Request a 1:1 Orbit Social DM. Does **not** open a chat thread.
- * Recipient must accept; Orbit Chat then binds `threadId`.
+ * Request a 1:1 Allda Social DM. Does **not** open a chat thread.
+ * Recipient must accept; Allda Chat then binds `threadId`.
  */
 export function requestSocialDm(input: {
   fromId: string
@@ -197,7 +197,7 @@ export function declineSocialDmRequest(requestId: string, actorId: string): Soci
   return structuredClone(req)
 }
 
-/** Orbit Chat calls this after creating its thread for an accepted request. */
+/** Allda Chat calls this after creating its thread for an accepted request. */
 export function attachSocialDmThreadId(requestId: string, threadId: string): SocialDmRequest | null {
   const clean = threadId.trim()
   if (!clean) return null

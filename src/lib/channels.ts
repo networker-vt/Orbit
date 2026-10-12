@@ -269,7 +269,7 @@ export function __resetChannelsForTests() {
 }
 
 export const CHANNELS_DISCLAIMER_DE =
-  'Verbinden ist ein Demo-Stub — kein OAuth, kein Login bei Meta / X / Steam / PlayStation. Orbit liest und scrapet diese Konten nicht. Nur nach ausdrücklicher Zustimmung speichert der Schalter lokal ein connected-Flag.'
+  'Verbinden ist ein Demo-Stub — kein OAuth, kein Login bei Meta / X / Steam / PlayStation. Allda liest und scrapet diese Konten nicht. Nur nach ausdrücklicher Zustimmung speichert der Schalter lokal ein connected-Flag.'
 
 export const CHANNELS_DISCLAIMER_EN =
-  'Connect is a demo stub — no OAuth, no Meta / X / Steam / PlayStation login. Orbit does not read or scrape those accounts. Only after explicit consent does the toggle store a local connected flag.'
+  'Connect is a demo stub — no OAuth, no Meta / X / Steam / PlayStation login. Allda does not read or scrape those accounts. Only after explicit consent does the toggle store a local connected flag.'

@@ -24,7 +24,7 @@ export function ErfahrungenPage() {
   const [, setTick] = useState(0)
   const [target, setTarget] = useState<ExperienceTarget>('app')
   const [targetId, setTargetId] = useState('orbit')
-  const [targetLabel, setTargetLabel] = useState('Orbit')
+  const [targetLabel, setTargetLabel] = useState('Allda')
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState('')
   const [flash, setFlash] = useState<string | null>(null)
@@ -77,7 +77,7 @@ export function ErfahrungenPage() {
             setTarget(next)
             if (next === 'app') {
               setTargetId('orbit')
-              setTargetLabel('Orbit')
+              setTargetLabel('Allda')
             }
           }}
         >

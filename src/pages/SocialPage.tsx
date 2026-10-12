@@ -113,7 +113,7 @@ export function SocialPage() {
     const text = `${author}: ${body}`
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'Orbit Social', text })
+        await navigator.share({ title: 'Allda Social', text })
         return
       }
     } catch {
@@ -148,7 +148,7 @@ export function SocialPage() {
           'orbit-social-hero relative -mx-4 md:-mx-6',
           heroReady && 'orbit-social-hero--ready',
         )}
-        aria-label="Orbit Social"
+        aria-label="Allda Social"
       >
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
           <img

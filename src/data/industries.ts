@@ -1,4 +1,4 @@
-/** Orbit — global industries & job taxonomy (DE labels). */
+/** Allda — global industries & job taxonomy (DE labels). */
 
 export const COUNTRIES = [
   'Deutschland',
@@ -113,13 +113,13 @@ export const AGGREGATOR_SOURCES = [
   },
   {
     id: 'orbit',
-    name: 'Orbit Direct',
+    name: 'Allda Direct',
     status: 'live' as const,
-    hint: 'Native Inserate in Orbit',
+    hint: 'Native Inserate in Allda',
   },
 ] as const
 
 export type AggregatorId = (typeof AGGREGATOR_SOURCES)[number]['id']
 
-export const ORBIT_TAGLINE_DE = 'Dein Orbit für Arbeit — Matching statt Spam.'
-export const ORBIT_BRAND = 'Orbit'
+export const ORBIT_TAGLINE_DE = 'Dein Allda für Arbeit — Matching statt Spam.'
+export const ORBIT_BRAND = 'Allda'

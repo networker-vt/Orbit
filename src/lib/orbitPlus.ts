@@ -1,5 +1,5 @@
 /**
- * Orbit+ profile / accent themes — cosmetic unlocks via Credits (no cash-out).
+ * Allda+ profile / accent themes — cosmetic unlocks via Credits (no cash-out).
  * Applies `data-orbit-plus` on <html> for CSS accent overrides.
  */
 const KEY = 'orbit_orbit_plus_v1'

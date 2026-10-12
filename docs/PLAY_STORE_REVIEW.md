@@ -1,12 +1,12 @@
 # Google Play — Review / Data safety (paste)
 
-Copy into **Play Console → App content** notes when submitting Orbit (`app.orbit.companion`).
+Copy into **Play Console → App content** notes when submitting Allda (`app.orbit.companion`).
 
 ---
 
 ## English
 
-Orbit is a marketplace companion (jobs, learning, social stubs, travel search links).
+Allda is a marketplace companion (jobs, learning, social stubs, travel search links).
 
 **Demo mode:** No real payments, no Play Billing. Wallet and credits are local stubs.
 

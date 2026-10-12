@@ -27,13 +27,13 @@ function post(partial: Partial<SocialPost> & Pick<SocialPost, 'id' | 'body'>): S
   }
 }
 
-describe('Orbit Social search prefs + ranking', () => {
+describe('Allda Social search prefs + ranking', () => {
   beforeEach(() => {
     localStorage.clear()
     __resetSocialCacheForTests()
   })
 
-  it('derives interest terms from Orbit prefs', () => {
+  it('derives interest terms from Allda prefs', () => {
     const prefs: OrbitPrefs = {
       ...defaultPrefs(),
       seeker: {

@@ -46,9 +46,9 @@ function llmConfigured() {
 
 function systemPrompt(locale: 'de' | 'en', kids: boolean): string {
   const baseDe =
-    'Du bist Orbit AI, der kostenlose Assistent in der Orbit-App. Antworte kurz (max 3 Sätze). Keine Beleidigungen, Diskriminierung oder Hilfe bei Straftaten. Wenn der Nutzer App-Aktionen will, nenne passende Orbit-Bereiche (Match, Abflug, Einstellungen, Chat, Wallet). Keine Live-Buchung ohne Checkout.'
+    'Du bist Allda AI, der kostenlose Assistent in der Allda-App. Antworte kurz (max 3 Sätze). Keine Beleidigungen, Diskriminierung oder Hilfe bei Straftaten. Wenn der Nutzer App-Aktionen will, nenne passende Allda-Bereiche (Match, Abflug, Einstellungen, Chat, Wallet). Keine Live-Buchung ohne Checkout.'
   const baseEn =
-    'You are Orbit AI, the free assistant in the Orbit app. Reply briefly (max 3 sentences). No hate, discrimination, or crime help. For app actions, point to Orbit areas (Match, Travel, Settings, Chat, Wallet). No live booking without checkout.'
+    'You are Allda AI, the free assistant in the Allda app. Reply briefly (max 3 sentences). No hate, discrimination, or crime help. For app actions, point to Allda areas (Match, Travel, Settings, Chat, Wallet). No live booking without checkout.'
   const kidsDe = ' Kids-Modus: keine Erwachsenen-, Alkohol- oder Gewaltinhalte.'
   const kidsEn = ' Kids mode: no adult, alcohol, or violence topics.'
   if (locale === 'de') return baseDe + (kids ? kidsDe : '')
@@ -103,12 +103,12 @@ function creditsStatusReply(locale: 'de' | 'en'): string {
   const used = c.assistUsed ?? 0
   if (!isFlagOn('credits')) {
     return locale === 'de'
-      ? `Orbit AI ist kostenlos. Assist-Nutzung heute: ${used}/${FREE_ASSIST_PER_DAY} (lokal gezählt).`
-      : `Orbit AI is free. Assist usage today: ${used}/${FREE_ASSIST_PER_DAY} (tracked locally).`
+      ? `Allda AI ist kostenlos. Assist-Nutzung heute: ${used}/${FREE_ASSIST_PER_DAY} (lokal gezählt).`
+      : `Allda AI is free. Assist usage today: ${used}/${FREE_ASSIST_PER_DAY} (tracked locally).`
   }
   return locale === 'de'
-    ? `Dein Guthaben: ${c.balance} Orbit Credits. Basis-KI ist kostenlos; Boosts kosten Credits im Wallet.`
-    : `Your balance: ${c.balance} Orbit Credits. Core AI is free; boosts use credits in Wallet.`
+    ? `Dein Guthaben: ${c.balance} Allda Credits. Basis-KI ist kostenlos; Boosts kosten Credits im Wallet.`
+    : `Your balance: ${c.balance} Allda Credits. Core AI is free; boosts use credits in Wallet.`
 }
 
 function toolReply(call: OrbitAiToolCall, locale: 'de' | 'en'): string {

@@ -97,7 +97,7 @@ export function BookingPage() {
         <CalendarExport
           kind={booking.status === 'booked' || booking.status === 'accepted' ? 'start' : 'interview'}
           event={{
-            title: `Orbit: ${booking.listingTitle}`,
+            title: `Allda: ${booking.listingTitle}`,
             description: `${booking.requesterName} ↔ ${booking.providerName}\nStatus: ${booking.status}`,
             startIso: `${booking.dateFrom}T09:00:00.000Z`,
             endIso: booking.dateTo ? `${booking.dateTo}T17:00:00.000Z` : undefined,

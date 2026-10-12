@@ -1,6 +1,6 @@
 import { generateSecret, generateSync, generateURI, verifySync } from 'otplib'
 
-const ISSUER = 'Orbit'
+const ISSUER = 'Allda'
 
 export function generateTotpSecret(): string {
   return generateSecret()

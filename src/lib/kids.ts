@@ -1,5 +1,5 @@
 /**
- * Orbit Kids — age bands, kids mode, parental PIN, content filter.
+ * Allda Kids — age bands, kids mode, parental PIN, content filter.
  * Kids mode is on for every band under 18. 18+ is adult. Unset age is adult (no lock-in).
  * Super veto: parental PIN/gate first, then kid UI. 0 Credits (no mint/spend/P2P). Hide Wallet.
  */
@@ -46,8 +46,8 @@ export const AGE_BAND_COPY: Record<AgeBand, { de: string; en: string; hintDe: st
   '18+': {
     de: '18+',
     en: '18+',
-    hintDe: 'Voller Orbit. Eltern-PIN beim Verlassen von Kids.',
-    hintEn: 'Full Orbit. Parental PIN when leaving Kids.',
+    hintDe: 'Voller Allda. Eltern-PIN beim Verlassen von Kids.',
+    hintEn: 'Full Allda. Parental PIN when leaving Kids.',
   },
 }
 

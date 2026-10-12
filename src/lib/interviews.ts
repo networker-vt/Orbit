@@ -51,7 +51,7 @@ function defaultRooms(): InterviewRoom[] {
         {
           id: 'ivm-1',
           role: 'bot',
-          body: BOT_QUESTIONS[0] ? 'Hallo — kurzes Orbit-Interview (Demo). Kein klassisches CV-Spam. ' + BOT_QUESTIONS[0] : '',
+          body: BOT_QUESTIONS[0] ? 'Hallo — kurzes Allda-Interview (Demo). Kein klassisches CV-Spam. ' + BOT_QUESTIONS[0] : '',
           at: now.toISOString(),
         },
       ],
@@ -136,7 +136,7 @@ export function ensureInterviewRoom(input: {
   if (existing) return structuredClone(existing)
   const room: InterviewRoom = {
     id: uid('iv'),
-    title: input.listingTitle ? `Interview · ${input.listingTitle}` : 'Orbit Interview',
+    title: input.listingTitle ? `Interview · ${input.listingTitle}` : 'Allda Interview',
     listingId: input.listingId,
     listingTitle: input.listingTitle,
     peerName: input.peerName,
@@ -145,7 +145,7 @@ export function ensureInterviewRoom(input: {
       {
         id: uid('ivm'),
         role: 'bot',
-        body: `Hallo — kurzes Orbit-Interview (Demo) mit ${input.peerName}. ${BOT_QUESTIONS[0]}`,
+        body: `Hallo — kurzes Allda-Interview (Demo) mit ${input.peerName}. ${BOT_QUESTIONS[0]}`,
         at: new Date().toISOString(),
       },
     ],

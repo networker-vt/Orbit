@@ -382,10 +382,10 @@ export function localizeTripOption(opt: TripOption, locale: 'de' | 'en') {
 }
 
 export const TRIP_DEMO_DISCLAIMER_DE =
-  'Skizze (Stub), kein Live-Tarif. Tippen öffnet die öffentliche Suche. Orbit bucht nicht und legt kein Ticket an.'
+  'Skizze (Stub), kein Live-Tarif. Tippen öffnet die öffentliche Suche. Allda bucht nicht und legt kein Ticket an.'
 
 export const TRIP_DEMO_DISCLAIMER_EN =
-  'A sketch (stub), not a live fare. Tap opens a public search. Orbit does not book and does not create a ticket.'
+  'A sketch (stub), not a live fare. Tap opens a public search. Allda does not book and does not create a ticket.'
 
 function cleanPlace(raw: string) {
   return raw

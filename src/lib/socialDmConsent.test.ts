@@ -11,7 +11,7 @@ import {
 } from './socialDmConsent'
 import { startSocialDm } from './social'
 
-describe('Orbit Social DM consent (1:1)', () => {
+describe('Allda Social DM consent (1:1)', () => {
   beforeEach(() => {
     localStorage.clear()
     __resetSocialDmConsentForTests()
@@ -23,7 +23,7 @@ describe('Orbit Social DM consent (1:1)', () => {
       fromName: 'Alex',
       toId: 'u2',
       toName: 'Nora',
-      note: 'Hi from Orbit Social',
+      note: 'Hi from Allda Social',
     })
     expect(req.status).toBe('pending')
     expect(req.threadId).toBeNull()

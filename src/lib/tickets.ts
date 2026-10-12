@@ -95,10 +95,10 @@ export async function bookTravelOffer(input: {
 
   const thread = store.createDirectThread({
     participantIds: [input.payerId, 'orbit-support'],
-    participantNames: [input.payerName, 'Orbit Support'],
+    participantNames: [input.payerName, 'Allda Support'],
     listingTitle: offer.title,
     senderId: 'orbit-support',
-    senderName: 'Orbit Support',
+    senderName: 'Allda Support',
     body: `Buchung bestätigt (Demo). ${offer.provider} · ${offer.title}. Kein echtes Ticket, kein GDS.`,
     kind: 'booking',
   })
@@ -109,7 +109,7 @@ export async function bookTravelOffer(input: {
     title: offer.title,
     subtitle: `${offer.provider} · ${offer.to}`,
     ref: `ORB-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
-    qr: `ORBIT-DEMO-${Date.now().toString(36).toUpperCase()}`,
+    qr: `ALLDA-DEMO-${Date.now().toString(36).toUpperCase()}`,
     status: 'confirmed',
     paidWith: input.pay,
     priceEur: offer.priceEur,
@@ -121,7 +121,7 @@ export async function bookTravelOffer(input: {
   }
   commit([ticket, ...get()])
   addLocalCalendarItem({
-    title: `Orbit: ${offer.title}`,
+    title: `Allda: ${offer.title}`,
     startIso: ticket.whenIso,
     location: offer.to,
     kind: 'plan',
@@ -149,10 +149,10 @@ export async function bookTripOption(input: {
 
   const thread = store.createDirectThread({
     participantIds: [input.payerId, 'orbit-support'],
-    participantNames: [input.payerName, 'Orbit Support'],
+    participantNames: [input.payerName, 'Allda Support'],
     listingTitle: copy.flightSketch,
     senderId: 'orbit-support',
-    senderName: 'Orbit Support',
+    senderName: 'Allda Support',
     body: `Orbi Demo-Bestätigung. ${copy.label} · ${copy.priceHint}. Kein echtes Ticket, kein GDS, kein Auto-Checkout.`,
     kind: 'booking',
   })
@@ -163,7 +163,7 @@ export async function bookTripOption(input: {
     title: `${copy.label} · ${copy.flightSketch}`,
     subtitle: `Orbi Demo · ${copy.priceHint}`,
     ref: `ORB-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
-    qr: `ORBIT-DEMO-${Date.now().toString(36).toUpperCase()}`,
+    qr: `ALLDA-DEMO-${Date.now().toString(36).toUpperCase()}`,
     status: 'confirmed',
     paidWith: 'fiat',
     priceEur: opt.priceEur,

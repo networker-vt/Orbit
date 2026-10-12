@@ -1,5 +1,5 @@
 /**
- * Orbit 2.8.1 — Home discover vs Mein account tile catalogs.
+ * Allda 2.8.1 — Home discover vs Mein account tile catalogs.
  * Home never lists Mein / Social / Wallet (those live in bottom nav or Mein).
  * Each tile has a visible emoji (or optional thematic image).
  */

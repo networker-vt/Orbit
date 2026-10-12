@@ -1,5 +1,5 @@
 /**
- * Orbit Chat — Social DM permission API (stable for Social redesign).
+ * Allda Chat — Social DM permission API (stable for Social redesign).
  *
  * Social cold-DMs require recipient consent: request → accept → chat unlocks.
  * Match / listing / booking threads do NOT use this gate.
@@ -41,7 +41,7 @@ function defaultState(): SocialDmState {
         fromName: 'Nora Patel',
         toId: 'user-demo-1',
         toName: 'Alex Müller',
-        note: 'Kurz zu Buchhaltungs-Sprints — darf ich dich in Orbit Chat anschreiben?',
+        note: 'Kurz zu Buchhaltungs-Sprints — darf ich dich in Allda Chat anschreiben?',
         status: 'pending',
         createdAt: '2026-10-09T12:00:00Z',
       },
@@ -199,7 +199,7 @@ export function acceptSocialDm(
     meName: req.toName,
     otherId: req.fromId,
     otherName: req.fromName,
-    openerBody: `Orbit Chat freigeschaltet — ${req.toName} hat die Social-Anfrage angenommen.`,
+    openerBody: `Allda Chat freigeschaltet — ${req.toName} hat die Social-Anfrage angenommen.`,
   })
   req.status = 'accepted'
   req.resolvedAt = new Date().toISOString()
@@ -237,7 +237,7 @@ export function openAcceptedSocialChat(input: {
   if (existing) return existing
   return ensureSocialThread({
     ...input,
-    openerBody: 'Orbit Social — Chat freigeschaltet.',
+    openerBody: 'Allda Social — Chat freigeschaltet.',
   })
 }
 

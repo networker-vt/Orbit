@@ -102,7 +102,7 @@ export function MessagesPage() {
   const peerName = (th: (typeof threads)[0]) => {
     if (th.participantIds.some((id) => id.startsWith('topic:'))) {
       return (
-        th.listingTitle?.replace(/\s*·\s*Orbit Social$/i, '') ||
+        th.listingTitle?.replace(/\s*·\s*(?:Allda|Orbit) Social$/i, '') ||
         th.participantNames.find((n) => n.startsWith('#')) ||
         t('chat.brand')
       )

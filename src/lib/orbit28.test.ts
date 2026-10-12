@@ -3,12 +3,12 @@ import { tStatic } from './i18n'
 
 const META = /ruhig|quiet tiles|zwei Kachel|Discover-Liste|Nichts Lautes|Ruhige Links|Quiet links/i
 
-describe('Orbit 2.8.1 surface', () => {
-  it('renames bottom nav to Start · Match · Orbit Social · Mein', () => {
+describe('Allda 2.8.1 surface', () => {
+  it('renames bottom nav to Start · Match · Allda Social · Mein', () => {
     for (const locale of ['de', 'en'] as const) {
       expect(tStatic('nav.home', locale)).toMatch(/Start|Home/)
       expect(tStatic('nav.match', locale)).toBe('Match')
-      expect(tStatic('nav.social', locale)).toBe('Orbit Social')
+      expect(tStatic('nav.social', locale)).toBe('Allda Social')
       expect(tStatic('nav.mein', locale)).toMatch(/Mein|Me/)
     }
   })
@@ -40,8 +40,8 @@ describe('Orbit 2.8.1 surface', () => {
 
   it('labels Entdecker as Demo and keeps Assist primary copy', () => {
     expect(tStatic('entdecker.explain', 'de')).toMatch(/Demo/)
-    expect(tStatic('assist.submit', 'de')).toMatch(/Orbit fragen/)
-    expect(tStatic('assist.submit', 'en')).toMatch(/Ask Orbit/)
+    expect(tStatic('assist.submit', 'de')).toMatch(/Allda fragen/)
+    expect(tStatic('assist.submit', 'en')).toMatch(/Ask Allda/)
   })
 
   it('Home discover copy no longer lists Mein / Social / Wallet', () => {
@@ -50,9 +50,9 @@ describe('Orbit 2.8.1 surface', () => {
     }
   })
 
-  it('Mein Orbit title and Einstellung entry are renamed', () => {
-    expect(tStatic('mein.title', 'de')).toBe('Mein Orbit')
-    expect(tStatic('mein.kicker', 'de')).toBe('Mein Orbit')
+  it('Mein Allda title and Einstellung entry are renamed', () => {
+    expect(tStatic('mein.title', 'de')).toBe('Mein Allda')
+    expect(tStatic('mein.kicker', 'de')).toBe('Mein Allda')
     expect(tStatic('einstellung.title', 'de')).toBe('Einstellung')
     expect(tStatic('mein.lead', 'de')).toMatch(/Schnellzugriffe|Startseite/)
   })

@@ -105,7 +105,7 @@ function socialScore(post: SocialPost): MatchScore {
   return {
     percent: base,
     breakdown: { skills: base, land: 50, sprache: 50, gehalt: post.likes.length * 5, typ: 70 },
-    reasons: ['Orbit Social'],
+    reasons: ['Allda Social'],
     labels: [
       ['Skills', 'skills'],
       ['Land', 'land'],
@@ -305,7 +305,7 @@ export function MatchPage() {
               kind: 'social' as const,
               post,
               score: socialScore(post),
-              reason: 'Orbit Social',
+              reason: 'Allda Social',
             }))
           cards = [...posts, ...cards]
         }
@@ -349,7 +349,7 @@ export function MatchPage() {
               kind: 'social' as const,
               post,
               score: socialScore(post),
-              reason: 'Orbit Social',
+              reason: 'Allda Social',
             }))
           cards = [...posts, ...cards]
         }
@@ -521,7 +521,7 @@ export function MatchPage() {
             listingTitle: current.profile.name,
             senderId: actor.id,
             senderName: actor.name,
-            body: `Orbit Match — ${company.firmName || actor.name} · ${t('match.candidateNote')}`,
+            body: `Allda Match — ${company.firmName || actor.name} · ${t('match.candidateNote')}`,
             kind: 'match',
           })
         }
@@ -646,7 +646,7 @@ export function MatchPage() {
 
       {highlightActive && (
         <p className="rounded-xl border border-[var(--theme-accent)]/35 bg-[var(--theme-accent)]/10 px-3 py-2 text-xs text-[var(--theme-accent)]">
-          Match-Boost: Profil kurz hervorgehoben (24h Demo, Orbit Credits — kein echtes Geld).
+          Match-Boost: Profil kurz hervorgehoben (24h Demo, Allda Credits — kein echtes Geld).
         </p>
       )}
 

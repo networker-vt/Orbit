@@ -4,7 +4,7 @@ import { getHomePins, subscribeHomePins, type HomePin } from '../../lib/homePins
 import { useI18n } from '../../lib/i18n'
 
 /**
- * Home slot for Mein Orbit Schnellzugriffe.
+ * Home slot for Mein Allda Schnellzugriffe.
  * Renders nothing when empty so presets / news / Mehr Entdecken stay primary.
  * Writers: `src/lib/homePins.ts` (`orbit_home_pins_v1`).
  */

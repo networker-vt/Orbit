@@ -335,7 +335,7 @@ export function HomePage() {
 
       <NewsStrip items={newsItems} />
 
-      {/* Shared slot: Mein Orbit writes via `orbit_home_pins_v1` / src/lib/homePins.ts */}
+      {/* Shared slot: Mein Allda writes via `orbit_home_pins_v1` / src/lib/homePins.ts */}
       <HomePins />
 
       <section className="space-y-3 pt-2" aria-labelledby="mehr-entdecken">

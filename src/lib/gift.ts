@@ -1,5 +1,5 @@
 /**
- * Gift / sponsoring — peer transfer of Orbit Credits (demo).
+ * Gift / sponsoring — peer transfer of Allda Credits (demo).
  * No new mint. Recipient is a listing, company or profile on this device.
  */
 import { giftCredits } from './credits'

@@ -7,7 +7,7 @@ export function SupportPage() {
   return (
     <LegalLayout title="Support">
       <p className="rounded-xl border border-cyan/30 bg-cyan/10 px-4 py-3 text-sm text-cyan">
-        {LEGAL.operatorName} betreibt Orbit als <strong>natürliche Person</strong>. Es gibt keine Firma,
+        {LEGAL.operatorName} betreibt Allda als <strong>natürliche Person</strong>. Es gibt keine Firma,
         kein Support-Team und keine zugesagte Antwortzeit.
       </p>
 
@@ -22,7 +22,7 @@ export function SupportPage() {
 
       <h2>Wobei diese Adresse hilft</h2>
       <ul>
-        <li>Fragen zur App Orbit (PWA).</li>
+        <li>Fragen zur App Allda (PWA).</li>
         <li>Fehlermeldungen: was du getippt hast, welche Seite, was stattdessen passiert ist.</li>
         <li>
           Datenschutz: Auskunft oder Löschung. Lokale Demo-Daten liegen im Browser — Speicher leeren
@@ -34,10 +34,10 @@ export function SupportPage() {
       <h2>Was Support nicht ist</h2>
       <ul>
         <li>Kein Reisebüro, keine Airline, keine Bahn, kein Hotel.</li>
-        <li>Keine Zahlungsstelle. Orbit bewegt kein echtes Geld; Wallet und Credits sind Demo.</li>
+        <li>Keine Zahlungsstelle. Allda bewegt kein echtes Geld; Wallet und Credits sind Demo.</li>
         <li>Kein Anspruch auf eine Frist. Antwort nach Kapazität einer Privatperson.</li>
         <li>
-          Orbit Kids (wenn eingeschaltet): Fragen zur Eltern-PIN und zum Altersband — keine
+          Allda Kids (wenn eingeschaltet): Fragen zur Eltern-PIN und zum Altersband — keine
           zertifizierte Kinderschutz-Hotline.
         </li>
       </ul>
@@ -59,14 +59,14 @@ export function SupportPage() {
 
       <h2>English</h2>
       <p>
-        {LEGAL.operatorName} runs Orbit as a <strong>private individual</strong>, not a company. There
+        {LEGAL.operatorName} runs Allda as a <strong>private individual</strong>, not a company. There
         is no support team and no promised reply time.
       </p>
       <p>
         Write to <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a> ({LEGAL_ADDRESS_LINE}, Germany)
-        about the Orbit app, a bug, or a privacy request. Local data stays in the browser until
-        you clear site data. Orbit does not sell tickets and does not take payment — wallet and
-        credits are demo stubs. Orbit Kids (when enabled) is a parental-PIN mode, not a certified
+        about the Allda app, a bug, or a privacy request. Local data stays in the browser until
+        you clear site data. Allda does not sell tickets and does not take payment — wallet and
+        credits are demo stubs. Allda Kids (when enabled) is a parental-PIN mode, not a certified
         safety hotline.
       </p>
       <p>

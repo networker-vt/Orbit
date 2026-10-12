@@ -29,7 +29,7 @@ export function AgbPage() {
         oder Adult-Funktionen.
       </p>
       <p>
-        <strong>Orbit Kids</strong> (wenn in der App eingeschaltet) ist ein eingeschränkter Modus
+        <strong>Allda Kids</strong> (wenn in der App eingeschaltet) ist ein eingeschränkter Modus
         hinter einer Eltern-PIN: Campus und Assist ohne Wallet, ohne öffentlichen Chat und ohne
         Adult-Buchung. Eltern richten PIN und Altersband auf dem Gerät ein. Das ersetzt keine
         zertifizierte Jugendschutz- oder Elternkontroll-Software.

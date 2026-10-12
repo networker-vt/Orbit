@@ -141,5 +141,5 @@ export function logSafetyBlock(reason: SafetyBlockReason): void {
   console.info('[orbit-ai] input blocked', { reason })
 }
 
-export const ORBIT_AI_BLOCKED_DE = 'Das kann Orbit nicht annehmen.'
-export const ORBIT_AI_BLOCKED_EN = 'Orbit cannot accept that.'
+export const ORBIT_AI_BLOCKED_DE = 'Das kann Allda nicht annehmen.'
+export const ORBIT_AI_BLOCKED_EN = 'Allda cannot accept that.'

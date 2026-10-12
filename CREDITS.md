@@ -1,6 +1,6 @@
-# Orbit Credits (v2.7.0)
+# Allda Credits (v2.7.0)
 
-Bitcoin-style **hard cap: 21.000.000** Orbit Credits. **Balance = sum(`credit_events.delta`)**. Every write is an append-only intent with an idempotent **`txn_id`**. Duplicate `txn_id` is a no-op.
+Bitcoin-style **hard cap: 21.000.000** Allda Credits. **Balance = sum(`credit_events.delta`)**. Every write is an append-only intent with an idempotent **`txn_id`**. Duplicate `txn_id` is a no-op.
 
 ## Modes (`VITE_APP_MODE=demo|prod`)
 
@@ -120,7 +120,7 @@ While the **packs pool** has remainder, packs debit that pool:
 | Gift / sponsoring | peer transfer, **1 burned** | — |
 | Match highlight (24h demo) | 22 | 18 |
 | Home-Pins+ (+2 slots) | 35 | 28 |
-| Orbit+ theme unlock | 28 | 22 |
+| Allda+ theme unlock | 28 | 22 |
 | Chat-Extras (local history today) | 18 | 14 |
 | Referral signup grant | 40 from rewards pool | — |
 
@@ -140,7 +140,7 @@ Mein → **Kanäle verbinden**: Amazon, Netflix, YouTube, Spotify, Instagram.
 
 - **Connected flag only.** Toggle only. **No OAuth, no scraping, no real account access.**
 - When “connected”, Home Für-dich / Top Deals / News get a **light on-device tag bias** (shopping, entertainment, music, look).
-- Copy never claims Orbit read those accounts.
+- Copy never claims Allda read those accounts.
 
 ## Public Wert-Index + Burn table
 

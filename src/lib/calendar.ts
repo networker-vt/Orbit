@@ -1,4 +1,4 @@
-/** ICS / webcal / Google Calendar helpers for Orbit interviews & starts. */
+/** ICS / webcal / Google Calendar helpers for Allda interviews & starts. */
 
 export interface CalEventInput {
   title: string
@@ -42,7 +42,7 @@ export function buildIcs(ev: CalEventInput): string {
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Orbit//Marketplace//DE',
+    'PRODID:-//Allda//Marketplace//DE',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',

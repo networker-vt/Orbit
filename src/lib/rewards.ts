@@ -1,5 +1,5 @@
 /**
- * Orbit Credits rewards — fair, once-per-action, from the pre-allocated rewards pool.
+ * Allda Credits rewards — fair, once-per-action, from the pre-allocated rewards pool.
  * Welcome / early-tester grants debit their own pools inside the 21M cap.
  *
  * Super veto — Contributor-Rewards:

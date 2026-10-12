@@ -82,7 +82,7 @@ const OFFERS: TravelOffer[] = [
     to: 'Berlin',
     dateFrom: '2026-10-16',
     dateTo: '2026-10-18',
-    provider: 'Orbit Stays (Demo)',
+    provider: 'Allda Stays (Demo)',
     priceEur: 78,
     duration: '/ Nacht',
     rating: 4.5,
@@ -181,7 +181,7 @@ const OFFERS: TravelOffer[] = [
     to: 'Berlin',
     dateFrom: '2026-10-16',
     dateTo: '2026-10-18',
-    provider: 'Orbit Packs (Demo)',
+    provider: 'Allda Packs (Demo)',
     priceEur: 189,
     duration: '2 Nächte',
     rating: 4.3,
@@ -195,7 +195,7 @@ const OFFERS: TravelOffer[] = [
     to: 'München',
     dateFrom: '2026-10-29',
     dateTo: '2026-10-31',
-    provider: 'Orbit Packs (Demo)',
+    provider: 'Allda Packs (Demo)',
     priceEur: 214,
     duration: '2 Nächte',
     rating: 4.4,
@@ -316,7 +316,7 @@ export const TRAVEL_DEEP_SCAN_OFFERS: TravelOffer[] = [
     from: 'Frankfurt-Hahn',
     to: 'Berlin',
     dateFrom: '2026-10-16',
-    provider: 'Orbit Scan (Demo)',
+    provider: 'Allda Scan (Demo)',
     priceEur: 19,
     duration: '1h 25m',
     rating: 3.4,
@@ -330,7 +330,7 @@ export const TRAVEL_DEEP_SCAN_OFFERS: TravelOffer[] = [
     to: 'Berlin',
     dateFrom: '2026-10-16',
     dateTo: '2026-10-17',
-    provider: 'Orbit Scan (Demo)',
+    provider: 'Allda Scan (Demo)',
     priceEur: 22,
     duration: '/ Nacht',
     rating: 3.9,
@@ -344,7 +344,7 @@ export const TRAVEL_DEEP_SCAN_OFFERS: TravelOffer[] = [
     from: 'Köln',
     to: 'Berlin',
     dateFrom: '2026-10-16',
-    provider: 'Orbit Scan · DB (Demo)',
+    provider: 'Allda Scan · DB (Demo)',
     priceEur: 17,
     duration: '4h 20m',
     rating: 4.0,
@@ -365,7 +365,7 @@ export function listDemoTravelCatalog(): TravelOffer[] {
 }
 
 export const TRAVEL_DISCLAIMER_DE =
-  'Zug: Live-Fahrplan über transport.rest (Open Data), wenn erreichbar — sonst bahn.de. Flug/Hotel: Skyscanner & Booking — Buchung beim Partner. Orbit nimmt kein Geld entgegen.'
+  'Zug: Live-Fahrplan über transport.rest (Open Data), wenn erreichbar — sonst bahn.de. Flug/Hotel: Skyscanner & Booking — Buchung beim Partner. Allda nimmt kein Geld entgegen.'
 
 export const TRAVEL_DISCLAIMER_EN =
-  'Rail: live timetable via transport.rest when available — otherwise bahn.de. Flights/hotels: Skyscanner & Booking — you book with the partner. Orbit does not take payment.'
+  'Rail: live timetable via transport.rest when available — otherwise bahn.de. Flights/hotels: Skyscanner & Booking — you book with the partner. Allda does not take payment.'

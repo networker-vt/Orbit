@@ -15,7 +15,7 @@ if (!Capacitor.isNativePlatform()) {
   registerSW({
     immediate: true,
     onOfflineReady() {
-      console.info('[Orbit] Offline-Shell bereit')
+      console.info('[Allda] Offline-Shell bereit')
     },
   })
 }

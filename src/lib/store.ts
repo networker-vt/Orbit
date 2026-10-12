@@ -137,7 +137,7 @@ export async function initStore(): Promise<StoreMode> {
   if (!snap) {
     mode = 'local'
     console.info(
-      '[Orbit] VITE_SUPABASE_* gesetzt, aber kein nutzbarer Snapshot — Demo-Store aktiv',
+      '[Allda] VITE_SUPABASE_* gesetzt, aber kein nutzbarer Snapshot — Demo-Store aktiv',
     )
     return mode
   }
@@ -152,7 +152,7 @@ export async function initStore(): Promise<StoreMode> {
   }
   save(cache)
   mode = 'supabase'
-  console.info('[Orbit] Store: Supabase live (%d listings)', snap.listings.length)
+  console.info('[Allda] Store: Supabase live (%d listings)', snap.listings.length)
   return mode
 }
 

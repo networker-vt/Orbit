@@ -1,9 +1,9 @@
 /**
- * OpenStreetMap tile images for the open Parkmerke page.
+ * OpenStreetMap tile images for the open pin view.
  * The only network call in Parkmerke. No photo, no raw coordinates, no body.
+ * Tiles are not stored and are not requested before that view is on screen.
  */
 import { isOsmTileGet, osmTileUrl } from './parkmerke'
-import { readParkingTile, writeParkingTile } from './parkmerkeStore'
 
 export async function loadMapTile(
   z: number,
@@ -11,12 +11,8 @@ export async function loadMapTile(
   y: number,
   online: boolean,
   signal: AbortSignal,
-  persist: boolean,
   fetchImpl: typeof fetch = fetch,
 ): Promise<Blob | null> {
-  const key = `${z}/${x}/${y}`
-  const cached = await readParkingTile(key)
-  if (cached) return cached
   if (!online || signal.aborted) return null
   const url = osmTileUrl(z, x, y)
   if (!isOsmTileGet(url)) return null
@@ -26,7 +22,8 @@ export async function loadMapTile(
       method: 'GET',
       signal,
       credentials: 'omit',
-      referrerPolicy: 'no-referrer',
+      referrerPolicy: 'strict-origin',
+      cache: 'no-store',
     })
   } catch {
     return null
@@ -34,6 +31,5 @@ export async function loadMapTile(
   if (!res.ok) return null
   const blob = await res.blob()
   if (blob.size <= 0) return null
-  if (persist && !signal.aborted) await writeParkingTile(key, blob)
   return blob
 }

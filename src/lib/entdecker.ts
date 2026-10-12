@@ -7,7 +7,7 @@ export interface EntdeckerExplain {
 const DE: EntdeckerExplain[] = [
   {
     title: 'Szene im Freien',
-    body: 'Orbit sieht Licht, Horizont und ein paar Formen — eher draußen als drinnen. Demo-Erklärung, kein Live-Vision.',
+    body: 'Allda sieht Licht, Horizont und ein paar Formen — eher draußen als drinnen. Demo-Erklärung, kein Live-Vision.',
     tags: ['Outdoor', 'Demo'],
   },
   {
@@ -22,7 +22,7 @@ const DE: EntdeckerExplain[] = [
   },
   {
     title: 'Innenraum',
-    body: 'Wände und Licht von oben. Orbit beschreibt die Stimmung, nicht die Adresse.',
+    body: 'Wände und Licht von oben. Allda beschreibt die Stimmung, nicht die Adresse.',
     tags: ['Indoor', 'Demo'],
   },
 ]
@@ -45,7 +45,7 @@ const EN: EntdeckerExplain[] = [
   },
   {
     title: 'Indoor space',
-    body: 'Walls and overhead light. Orbit describes the mood, not the address.',
+    body: 'Walls and overhead light. Allda describes the mood, not the address.',
     tags: ['Indoor', 'Demo'],
   },
 ]

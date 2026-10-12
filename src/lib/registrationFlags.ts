@@ -11,7 +11,7 @@ function productMode(): ProductMode | null {
   }
 }
 
-/** Kids UI when flag is on or the user chose Orbit Kids in onboarding (demo builds). */
+/** Kids UI when flag is on or the user chose Allda Kids in onboarding (demo builds). */
 export function kidsSurfaceEnabled() {
   if (isFlagOn('kids')) return true
   return productMode() === 'kids'

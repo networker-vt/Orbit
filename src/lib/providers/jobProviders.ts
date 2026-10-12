@@ -24,12 +24,12 @@ function listingToHit(listing: Listing): JobSearchHit {
   return {
     id: `orbit-job-${listing.id}`,
     title: listing.title,
-    company: listing.ownerName || listing.city || 'Orbit',
+    company: listing.ownerName || listing.city || 'Allda',
     location: listing.city,
     snippet: listing.description?.slice(0, 160),
     mode: 'orbit',
     orbitListingId: listing.id,
-    sourceLabel: 'Orbit',
+    sourceLabel: 'Allda',
   }
 }
 

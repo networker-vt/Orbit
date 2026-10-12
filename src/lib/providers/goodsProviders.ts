@@ -31,7 +31,7 @@ function listingToHit(listing: Listing): GoodsSearchHit {
     location: listing.city,
     mode: 'orbit',
     listingId: listing.id,
-    sourceLabel: 'Orbit',
+    sourceLabel: 'Allda',
   }
 }
 

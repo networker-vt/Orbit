@@ -1,8 +1,8 @@
-# Contributing to Orbit / Orbit mitgestalten
+# Contributing to Allda / Allda mitgestalten
 
 ## English
 
-Forks are welcome if they improve **Orbit** — the global job-matching OS.
+Forks are welcome if they improve **Allda** — the global job-matching OS.
 
 1. Fork the repo, create a branch, open a PR against `main`.
 2. Keep the default Vite `base` as `/orbit/` for GitHub Pages. Native iOS builds set `CAPACITOR=1` (`npm run build:ios`) and must not change that Pages default.
@@ -40,7 +40,7 @@ Ledger rules unchanged: RPC-first in prod, local demo ledger, `MAX_SUPPLY` 21M. 
 
 ## Deutsch
 
-Forks sind willkommen, wenn sie **Orbit** verbessern.
+Forks sind willkommen, wenn sie **Allda** verbessern.
 
 1. Fork → Branch → PR gegen `main`.
 2. Vite-`base` bleibt standardmäßig `/orbit/` (GitHub Pages). Der iOS-Build setzt `CAPACITOR=1` (`npm run build:ios`) und ändert diesen Pages-Default nicht.

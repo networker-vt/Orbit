@@ -109,7 +109,7 @@ export function PrefsPage() {
           <BrandIcon size={40} />
           <div className="min-w-0">
             <h1 className="text-2xl font-bold tracking-tight">
-              {moneyIntent ? 'Was du arbeiten willst' : 'Dein Orbit einrichten'}
+              {moneyIntent ? 'Was du arbeiten willst' : 'Dein Allda einrichten'}
             </h1>
             <p className="text-sm text-muted">
               {moneyIntent

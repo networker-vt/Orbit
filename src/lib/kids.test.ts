@@ -21,7 +21,7 @@ import {
   verifyPin,
 } from './kids'
 
-describe('Orbit Kids', () => {
+describe('Allda Kids', () => {
   afterEach(() => {
     __resetKidsForTests()
   })

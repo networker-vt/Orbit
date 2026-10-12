@@ -62,7 +62,14 @@ describe('legal routes', () => {
     expect(privacy.host.textContent).toContain('Verantwortlich')
     expect(privacy.host.textContent).toContain('TDDDG')
     expect(privacy.host.textContent).toContain('Art. 14')
-    expect(privacy.host.textContent).toContain('Orbit Kids')
+    expect(privacy.host.textContent).toContain(
+      'Die Kartenbilder lädt dein Browser von der OpenStreetMap Foundation (Großbritannien). Dabei erhält sie deine IP-Adresse und erkennt den Kartenausschnitt.',
+    )
+    expect(privacy.host.textContent).toContain(
+      'Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; für Großbritannien besteht ein Angemessenheitsbeschluss der EU-Kommission.',
+    )
+    expect(privacy.host.querySelector('a[href="https://osmfoundation.org/wiki/Privacy_Policy"]')).toBeTruthy()
+    expect(privacy.host.textContent).toContain('Allda Kids')
     expect(privacy.host.textContent).toContain('Eltern-PIN')
     expect(privacy.host.textContent).toContain('ab 18 Jahren')
     expect(privacy.host.textContent).not.toContain('Startklar')
@@ -99,7 +106,7 @@ describe('legal routes', () => {
     const agb = await renderAt('/agb')
     expect(agb.host.textContent).toContain('nicht anwaltlich geprüft')
     expect(agb.host.textContent).toContain('Vermittler')
-    expect(agb.host.textContent).toContain('Orbit Kids')
+    expect(agb.host.textContent).toContain('Allda Kids')
     expect(agb.host.textContent).toContain('Eltern-PIN')
     expect(agb.host.textContent).not.toContain('Konten für Kinder gibt es nicht')
     expect(agb.host.textContent).not.toContain('Kabine')

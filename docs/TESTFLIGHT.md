@@ -1,11 +1,13 @@
-# Orbit — iOS / TestFlight
+# Allda — iOS / TestFlight
 
 Native shell only. The site stays on GitHub Pages. This repo has **no** Google Play / `android/` project. Nothing in this repo is an App Store submission until someone runs the workflow below.
 
 | | |
 |---|---|
-| App name | Orbit |
+| App name | Allda |
+| Subtitle | Alles für deinen Alltag |
 | Bundle ID | `app.orbit.companion` |
+| SKU | `orbit-companion` |
 | Operator | Mirco Küßner, private person (see Impressum) |
 | Web dir | `dist` (Vite) |
 | Pages base | `/orbit/` (`npm run build`, `npm run deploy:pages`) |
@@ -23,7 +25,7 @@ Nach dem Merge dieses Workflows und den vier Secrets: **Actions → iOS TestFlig
 ### Einmalig bei Apple (iPhone reicht)
 
 1. [Apple Developer](https://developer.apple.com/account) → **Certificates, Identifiers & Profiles** → **Identifiers** → **+** → App IDs → App → Bundle ID **explizit** `app.orbit.companion`.
-2. [App Store Connect](https://appstoreconnect.apple.com/) → **Apps** → **+** → **Neue App** → iOS, Name `Orbit`, Bundle-ID oben, SKU z. B. `orbit-companion`. Die App-Zeile muss existieren, bevor der erste Lauf die Build-Nummer lesen kann.
+2. [App Store Connect](https://appstoreconnect.apple.com/) → **Apps** → **+** → **Neue App** → iOS, Name `Allda`, Bundle-ID oben, SKU z. B. `orbit-companion`. Die App-Zeile muss existieren, bevor der erste Lauf die Build-Nummer lesen kann.
 3. **Business / Verträge:** den aktuellen Free-Apps-Vertrag (und falls Apple ihn verlangt, Paid Apps) annehmen. Ohne aktiven Vertrag lehnt der Upload ab, auch bei einer kostenlosen App.
 4. **Users and Access → Integrations → App Store Connect API** (Team Keys, nicht ein einzelner Nutzer-Key ohne Admin):
    - **Issuer ID** oben auf der Seite kopieren (UUID).
@@ -34,7 +36,9 @@ Nach dem Merge dieses Workflows und den vier Secrets: **Actions → iOS TestFlig
 
 Privacy-URL: https://networker-vt.github.io/orbit/privacy  
 Support-URL: https://networker-vt.github.io/orbit/support  
-Impressum: https://networker-vt.github.io/orbit/impressum
+Impressum: https://networker-vt.github.io/orbit/impressum  
+
+`https://networker-vt.github.io/eventlogistik-event-os/privacy/` antwortet mit HTTP 404 (GitHub „Site not found“). Die funktionierende Privacy-URL steht oben. Ursache und Fix: [`docs/PAGES_BASE.md`](./PAGES_BASE.md).
 
 ### Repository-Secrets
 
@@ -71,7 +75,7 @@ Fehlt ein Secret oder hat es die falsche Form (Key ID / Team ID / UUID / Base64)
 
 ### Danach auf dem iPhone
 
-Apple verarbeitet den Build oft 5–30 Minuten. Dann: App Store Connect → **TestFlight → Internal Testing**, und die App **TestFlight** auf dem iPhone → Orbit. Der Account Holder ist interner Tester. Kein Beta App Review. Ein öffentlicher Link ist das nicht.
+Apple verarbeitet den Build oft 5–30 Minuten. Dann: App Store Connect → **TestFlight → Internal Testing**, und die App **TestFlight** auf dem iPhone → Allda. Der Account Holder ist interner Tester. Kein Beta App Review. Ein öffentlicher Link ist das nicht.
 
 `Info.plist` setzt `ITSAppUsesNonExemptEncryption = false` (nur HTTPS). Fragt App Store Connect trotzdem „Missing Compliance“, **No** / keine nicht-ausgenommene Verschlüsselung antworten.
 
@@ -96,7 +100,7 @@ After this workflow is on `main` and the four secrets exist: **Actions → iOS T
 ### Once, in Apple (an iPhone is enough)
 
 1. [Apple Developer](https://developer.apple.com/account) → **Certificates, Identifiers & Profiles** → **Identifiers** → **+** → App IDs → App → explicit bundle id `app.orbit.companion`.
-2. [App Store Connect](https://appstoreconnect.apple.com/) → **Apps** → **+** → **New App** → iOS, name Orbit, that bundle id, SKU such as `orbit-companion`. The app record must exist before the first run can read a build number.
+2. [App Store Connect](https://appstoreconnect.apple.com/) → **Apps** → **+** → **New App** → iOS, name Allda, that bundle id, SKU such as `orbit-companion`. The app record must exist before the first run can read a build number.
 3. **Business / Agreements:** accept the current Free Apps agreement (and Paid Apps if Apple asks). Upload fails without an active agreement, including for a free app.
 4. **Users and Access → Integrations → App Store Connect API** (team keys):
    - Copy the **Issuer ID** at the top of the page (a UUID).
@@ -107,7 +111,9 @@ After this workflow is on `main` and the four secrets exist: **Actions → iOS T
 
 Privacy URL: https://networker-vt.github.io/orbit/privacy  
 Support URL: https://networker-vt.github.io/orbit/support  
-Impressum: https://networker-vt.github.io/orbit/impressum
+Impressum: https://networker-vt.github.io/orbit/impressum  
+
+`https://networker-vt.github.io/eventlogistik-event-os/privacy/` returns HTTP 404 (GitHub “Site not found”). Use the privacy URL above. Cause and fix: [`docs/PAGES_BASE.md`](./PAGES_BASE.md).
 
 ### Repository secrets
 
@@ -144,7 +150,7 @@ If a secret is missing or the wrong shape (Key ID / Team ID / UUID / base64), th
 
 ### On the iPhone afterwards
 
-Apple often processes the build for 5–30 minutes. Then: App Store Connect → **TestFlight → Internal Testing**, and the **TestFlight** app on the iPhone → Orbit. The account holder is an internal tester. No Beta App Review. This is not a public link.
+Apple often processes the build for 5–30 minutes. Then: App Store Connect → **TestFlight → Internal Testing**, and the **TestFlight** app on the iPhone → Allda. The account holder is an internal tester. No Beta App Review. This is not a public link.
 
 `Info.plist` sets `ITSAppUsesNonExemptEncryption = false` (HTTPS only). If App Store Connect still shows “Missing Compliance”, answer **No**.
 
@@ -170,10 +176,10 @@ Dieselbe App lässt sich lokal archivieren. Der Actions-Weg oben ersetzt das, we
 - Im Projektroot: `npm ci`, danach `npm run cap:sync`. Das baut mit Vite-Base `/` und kopiert `dist` nach `ios/`. Ohne diesen Schritt ist die WebView leer.
 - Xcode: `ios/App/App.xcodeproj` öffnen, oder `npx cap open ios` (nur macOS). Das Shared Scheme `App` liegt im Repo.
 - **Signing & Capabilities:** Team = Mircos Apple-Team. Automatically manage signing an. Bundle-ID `app.orbit.companion` lassen, solange sie im Developer-Portal angelegt ist.
-- **General:** Display Name `Orbit`. Version an `package.json` halten (aktuell 2.9.1). **Build** bei jedem Upload um 1 erhöhen. Gleicher Build darf nicht zweimal hochgeladen werden. Der Actions-Lauf setzt die Build-Nummer selbst.
+- **General:** Display Name `Allda`. Version an `package.json` halten (aktuell 2.9.1). **Build** bei jedem Upload um 1 erhöhen. Gleicher Build darf nicht zweimal hochgeladen werden. Der Actions-Lauf setzt die Build-Nummer selbst.
 - **Product → Archive**. Im Organizer: **Distribute App → App Store Connect → Upload**.
 - [App Store Connect](https://appstoreconnect.apple.com/): App anlegen (Bundle-ID oben), dann **TestFlight → Internal Testing**. Interne Tester sind das Team; kein Beta-Review.
-- `Info.plist` enthält nur `NSCameraUsageDescription`. Die Web-App öffnet die Kamera (Foto-Upload, Kabine, Entdecker, Interview-Vorschau). Kein Mikrofon, kein Standort, kein Tracking.
+- `Info.plist`: `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription` (Fotos lesen — Parkmerke und Uploads), `NSFaceIDUsageDescription`, `NSLocationWhenInUseUsageDescription`. Die App schreibt keine Fotos in die Mediathek, deshalb kein `NSPhotoLibraryAddUsageDescription`. Kein Mikrofon, kein Tracking.
 - Store-Text: Marktplatz. Keine ORB-, Token- oder Krypto-Claims.
 - Kein Play Store in diesem Stand. `npm run build` bleibt der Pages-Build.
 
@@ -200,10 +206,10 @@ The same app can be archived locally. The Actions path above is the one that doe
 - From the repo root: `npm ci`, then `npm run cap:sync`. That builds with Vite base `/` and copies `dist` into `ios/`. Skip it and the WebView is empty.
 - Open `ios/App/App.xcodeproj`, or `npx cap open ios` on macOS. The shared `App` scheme is in the repo.
 - **Signing & Capabilities:** Team = Mirco’s Apple team, automatically manage signing. Keep bundle id `app.orbit.companion` once it exists in the developer portal.
-- **General:** display name Orbit. Keep the marketing version aligned with `package.json` (currently 2.9.1). Bump **Build** by 1 on every manual upload. The Actions run picks the build number itself.
+- **General:** display name Allda. Keep the marketing version aligned with `package.json` (currently 2.9.1). Bump **Build** by 1 on every manual upload. The Actions run picks the build number itself.
 - **Product → Archive**, then Organizer → **Distribute App → App Store Connect → Upload**.
 - In App Store Connect, create the app with that bundle id, then **TestFlight → Internal Testing**.
-- `Info.plist` has `NSCameraUsageDescription` only, because the web app already opens the camera. No microphone, location, or tracking usage strings.
+- `Info.plist` has `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription` (read photos for Parkmerke and uploads), `NSFaceIDUsageDescription`, and `NSLocationWhenInUseUsageDescription`. The app does not save photos into the library, so there is no `NSPhotoLibraryAddUsageDescription`. No microphone and no tracking usage string.
 - Store copy is a marketplace. No ORB, token, or crypto claims.
 - No Play Store in this change. `npm run build` is still the GitHub Pages build.
 

@@ -1,5 +1,5 @@
 /**
- * Orbit Lernen — product name „Campus“.
+ * Allda Lernen — product name „Campus“.
  * Super veto: pick one path → one CTA „Lektion starten“.
  * 1 lesson/day free; extras SoftPaywall/Credits on adult accounts only.
  */
@@ -69,8 +69,8 @@ export const CAMPUS_CATALOG: CampusCourse[] = [
   {
     id: 'gs-lesen',
     level: 'grundschule',
-    titleDe: 'Lesen mit Orbit',
-    titleEn: 'Reading with Orbit',
+    titleDe: 'Lesen mit Allda',
+    titleEn: 'Reading with Allda',
     blurbDe: 'Kurze Geschichten, Fragen, ein Sticker — Demo, kein Schulabschluss.',
     blurbEn: 'Short stories, questions, a sticker — demo, not a diploma.',
     durationDe: '10 Min',
@@ -190,8 +190,8 @@ export const CAMPUS_CATALOG: CampusCourse[] = [
   {
     id: 'skill-assist',
     level: 'skills',
-    titleDe: 'Orbit fragen lernen',
-    titleEn: 'Learn to ask Orbit',
+    titleDe: 'Allda fragen lernen',
+    titleEn: 'Learn to ask Allda',
     blurbDe: 'Ein guter Satz statt Katalog-Spam. Free.',
     blurbEn: 'One good sentence instead of catalogue spam. Free.',
     durationDe: '8 Min',

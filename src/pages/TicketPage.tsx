@@ -59,7 +59,7 @@ export function TicketPage() {
           {ticket.location} · {formatDateTime(ticket.whenIso)}
         </p>
         <p className="text-sm">
-          {formatPrice(ticket.priceEur)} · {ticket.paidWith === 'credits' ? 'Orbit Credits' : t('checkout.fiat')}
+          {formatPrice(ticket.priceEur)} · {ticket.paidWith === 'credits' ? 'Allda Credits' : t('checkout.fiat')}
         </p>
       </section>
 

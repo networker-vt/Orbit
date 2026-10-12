@@ -56,8 +56,9 @@ const COPY = {
   ended: 'Die Parkzeit ist vorbei.',
   soon: 'Die Parkzeit endet bald.',
   ends: 'Ende',
-  mapNotice: 'Die Kartenbilder kommen von OpenStreetMap. An ihnen ist die Kartenstelle erkennbar.',
-  mapMiss: 'Ohne Netz sind die Kartenbilder nur da, wenn sie schon geladen wurden.',
+  mapNotice:
+    'Die Kartenbilder lädt dein Browser von der OpenStreetMap Foundation (Großbritannien). Dabei erhält sie deine IP-Adresse und erkennt den Kartenausschnitt.',
+  mapMiss: 'Ohne Netz werden keine Kartenbilder geladen.',
   mapFail: 'Die Kartenbilder sind gerade nicht erreichbar.',
   mapCredit: '© OpenStreetMap-Mitwirkende',
   needPhoto: 'Bitte ein Foto wählen.',
@@ -123,12 +124,10 @@ function noticeIsVisible(node: HTMLElement | null): boolean {
 function SpotMap({
   lat,
   lng,
-  persist,
   online,
 }: {
   lat: number
   lng: number
-  persist: boolean
   online: boolean
 }) {
   const noticeRef = useRef<HTMLParagraphElement>(null)
@@ -138,7 +137,7 @@ function SpotMap({
 
   useEffect(() => {
     if (noticeIsVisible(noticeRef.current)) setMayLoad(true)
-  }, [lat, lng, online, persist])
+  }, [lat, lng, online])
 
   useEffect(() => {
     if (!mayLoad || !noticeIsVisible(noticeRef.current)) return
@@ -151,7 +150,7 @@ function SpotMap({
       const loaded: { key: string; url: string; left: number; top: number }[] = []
       for (const tile of tiles) {
         if (ctrl.signal.aborted || gone || !noticeIsVisible(noticeRef.current)) break
-        const blob = await loadMapTile(tile.z, tile.x, tile.y, online, ctrl.signal, persist)
+        const blob = await loadMapTile(tile.z, tile.x, tile.y, online, ctrl.signal)
         if (!blob || gone) continue
         const url = URL.createObjectURL(blob)
         urls.push(url)
@@ -174,7 +173,7 @@ function SpotMap({
       ctrl.abort()
       for (const url of urls) URL.revokeObjectURL(url)
     }
-  }, [mayLoad, lat, lng, persist, online])
+  }, [mayLoad, lat, lng, online])
 
   return (
     <div className="space-y-1" data-park-map-block="1">
@@ -184,7 +183,7 @@ function SpotMap({
       <a
         href="https://www.openstreetmap.org/copyright"
         className="text-xs text-muted underline"
-        rel="noreferrer"
+        referrerPolicy="strict-origin"
         data-park-map-credit="1"
       >
         {COPY.mapCredit}
@@ -486,7 +485,7 @@ export function ParkmerkePage() {
               </Button>
             </div>
           </div>
-          <SpotMap lat={spot.lat} lng={spot.lng} persist online={online} />
+          <SpotMap lat={spot.lat} lng={spot.lng} online={online} />
           <p className="text-sm text-muted" data-park-coords={formatPin(spot.lat, spot.lng)}>
             {formatPin(spot.lat, spot.lng)}
           </p>
@@ -621,7 +620,7 @@ export function ParkmerkePage() {
                 {formatPin(pin.lat, pin.lng)}
               </p>
             )}
-            {pin && !spot && <SpotMap lat={pin.lat} lng={pin.lng} persist={false} online={online} />}
+            {pin && !spot && <SpotMap lat={pin.lat} lng={pin.lng} online={online} />}
           </fieldset>
 
           <Button type="submit" data-park-save="1">

@@ -1,4 +1,10 @@
-# Store-Ready — Orbit 2.8.1 (ehrlich, Stand 2026-09-20)
+# Store-Ready — Allda (ehrlich)
+
+**App-Store-Name:** Allda  
+**Untertitel:** Alles für deinen Alltag  
+**Bundle-ID:** `app.orbit.companion` (unverändert)  
+**SKU:** `orbit-companion` (unverändert)  
+**Maskottchen in der App:** Orbi
 
 **Kein Store-Upload ist in diesem Repo passiert und wird hier nicht behauptet.**  
 PWA ist installierbar. Native App Store / Play-Einreichung braucht **morgen (und danach)** Klicks **vom Operator** in Apple Developer + Play Console. Dieses Dokument ist die Checkliste dafür — keine Fake-Submission.
@@ -13,7 +19,7 @@ https://networker-vt.github.io/orbit/support
 Impressum (unverändert, Mirco Küßner, Privatperson):  
 https://networker-vt.github.io/orbit/impressum
 
-HTTP-Status: erst nach Merge **und** `deploy:pages`. Verzeichnis-Indexe (`privacy/index.html` usw.) liefern 200; `curl -sI` auf die URL **mit** Slash. Ohne Slash: 301, `curl -sI -L` endet bei 200. Siehe LAUNCH.md §4.
+HTTP-Status der Privacy-URL oben (geprüft 2026-10-12): `https://networker-vt.github.io/orbit/privacy/` ist **HTTP 200**. `https://networker-vt.github.io/eventlogistik-event-os/privacy/` ist **HTTP 404** („Site not found“). Ursache und der Fix ohne Deploy aus diesem PR: [`docs/PAGES_BASE.md`](./docs/PAGES_BASE.md). Ohne abschließenden Slash antwortet die funktionierende URL mit 301 auf die Slash-URL.
 
 Live PWA: https://networker-vt.github.io/orbit/  
 Pages `base` **muss** `/orbit/` bleiben. Store-Webview braucht `base: /`.
@@ -42,7 +48,7 @@ npx cap open ios    # nur macOS
 
 GitHub Pages bleibt `npm run build` mit `base: /orbit/`. Kein Play-Scaffold in diesem Stand.
 
-## Jugendschutz / Age rating (Orbit Kids in 2.6.0)
+## Jugendschutz / Age rating (Allda Kids in 2.6.0)
 
 In-App: Altersbänder unter13 / 13–15 / 16–17 / 18+. **Eltern-PIN zuerst**, danach Kids-UI. Kids: **0 Credits** (kein Mint/Spend/P2P), Wallet und öffentlicher Chat aus. Kein Adult-SoftPaywall, keine Abflug-Buchung, kein Kabine-Adult-Try-on. Content-Flag `safeForKids`. Campus: 1 Lektion/Tag frei.
 
@@ -58,7 +64,7 @@ Das ersetzt **kein** Rechtsgutachten. Operator muss die Fragebögen selbst ausf�
 
 Stores akzeptieren keine Platzhalter. Benötigt:
 
-- [ ] iPhone 6.7" (1290×2796): Home (gefülltes „Orbit fragen“ + outlined chips, **ohne** Campus/Kids/Rewards), Kids-PIN-Gate, Campus (eine Stufe + „Lektion starten“), Treffer, Wallet mit Demo-Hinweis (Adult)
+- [ ] iPhone 6.7" (1290×2796): Home (gefülltes „Allda fragen“ + outlined chips, **ohne** Campus/Kids/Rewards), Kids-PIN-Gate, Campus (eine Stufe + „Lektion starten“), Treffer, Wallet mit Demo-Hinweis (Adult)
 - [ ] iPhone 6.5" / 5.5" (falls Zielgeräte)
 - [ ] iPad 13"
 - [ ] Android Phone + 7" + 10" Tablet
@@ -70,7 +76,7 @@ Stores akzeptieren keine Platzhalter. Benötigt:
 - [x] Impressum / Datenschutz / AGB mit echten Kontaktdaten (natürliche Person, Mirco Küßner)
 - [x] Privacy Policy URL öffentlich
 - [x] PWA installierbar (Service Worker, Manifest, Icons)
-- [x] Orbit Kids parental gate + `safeForKids` (2.6.0) — Store-Fragebogen noch offen
+- [x] Allda Kids parental gate + `safeForKids` (2.6.0) — Store-Fragebogen noch offen
 - [ ] AGB Marktplatz anwaltlich prüfen
 - [ ] Supabase live (Auth + RLS) statt Demo-Store — **nicht** für den ersten TestFlight/Internal-Test zwingend, wohl für Production-Payments
 - [ ] Content-Moderation & Melde-Flow
