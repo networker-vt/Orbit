@@ -45,5 +45,9 @@ test('offer feature imports stay within login, storage (internal), and UI primit
     assert.doesNotMatch(text, /from ['"][^'"]*\/lib\//)
     assert.doesNotMatch(text, /from ['"][^'"]*\/features\/(?!offer)/)
     assert.doesNotMatch(text, /from ['"][^'"]*\/pages\/(?!AuthPage)/)
+    const isDictationModule = file.endsWith('HoldToDictateButton.tsx')
+    if (!isDictationModule) {
+      assert.doesNotMatch(text, /webkitSpeechRecognition|SpeechRecognition/)
+    }
   }
 })

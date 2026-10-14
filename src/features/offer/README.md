@@ -20,6 +20,18 @@ localStorage.setItem('orbit_flag_offerBeta', '1')
 
 Danach Seite neu laden. Ohne Flag leitet `/angebot` auf die Startseite um.
 
+## Diktat vs. Text (`offerDictation`, Standard: aus)
+
+In der Beta ist **kein Browser-Diktat** aktiv (kein `webkitSpeechRecognition` / Cloud-Speech). Stattdessen nutzen Sie das Feld **„Angebot eintippen“** — der Text geht in dieselbe **Mock-KI** wie zuvor das Diktat.
+
+Optional für Tester (Audio geht an den Browser-Anbieter):
+
+```bash
+VITE_FLAG_OFFER_DICTATION=1
+```
+
+Dev: `localStorage.setItem('orbit_flag_offerDictation', '1')`. Dann erscheint zusätzlich **Gedrückt halten zum Diktieren**.
+
 ## Erstnutzung (§ 14 BGB)
 
 Beim ersten Besuch (Flag an) erscheint ein Gate mit Pflicht-Checkbox **„Ich nutze das für meinen Betrieb (§ 14 BGB).“** — ohne Häkchen kein Zugang zu Schritt 1/2. Die Zustimmung wird offline in **IndexedDB** (`orbit-offers`, Store `meta`) gespeichert.
@@ -30,7 +42,7 @@ In der App: **`/angebot`** (Kachel unter **Mehr**, wenn Flag an).
 
 ## Ablauf
 
-1. **Schritt 1:** Foto oder Halten-zum-Diktieren → Mock-KI erzeugt Positionen → jede Position prüfen und bestätigen (Steuersatz manuell wählen). Angebote liegen in **IndexedDB**; ohne Netz wird die KI-Analyse in eine Warteschlange gelegt.
+1. **Schritt 1:** Foto oder **Angebot eintippen** → Mock-KI erzeugt Positionen → jede Position prüfen und bestätigen (Steuersatz manuell wählen). Angebote liegen in **IndexedDB**; ohne Netz wird die KI-Analyse in eine Warteschlange gelegt.
 2. **Schritt 2:** Rechnungsstammdaten (§ 14 UStG) ergänzen → Download **XRechnung-XML** oder **ZUGFeRD-PDF** (kein Versand in der Beta).
 
 ## Import-Grenze

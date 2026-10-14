@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { analyzeOfferInput, getOfferAiMode } from './aiProvider'
 import { OfferBetaBanner, OfferTaxDisclaimer } from './components/OfferBetaBanner'
-import { HoldToDictateButton } from './components/HoldToDictateButton'
+import { OfferTextInput } from './components/OfferTextInput'
 import { OfferLineEditor } from './components/OfferLineEditor'
 import { downloadBlob, exportXRechnungXml, exportZugferdPdf } from './einvoiceExport'
 import { listenOnlineDrain, pendingAiCount, queueAiJob } from './offerAiQueue'
@@ -60,7 +60,7 @@ function AngebotFlow() {
   const [exportBusy, setExportBusy] = useState(false)
   const [exportErrors, setExportErrors] = useState<string[]>([])
   const cameraRef = useRef<HTMLInputElement>(null)
-  const [dictationHint, setDictationHint] = useState('')
+  const [lastInputPreview, setLastInputPreview] = useState('')
 
   useEffect(() => {
     return listenOnlineDrain((n) => {
@@ -207,7 +207,7 @@ function AngebotFlow() {
       {step === 1 && (
         <>
           <section className="space-y-3 rounded-2xl border border-border bg-surface-2 p-4">
-            <h2 className="text-lg font-semibold">Angebot per Foto oder Diktat</h2>
+            <h2 className="text-lg font-semibold">Angebot per Foto oder Text</h2>
             <p className="text-sm text-muted">Bitte keine Personen fotografieren, nur Räume und Technik.</p>
             <Button
               type="button"
@@ -231,16 +231,15 @@ function AngebotFlow() {
                 if (f) void runAnalysis('photo', f)
               }}
             />
-            <p className="text-sm font-medium text-ink">Diktieren Sie das Angebot selbst.</p>
-            <HoldToDictateButton
+            <OfferTextInput
               disabled={busy}
-              onTranscript={(text) => {
-                setDictationHint(text)
+              onAnalyzeText={(text) => {
+                setLastInputPreview(text)
                 void runAnalysis('dictation', undefined, text)
               }}
             />
-            {dictationHint && (
-              <p className="text-xs text-muted">Erkannt: „{dictationHint.slice(0, 120)}“</p>
+            {lastInputPreview && (
+              <p className="text-xs text-muted">Eingabe: „{lastInputPreview.slice(0, 120)}“</p>
             )}
             {busy && (
               <p className="flex items-center gap-2 text-sm text-muted">
