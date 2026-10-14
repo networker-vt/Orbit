@@ -1,7 +1,13 @@
 import { Mic } from 'lucide-react'
 import { useCallback, useRef, useState } from 'react'
-import { cn } from '../../../lib/utils'
-import { canListen } from '../../../lib/speech'
+function canListen(): boolean {
+  if (typeof window === 'undefined') return false
+  const w = window as Window & {
+    SpeechRecognition?: unknown
+    webkitSpeechRecognition?: unknown
+  }
+  return Boolean(w.SpeechRecognition || w.webkitSpeechRecognition)
+}
 
 type Props = {
   onTranscript: (text: string) => void
@@ -66,7 +72,9 @@ export function HoldToDictateButton({ onTranscript, disabled }: Props) {
 
   if (!supported) {
     return (
-      <p className="text-sm text-muted">Diktat wird in diesem Browser nicht unterstützt. Bitte Foto oder Tastatur nutzen.</p>
+      <p className="text-sm text-muted">
+        Diktat wird in diesem Browser nicht unterstützt. Bitte nutzen Sie Foto oder Tastatur.
+      </p>
     )
   }
 
@@ -75,13 +83,15 @@ export function HoldToDictateButton({ onTranscript, disabled }: Props) {
       type="button"
       disabled={disabled}
       aria-pressed={recording}
-      className={cn(
+      className={[
         'tap-target flex min-h-14 w-full select-none items-center justify-center gap-2 rounded-2xl border-2 px-4 text-base font-semibold touch-manipulation',
         recording
           ? 'border-rose-400 bg-rose-600/25 text-rose-50'
           : 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/15 text-ink',
-        disabled && 'opacity-50',
-      )}
+        disabled ? 'opacity-50' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       onPointerDown={(e) => {
         e.preventDefault()
         start()

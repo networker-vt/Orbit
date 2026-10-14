@@ -181,7 +181,7 @@ function AppReady() {
               <Route path="auth" element={<AuthPage />} />
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="mehr" element={<MehrPage />} />
-              <Route path="angebot" element={<AngebotPage />} />
+              <Route path="angebot" element={<FlagRoute flag="offerBeta"><AngebotPage /></FlagRoute>} />
               <Route path="parkmerke" element={<ParkmerkePage />} />
               <Route path="outfit" element={<OutfitPage />} />
               <Route path="tanken" element={<TankenPage />} />

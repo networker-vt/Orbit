@@ -88,7 +88,7 @@ export const MEHR_DISCOVER_DEFS: HubTileDef[] = [
     tone: 'orange',
     surface: 'discover',
     demo: true,
-    hide: (c) => c.kids,
+    hide: (c) => c.kids || !isFlagOn('offerBeta'),
   },
 ]
 

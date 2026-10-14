@@ -96,7 +96,7 @@ export function OfferLineEditor({ line, onChange, onConfirm }: Props) {
               })
             }}
           >
-            <option value="">Bitte wählen</option>
+            <option value="">Bitte wählen Sie</option>
             {TAX_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
                 {o.label}

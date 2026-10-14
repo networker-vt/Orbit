@@ -7,7 +7,14 @@ import { HoldToDictateButton } from './components/HoldToDictateButton'
 import { OfferLineEditor } from './components/OfferLineEditor'
 import { downloadBlob, exportXRechnungXml, exportZugferdPdf } from './einvoiceExport'
 import { listenOnlineDrain, pendingAiCount, queueAiJob } from './offerAiQueue'
-import { listOffers, newOfferId, saveOffer } from './offerDb'
+import { OfferBusinessGate } from './components/OfferBusinessGate'
+import {
+  getBusinessConsent,
+  listOffers,
+  newOfferId,
+  saveOffer,
+  setBusinessConsentAccepted,
+} from './offerDb'
 import { defaultInvoiceDraft } from './testData'
 import type { InvoiceDraft, OfferLineItem, StoredOffer } from './types'
 import { lineTotals, validateUstg14 } from './ustg14'
@@ -17,6 +24,34 @@ function lineId() {
 }
 
 export function AngebotPage() {
+  const [consentReady, setConsentReady] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    void getBusinessConsent().then((record) => setConsentReady(record?.accepted === true))
+  }, [])
+
+  if (consentReady === null) {
+    return (
+      <div className="mx-auto max-w-lg py-12 text-center text-sm text-muted" aria-live="polite">
+        Wird geladen…
+      </div>
+    )
+  }
+
+  if (!consentReady) {
+    return (
+      <OfferBusinessGate
+        onAccepted={() => {
+          void setBusinessConsentAccepted().then(() => setConsentReady(true))
+        }}
+      />
+    )
+  }
+
+  return <AngebotFlow />
+}
+
+function AngebotFlow() {
   const [step, setStep] = useState<1 | 2>(1)
   const [offer, setOffer] = useState<StoredOffer | null>(null)
   const [invoice, setInvoice] = useState<InvoiceDraft>(() => defaultInvoiceDraft())
@@ -161,9 +196,10 @@ export function AngebotPage() {
         <p className="text-sm text-muted">
           Schritt {step} von 2 · KI-Modus: {getOfferAiMode()} (Testdaten)
         </p>
-        {queueCount > 0 && (
+            {queueCount > 0 && (
           <p className="text-sm text-amber-200">
-            {queueCount} Analyse(n) warten auf Netz — wird automatisch fortgesetzt.
+            {queueCount} Analyse(n) warten auf Netz — die Verarbeitung setzt automatisch fort, sobald Sie wieder
+            online sind.
           </p>
         )}
       </header>

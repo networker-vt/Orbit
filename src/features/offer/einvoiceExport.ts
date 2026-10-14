@@ -1,5 +1,6 @@
 import { buildEInvoiceUbl } from './einvoiceMapper'
 import type { InvoiceDraft, OfferLineItem, StoredOffer } from './types'
+import { lineTotals } from './ustg14'
 
 const silentLogger = { log: () => {}, warn: () => {}, error: () => {} }
 
@@ -28,7 +29,7 @@ export async function exportZugferdPdf(
   const doc = await PDFDocument.create()
   const page = doc.addPage()
   const font = await doc.embedFont(StandardFonts.Helvetica)
-  const { net, tax, gross } = await import('./ustg14').then((m) => m.lineTotals(lines))
+  const { net, tax, gross } = lineTotals(lines)
   page.drawText(`Rechnung ${invoice.invoiceNumber}`, { x: 40, y: 780, size: 16, font })
   page.drawText(`${invoice.seller.name} → ${invoice.buyer.name}`, { x: 40, y: 760, size: 10, font })
   page.drawText(`Netto ${net.toFixed(2)} EUR · USt ${tax.toFixed(2)} EUR · Brutto ${gross.toFixed(2)} EUR`, {

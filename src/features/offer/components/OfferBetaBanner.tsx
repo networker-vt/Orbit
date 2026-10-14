@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom'
-import { LEGAL } from '../../../lib/legal'
+import { OFFER_BETA_REPORT_EMAIL } from '../constants'
 
 export function OfferBetaBanner({ step }: { step: 1 | 2 }) {
   const { pathname, search } = useLocation()
@@ -8,7 +8,7 @@ export function OfferBetaBanner({ step }: { step: 1 | 2 }) {
   const body = encodeURIComponent(
     `Route: ${route}\nSchritt: ${step}\n\nBitte beschreiben Sie den Fehler:\n`,
   )
-  const mailHref = `mailto:${LEGAL.email}?subject=${subject}&body=${body}`
+  const mailHref = `mailto:${OFFER_BETA_REPORT_EMAIL}?subject=${subject}&body=${body}`
 
   return (
     <div
@@ -30,8 +30,7 @@ export function OfferBetaBanner({ step }: { step: 1 | 2 }) {
 export function OfferTaxDisclaimer() {
   return (
     <p className="rounded-xl border border-border bg-surface-3/80 px-3 py-2 text-xs text-muted">
-      Bei Steuerfragen fragen Sie Ihre Steuerberatung. Die App wählt keinen Steuersatz und keine § 13b-Regelung
-      automatisch.
+      Bei Steuerfragen fragen Sie Ihre Steuerberatung.       Die App wählt keinen Steuersatz und keine §-13b-Regelung automatisch für Sie aus.
     </p>
   )
 }
