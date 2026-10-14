@@ -1,4 +1,4 @@
-import { Camera, FileDown, Loader2 } from 'lucide-react'
+import { Camera, FileDown, Loader2, Share2 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { analyzeOfferInput, getOfferAiMode } from './aiProvider'
@@ -7,23 +7,39 @@ import { OfferLegalFooter } from './components/OfferLegalFooter'
 import { OfferProgress } from './components/OfferProgress'
 import { OfferTextInput } from './components/OfferTextInput'
 import { OfferLineEditor } from './components/OfferLineEditor'
+import { CompanyProfileForm } from './components/CompanyProfileForm'
+import { OfferBackupPanel } from './components/OfferBackupPanel'
+import { OfferLegalFooter } from './components/OfferLegalFooter'
 import { downloadBlob, exportXRechnungXml, exportZugferdPdf } from './einvoiceExport'
 import { listenOnlineDrain, pendingAiCount, queueAiJob } from './offerAiQueue'
 import { OfferBusinessGate } from './components/OfferBusinessGate'
 import {
   getBusinessConsent,
+  getCompanyProfile,
+  listInvoices,
   listOffers,
   newOfferId,
   saveOffer,
   setBusinessConsentAccepted,
 } from './offerDb'
-import { defaultInvoiceDraft } from './testData'
-import type { InvoiceDraft, OfferLineItem, StoredOffer } from './types'
-import { lineTotals, validateUstg14 } from './ustg14'
+import {
+  buildStoredInvoiceFromDraft,
+  convertOfferToInvoiceDraft,
+  markInvoiceExported,
+  stornoAndNewInvoice,
+} from './invoiceConvert'
+import { applyProfileToInvoice } from './companyProfile'
+import { sharePdfFile } from './sharePdf'
+import type { CompanyProfile, InvoiceDraft, OfferLineItem, StoredInvoice, StoredOffer } from './types'
+import { KLEINUNTERNEHMER_HINT, RETENTION_NOTE_PRIVATE_BAU } from './types'
+import { lineTotals, taxBreakdown, validateUstg14 } from './ustg14'
 
 function lineId() {
   return `ln-${Math.random().toString(36).slice(2, 10)}`
 }
+
+const fieldClass =
+  'mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3 text-base text-ink'
 
 export function AngebotPage() {
   const [consentReady, setConsentReady] = useState<boolean | null>(null)
@@ -55,14 +71,29 @@ export function AngebotPage() {
 
 function AngebotFlow() {
   const [step, setStep] = useState<1 | 2>(1)
+  const [panel, setPanel] = useState<'flow' | 'profile' | 'backup' | 'invoices'>('flow')
   const [offer, setOffer] = useState<StoredOffer | null>(null)
-  const [invoice, setInvoice] = useState<InvoiceDraft>(() => defaultInvoiceDraft())
+  const [invoice, setInvoice] = useState<InvoiceDraft | null>(null)
+  const [profile, setProfile] = useState<CompanyProfile | null>(null)
+  const [invoices, setInvoices] = useState<StoredInvoice[]>([])
+  const [activeStored, setActiveStored] = useState<StoredInvoice | null>(null)
   const [busy, setBusy] = useState(false)
   const [queueCount, setQueueCount] = useState(pendingAiCount())
   const [exportBusy, setExportBusy] = useState(false)
   const [exportErrors, setExportErrors] = useState<string[]>([])
+  const [statusMsg, setStatusMsg] = useState('')
   const cameraRef = useRef<HTMLInputElement>(null)
   const [lastInputPreview, setLastInputPreview] = useState('')
+
+  const reloadMeta = useCallback(async () => {
+    const [p, invs] = await Promise.all([getCompanyProfile(), listInvoices()])
+    setProfile(p)
+    setInvoices(invs)
+  }, [])
+
+  useEffect(() => {
+    void reloadMeta()
+  }, [reloadMeta])
 
   useEffect(() => {
     return listenOnlineDrain((n) => {
@@ -137,15 +168,29 @@ function AngebotFlow() {
   }, [offer])
 
   const allConfirmed = offer?.lines.every((l) => l.confirmed) && (offer?.lines.length ?? 0) > 0
+  const readOnly = activeStored?.status === 'exported'
 
-  const goStep2 = () => {
+  const goToInvoice = async () => {
     if (!allConfirmed || !offer) return
-    setStep(2)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setExportBusy(true)
+    setExportErrors([])
+    try {
+      const draft = await convertOfferToInvoiceDraft(offer, profile)
+      setInvoice(draft)
+      setActiveStored(null)
+      setStep(2)
+      setPanel('flow')
+      setStatusMsg(`Rechnung ${draft.invoiceNumber} angelegt.`)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } catch (err) {
+      setExportErrors([err instanceof Error ? err.message : 'Umwandlung fehlgeschlagen'])
+    } finally {
+      setExportBusy(false)
+    }
   }
 
   const updateLine = (line: OfferLineItem) => {
-    if (!offer) return
+    if (!offer || readOnly) return
     void persist({
       ...offer,
       lines: offer.lines.map((l) => (l.id === line.id ? line : l)),
@@ -158,27 +203,46 @@ function AngebotFlow() {
   }
 
   const ustgIssues =
-    offer && step === 2 ? validateUstg14(offer, invoice, offer.lines) : []
+    offer && invoice && step === 2 ? validateUstg14(offer, invoice, offer.lines, profile) : []
 
-  const doExport = async (kind: 'xml' | 'pdf') => {
-    if (!offer) return
-    const issues = validateUstg14(offer, invoice, offer.lines)
+  const persistExported = async (kind: 'xml' | 'pdf' | 'share') => {
+    if (!offer || !invoice) return
+    const issues = validateUstg14(offer, invoice, offer.lines, profile)
     if (issues.length > 0) {
       setExportErrors(issues.map((i) => i.labelDe))
       return
     }
+    if (readOnly && kind !== 'share' && kind !== 'pdf' && kind !== 'xml') return
+
     setExportBusy(true)
     setExportErrors([])
+    setStatusMsg('')
     try {
+      // Re-apply profile into seller before export
+      const draft = profile ? applyProfileToInvoice(invoice, profile) : invoice
+      setInvoice(draft)
+
       if (kind === 'xml') {
-        const xml = await exportXRechnungXml(offer, invoice, offer.lines)
-        downloadBlob(`${invoice.invoiceNumber}.xml`, new Blob([xml], { type: 'application/xml' }))
+        const xml = await exportXRechnungXml(offer, draft, offer.lines)
+        downloadBlob(`${draft.invoiceNumber}.xml`, new Blob([xml], { type: 'application/xml' }))
       } else {
-        const pdf = await exportZugferdPdf(offer, invoice, offer.lines)
-        downloadBlob(
-          `${invoice.invoiceNumber}-zugferd.pdf`,
-          new Blob([Uint8Array.from(pdf)], { type: 'application/pdf' }),
-        )
+        const pdf = await exportZugferdPdf(offer, draft, offer.lines)
+        if (kind === 'share') {
+          await sharePdfFile(`${draft.invoiceNumber}-zugferd.pdf`, pdf)
+        } else {
+          downloadBlob(
+            `${draft.invoiceNumber}-zugferd.pdf`,
+            new Blob([Uint8Array.from(pdf)], { type: 'application/pdf' }),
+          )
+        }
+      }
+
+      if (!readOnly) {
+        const stored = buildStoredInvoiceFromDraft(offer, draft, offer.lines, { status: 'exported' })
+        const saved = await markInvoiceExported(stored)
+        setActiveStored(saved)
+        await reloadMeta()
+        setStatusMsg('Rechnung exportiert — nur noch lesbar (Änderungen: Storno + neue Rechnung).')
       }
     } catch (err) {
       setExportErrors([err instanceof Error ? err.message : 'Export fehlgeschlagen'])
@@ -187,17 +251,44 @@ function AngebotFlow() {
     }
   }
 
-  const totals = offer ? lineTotals(offer.lines) : { net: 0, tax: 0, gross: 0 }
+  const doStorno = async () => {
+    if (!activeStored || activeStored.status !== 'exported') return
+    setExportBusy(true)
+    try {
+      const result = await stornoAndNewInvoice(activeStored, profile)
+      setOffer(result.offerSlice)
+      setInvoice(result.draft)
+      setActiveStored(null)
+      setStep(2)
+      await reloadMeta()
+      setStatusMsg(`Storno von ${result.cancelled.invoiceNumber}. Neue Nummer: ${result.draft.invoiceNumber}.`)
+    } catch (err) {
+      setExportErrors([err instanceof Error ? err.message : 'Storno fehlgeschlagen'])
+    } finally {
+      setExportBusy(false)
+    }
+  }
 
-  const progressId = step === 1 ? (offer?.lines.length ? 'lines' : 'offer') : 'invoice'
+  const totals = offer ? lineTotals(offer.lines) : { net: 0, tax: 0, gross: 0 }
+  const breakdown = offer ? taxBreakdown(offer.lines) : []
 
   return (
-    <div className="mx-auto flex max-w-lg flex-col gap-5 pb-32 pt-1">
+    <div className="mx-auto flex max-w-lg flex-col gap-5 pb-36 pt-1">
       <OfferBetaBanner step={step} />
 
       <header className="space-y-3">
         <h1 className="text-2xl font-bold tracking-tight text-ink">Angebot & E-Rechnung</h1>
-        <OfferProgress current={progressId} />
+        <OfferProgress
+          current={
+            panel === 'profile'
+              ? 'profile'
+              : step === 2
+                ? 'invoice'
+                : offer?.lines.length
+                  ? 'lines'
+                  : 'offer'
+          }
+        />
         <p className="text-sm text-muted">
           KI-Modus: {getOfferAiMode()} — Ergebnis ist ein{' '}
           <span className="font-semibold text-amber-100">Beispiel, keine echte Auswertung</span>.
@@ -210,14 +301,115 @@ function AngebotFlow() {
         )}
       </header>
 
-      {step === 1 && (
+      <nav className="grid grid-cols-2 gap-2" aria-label="Angebot-Bereiche">
+        {(
+          [
+            ['flow', 'Angebot'],
+            ['profile', 'Firmenprofil'],
+            ['backup', 'Sicherung'],
+            ['invoices', 'Rechnungen'],
+          ] as const
+        ).map(([id, label]) => (
+          <Button
+            key={id}
+            type="button"
+            variant={panel === id ? 'primary' : 'secondary'}
+            className="min-h-12"
+            onClick={() => setPanel(id)}
+          >
+            {label}
+          </Button>
+        ))}
+      </nav>
+
+      <div aria-live="polite" className="text-sm">
+        {statusMsg ? <p className="text-cyan-200">{statusMsg}</p> : null}
+        {exportErrors.length > 0 ? (
+          <ul className="space-y-1 text-rose-200">
+            {exportErrors.map((e) => (
+              <li key={e}>{e}</li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
+
+      {panel === 'profile' && (
+        <CompanyProfileForm
+          initial={profile}
+          onSaved={(p) => {
+            setProfile(p)
+            if (invoice) setInvoice(applyProfileToInvoice(invoice, p))
+          }}
+        />
+      )}
+
+      {panel === 'backup' && <OfferBackupPanel onImported={() => void reloadMeta()} />}
+
+      {panel === 'invoices' && (
+        <section className="space-y-3 rounded-2xl border border-border bg-surface-2 p-4">
+          <h2 className="text-lg font-semibold text-ink">Gespeicherte Rechnungen</h2>
+          {invoices.length === 0 ? (
+            <p className="text-sm text-muted">Noch keine exportierten Rechnungen.</p>
+          ) : (
+            <ul className="space-y-2">
+              {invoices.map((inv) => (
+                <li key={inv.id} className="rounded-xl border border-border p-3 text-sm">
+                  <p className="font-semibold text-ink">
+                    {inv.invoiceNumber} · {inv.status === 'cancelled' ? 'storniert' : 'exportiert (nur lesen)'}
+                  </p>
+                  <p className="text-muted">
+                    {inv.issueDate} · {inv.totals.gross.toFixed(2)} €
+                  </p>
+                  {inv.status === 'exported' ? (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="mt-2 min-h-12 w-full"
+                      onClick={() => {
+                        setActiveStored(inv)
+                        setOffer({
+                          id: inv.offerId,
+                          createdAt: inv.createdAt,
+                          updatedAt: inv.updatedAt,
+                          captureKind: 'dictation',
+                          title: `Rechnung ${inv.invoiceNumber}`,
+                          lines: inv.lines,
+                          servicePeriodStart: inv.servicePeriodStart,
+                          servicePeriodEnd: inv.servicePeriodEnd,
+                          synced: false,
+                        })
+                        setInvoice({
+                          invoiceNumber: inv.invoiceNumber,
+                          issueDate: inv.issueDate,
+                          dueDate: inv.dueDate,
+                          buyerReference: inv.buyerReference,
+                          iban: inv.iban,
+                          bic: inv.bic,
+                          seller: inv.seller,
+                          buyer: inv.buyer,
+                          buyerIsPrivatePerson: inv.buyerIsPrivatePerson,
+                          bauGrundstueckLeistung: inv.bauGrundstueckLeistung,
+                          kleinunternehmer: inv.kleinunternehmer,
+                        })
+                        setStep(2)
+                        setPanel('flow')
+                      }}
+                    >
+                      Anzeigen
+                    </Button>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
+      {panel === 'flow' && step === 1 && (
         <>
           <section className="space-y-3 rounded-2xl border border-border bg-surface-2 p-4">
-            <h2 className="text-lg font-semibold">Positionen & Angebot</h2>
-            <p className="text-sm text-muted">
-              Bitte erfassen Sie Ihr Angebot per Foto oder Text. Keine Personen fotografieren, nur Räume und
-              Technik.
-            </p>
+            <h2 className="text-lg font-semibold text-ink">Angebot per Foto oder Text</h2>
+            <p className="text-sm text-muted">Bitte keine Personen fotografieren, nur Räume und Technik.</p>
             <Button
               type="button"
               variant="secondary"
@@ -253,20 +445,17 @@ function AngebotFlow() {
             {busy && (
               <p className="flex items-center gap-2 text-sm text-muted" aria-live="polite">
                 <Loader2 className="animate-spin" size={16} aria-hidden />
-                Beispiel-Auswertung läuft…
+                KI analysiert…
               </p>
             )}
           </section>
 
           {offer && offer.lines.length > 0 && (
             <section className="space-y-3">
-              <div
-                className="rounded-xl border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-sm font-semibold text-amber-100"
-                role="status"
-              >
+              <div className="rounded-xl border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-sm font-semibold text-amber-100">
                 Beispiel, keine echte Auswertung — bitte prüfen (Art. 50 KI-VO)
               </div>
-              <h2 className="text-lg font-semibold">{offer.title}</h2>
+              <h2 className="text-lg font-semibold text-ink">{offer.title}</h2>
               <div className="grid gap-3">
                 {offer.lines.map((line) => (
                   <OfferLineEditor
@@ -277,22 +466,22 @@ function AngebotFlow() {
                   />
                 ))}
               </div>
-              <label className="block text-sm">
+              <label className="block text-sm text-ink">
                 Leistungszeitraum von
                 <input
                   type="date"
-                  className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3"
+                  className={fieldClass}
                   value={offer.servicePeriodStart}
                   onChange={(e) =>
                     void persist({ ...offer, servicePeriodStart: e.target.value, updatedAt: Date.now() })
                   }
                 />
               </label>
-              <label className="block text-sm">
+              <label className="block text-sm text-ink">
                 Leistungszeitraum bis
                 <input
                   type="date"
-                  className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3"
+                  className={fieldClass}
                   value={offer.servicePeriodEnd}
                   onChange={(e) =>
                     void persist({ ...offer, servicePeriodEnd: e.target.value, updatedAt: Date.now() })
@@ -304,46 +493,82 @@ function AngebotFlow() {
         </>
       )}
 
-      {step === 2 && offer && (
+      {panel === 'flow' && step === 2 && offer && invoice && (
         <>
           <OfferTaxDisclaimer />
+          {readOnly ? (
+            <p className="rounded-xl border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-50" role="status">
+              Diese Rechnung ist nach dem Export nur noch lesbar. Änderungen nur über Storno + neue Rechnung.
+            </p>
+          ) : null}
+          {invoice.kleinunternehmer ? (
+            <p className="rounded-xl border border-border bg-surface-3/80 px-3 py-2 text-sm text-ink">
+              {KLEINUNTERNEHMER_HINT}
+            </p>
+          ) : null}
+
           <section className="space-y-3 rounded-2xl border border-border bg-surface-2 p-4">
-            <h2 className="text-lg font-semibold">Rechnungsdaten (§ 14 UStG)</h2>
+            <h2 className="text-lg font-semibold text-ink">Rechnungsdaten (§ 14 Abs. 4 UStG)</h2>
             <PartyFields
               label="Leistender Unternehmer"
               party={invoice.seller}
               onChange={(seller) => setInvoice({ ...invoice, seller })}
               showTax
+              disabled={readOnly}
             />
             <PartyFields
               label="Leistungsempfänger"
               party={invoice.buyer}
               onChange={(buyer) => setInvoice({ ...invoice, buyer })}
+              disabled={readOnly}
             />
-            <label className="block text-sm">
-              Rechnungsnummer
+
+            <label className="flex min-h-12 items-center gap-3 text-sm text-ink">
               <input
-                className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3 text-base"
-                value={invoice.invoiceNumber}
-                onChange={(e) => setInvoice({ ...invoice, invoiceNumber: e.target.value })}
+                type="checkbox"
+                className="size-5 accent-[var(--theme-accent,#0f766e)]"
+                checked={invoice.buyerIsPrivatePerson}
+                disabled={readOnly}
+                onChange={(e) => setInvoice({ ...invoice, buyerIsPrivatePerson: e.target.checked })}
               />
+              Leistungsempfänger ist Privatperson
+            </label>
+            <label className="flex min-h-12 items-center gap-3 text-sm text-ink">
+              <input
+                type="checkbox"
+                className="size-5 accent-[var(--theme-accent,#0f766e)]"
+                checked={invoice.bauGrundstueckLeistung}
+                disabled={readOnly}
+                onChange={(e) => setInvoice({ ...invoice, bauGrundstueckLeistung: e.target.checked })}
+              />
+              Leistung im Zusammenhang mit einem Grundstück (Bau)
+            </label>
+            {invoice.buyerIsPrivatePerson && invoice.bauGrundstueckLeistung ? (
+              <p className="text-sm font-medium text-ink">{RETENTION_NOTE_PRIVATE_BAU}</p>
+            ) : null}
+
+            <label className="block text-sm text-ink">
+              Rechnungsnummer
+              <input className={fieldClass} value={invoice.invoiceNumber} readOnly disabled />
             </label>
             <div className="grid grid-cols-2 gap-3">
-              <label className="block text-sm">
+              <label className="block text-sm text-ink">
                 Rechnungsdatum
                 <input
                   type="date"
-                  className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3"
+                  className={fieldClass}
                   value={invoice.issueDate}
+                  disabled={readOnly}
                   onChange={(e) => setInvoice({ ...invoice, issueDate: e.target.value })}
                 />
               </label>
-              <label className="block text-sm">
+              <label className="block text-sm text-ink">
                 Fällig am
                 <input
                   type="date"
-                  className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3"
+                  className={fieldClass}
                   value={invoice.dueDate}
+                  disabled={readOnly}
                   onChange={(e) => setInvoice({ ...invoice, dueDate: e.target.value })}
                 />
               </label>
@@ -351,30 +576,42 @@ function AngebotFlow() {
             <label className="block text-sm text-ink">
               IBAN (SEPA)
               <input
-                className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3 text-base text-ink"
-                value={invoice.iban}
+                className={fieldClass}
                 inputMode="text"
-                autoComplete="off"
                 spellCheck={false}
-                aria-label="IBAN"
+                value={invoice.iban}
+                disabled={readOnly}
                 onChange={(e) => setInvoice({ ...invoice, iban: e.target.value })}
               />
             </label>
-            <p className="text-sm text-muted">
-              Summe netto {totals.net.toFixed(2)} € · USt {totals.tax.toFixed(2)} € · Brutto{' '}
-              {totals.gross.toFixed(2)} €
-            </p>
+            <label className="block text-sm text-ink">
+              BIC
+              <input
+                className={fieldClass}
+                inputMode="text"
+                spellCheck={false}
+                value={invoice.bic}
+                disabled={readOnly}
+                onChange={(e) => setInvoice({ ...invoice, bic: e.target.value })}
+              />
+            </label>
+
+            <div className="space-y-1 text-sm text-ink">
+              <p>
+                Summe netto {totals.net.toFixed(2)} € · USt {totals.tax.toFixed(2)} € · Brutto{' '}
+                {totals.gross.toFixed(2)} €
+              </p>
+              {breakdown.map((row) => (
+                <p key={row.rate} className="text-muted">
+                  Entgelt {row.rate}%: {row.net.toFixed(2)} € · Steuerbetrag: {row.tax.toFixed(2)} €
+                </p>
+              ))}
+            </div>
+
             {ustgIssues.length > 0 && (
               <ul className="space-y-1 text-sm text-amber-200" aria-live="polite">
                 {ustgIssues.map((issue) => (
-                  <li key={issue.field}>Fehlt: {issue.labelDe}</li>
-                ))}
-              </ul>
-            )}
-            {exportErrors.length > 0 && (
-              <ul className="space-y-1 text-sm text-rose-200" aria-live="assertive">
-                {exportErrors.map((e) => (
-                  <li key={e}>{e}</li>
+                  <li key={`${issue.field}-${issue.labelDe}`}>Fehlt: {issue.labelDe}</li>
                 ))}
               </ul>
             )}
@@ -384,42 +621,72 @@ function AngebotFlow() {
 
       <OfferLegalFooter />
 
-      <div className="fixed inset-x-0 bottom-[calc(var(--nav-height,0px)+env(safe-area-inset-bottom))] z-40 border-t border-border bg-surface-1/95 px-4 py-3 backdrop-blur-md">
-        <div className="mx-auto flex max-w-lg flex-col gap-2">
-          {step === 1 ? (
-            <Button type="button" size="lg" className="min-h-14 w-full" disabled={!allConfirmed} onClick={goStep2}>
-              Weiter zur Rechnung
-            </Button>
-          ) : (
-            <>
+      {panel === 'flow' && (
+        <div className="fixed inset-x-0 bottom-[calc(var(--nav-height,0px)+env(safe-area-inset-bottom))] z-40 border-t border-border bg-surface-1/95 px-4 py-3 backdrop-blur-md">
+          <div className="mx-auto flex max-w-lg flex-col gap-2">
+            {step === 1 ? (
               <Button
                 type="button"
                 size="lg"
                 className="min-h-14 w-full"
-                disabled={exportBusy || ustgIssues.length > 0}
-                onClick={() => void doExport('xml')}
+                disabled={!allConfirmed || exportBusy}
+                onClick={() => void goToInvoice()}
               >
-                <FileDown size={18} aria-hidden />
-                XRechnung (UBL) herunterladen
+                Angebot → Rechnung
               </Button>
-              <Button
-                type="button"
-                size="lg"
-                variant="secondary"
-                className="min-h-14 w-full"
-                disabled={exportBusy || ustgIssues.length > 0}
-                onClick={() => void doExport('pdf')}
-              >
-                <FileDown size={18} aria-hidden />
-                ZUGFeRD / Factur-X (PDF) herunterladen
-              </Button>
-              <Button type="button" variant="ghost" className="min-h-12 w-full" onClick={() => setStep(1)}>
-                Zurück zu Positionen
-              </Button>
-            </>
-          )}
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  size="lg"
+                  className="min-h-14 w-full"
+                  disabled={exportBusy || ustgIssues.length > 0}
+                  onClick={() => void persistExported('xml')}
+                >
+                  <FileDown size={18} aria-hidden />
+                  XRechnung (UBL) herunterladen
+                </Button>
+                <Button
+                  type="button"
+                  size="lg"
+                  variant="secondary"
+                  className="min-h-14 w-full"
+                  disabled={exportBusy || ustgIssues.length > 0}
+                  onClick={() => void persistExported('pdf')}
+                >
+                  <FileDown size={18} aria-hidden />
+                  ZUGFeRD / Factur-X (PDF) herunterladen
+                </Button>
+                <Button
+                  type="button"
+                  size="lg"
+                  variant="tonal"
+                  className="min-h-14 w-full"
+                  disabled={exportBusy || ustgIssues.length > 0}
+                  onClick={() => void persistExported('share')}
+                >
+                  <Share2 size={18} aria-hidden />
+                  Als PDF teilen
+                </Button>
+                {readOnly ? (
+                  <Button
+                    type="button"
+                    variant="danger"
+                    className="min-h-12 w-full"
+                    disabled={exportBusy}
+                    onClick={() => void doStorno()}
+                  >
+                    Storno + neue Rechnung
+                  </Button>
+                ) : null}
+                <Button type="button" variant="ghost" className="min-h-12 w-full" onClick={() => setStep(1)}>
+                  Zurück zu Positionen
+                </Button>
+              </>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
@@ -429,42 +696,34 @@ function PartyFields({
   party,
   onChange,
   showTax,
+  disabled,
 }: {
   label: string
   party: InvoiceDraft['seller']
   onChange: (p: InvoiceDraft['seller']) => void
   showTax?: boolean
+  disabled?: boolean
 }) {
   return (
-    <fieldset className="space-y-2 rounded-xl border border-border/80 p-3">
-      <legend className="px-1 text-sm font-semibold">{label}</legend>
-      {(['name', 'street', 'postCode', 'city', 'email'] as const).map((key) => (
+    <fieldset className="space-y-2 rounded-xl border border-border/80 p-3" disabled={disabled}>
+      <legend className="px-1 text-sm font-semibold text-ink">{label}</legend>
+      {(
+        [
+          ['name', 'Name', 'text'],
+          ['street', 'Straße', 'text'],
+          ['postCode', 'PLZ', 'numeric'],
+          ['city', 'Ort', 'text'],
+          ['email', 'E-Mail', 'email'],
+        ] as const
+      ).map(([key, lab, mode]) => (
         <label key={key} className="block text-sm text-ink">
-          {key === 'postCode'
-            ? 'PLZ'
-            : key === 'email'
-              ? 'E-Mail'
-              : key === 'name'
-                ? 'Name'
-                : key === 'street'
-                  ? 'Straße'
-                  : 'Ort'}
+          {lab}
           <input
-            className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3 text-base text-ink"
-            value={party[key]}
+            className={fieldClass}
+            inputMode={mode}
             type={key === 'email' ? 'email' : 'text'}
-            inputMode={key === 'postCode' ? 'numeric' : key === 'email' ? 'email' : undefined}
-            autoComplete={
-              key === 'email'
-                ? 'email'
-                : key === 'name'
-                  ? 'organization'
-                  : key === 'street'
-                    ? 'street-address'
-                    : key === 'postCode'
-                      ? 'postal-code'
-                      : 'address-level2'
-            }
+            value={party[key]}
+            disabled={disabled}
             onChange={(e) => onChange({ ...party, [key]: e.target.value })}
           />
         </label>
@@ -474,19 +733,18 @@ function PartyFields({
           <label className="block text-sm text-ink">
             USt-IdNr.
             <input
-              className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3 text-ink"
+              className={fieldClass}
               value={party.vatId}
-              autoComplete="off"
+              disabled={disabled}
               onChange={(e) => onChange({ ...party, vatId: e.target.value })}
             />
           </label>
           <label className="block text-sm text-ink">
             Steuernummer (alternativ)
             <input
-              className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3 text-ink"
+              className={fieldClass}
               value={party.taxNumber}
-              inputMode="numeric"
-              autoComplete="off"
+              disabled={disabled}
               onChange={(e) => onChange({ ...party, taxNumber: e.target.value })}
             />
           </label>

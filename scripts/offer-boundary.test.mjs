@@ -23,6 +23,7 @@ function isAllowed(spec, filePath) {
   if (spec.startsWith('react-router')) return true
   if (spec.startsWith('lucide-react')) return true
   if (spec.startsWith('@e-invoice-eu/') || spec.startsWith('@cantoo/')) return true
+  if (spec === 'jszip') return true
   if (spec.includes('/components/ui/')) return true
   if (spec.includes('/pages/AuthPage')) return true
   if (filePath.endsWith('.test.ts')) return true

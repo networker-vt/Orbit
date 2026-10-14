@@ -1,6 +1,7 @@
 import { buildEInvoiceUbl } from './einvoiceMapper'
 import type { InvoiceDraft, OfferLineItem, StoredOffer } from './types'
-import { lineTotals } from './ustg14'
+import { KLEINUNTERNEHMER_HINT } from './types'
+import { lineTotals, retentionNoteFor, taxBreakdown } from './ustg14'
 
 const silentLogger = { log: () => {}, warn: () => {}, error: () => {} }
 
@@ -30,15 +31,23 @@ export async function exportZugferdPdf(
   const page = doc.addPage()
   const font = await doc.embedFont(StandardFonts.Helvetica)
   const { net, tax, gross } = lineTotals(lines)
-  page.drawText(`Rechnung ${invoice.invoiceNumber}`, { x: 40, y: 780, size: 16, font })
-  page.drawText(`${invoice.seller.name} → ${invoice.buyer.name}`, { x: 40, y: 760, size: 10, font })
-  page.drawText(`Netto ${net.toFixed(2)} EUR · USt ${tax.toFixed(2)} EUR · Brutto ${gross.toFixed(2)} EUR`, {
-    x: 40,
-    y: 740,
-    size: 10,
-    font,
-  })
-  page.drawText('ZUGFeRD / Factur-X ( eingebettete XRechnung-XML )', { x: 40, y: 720, size: 9, font })
+  const breakdown = taxBreakdown(lines)
+  let y = 780
+  const line = (text: string, size = 10) => {
+    page.drawText(text.slice(0, 90), { x: 40, y, size, font })
+    y -= size + 4
+  }
+  line(`Rechnung ${invoice.invoiceNumber}`, 16)
+  line(`${invoice.seller.name} → ${invoice.buyer.name}`)
+  line(`Leistungszeitraum: ${offer.servicePeriodStart} – ${offer.servicePeriodEnd}`)
+  line(`Netto ${net.toFixed(2)} EUR · USt ${tax.toFixed(2)} EUR · Brutto ${gross.toFixed(2)} EUR`)
+  for (const row of breakdown) {
+    line(`Entgelt ${row.rate}%: ${row.net.toFixed(2)} EUR · Steuer: ${row.tax.toFixed(2)} EUR`)
+  }
+  if (invoice.kleinunternehmer) line(KLEINUNTERNEHMER_HINT, 9)
+  const retention = retentionNoteFor(invoice)
+  if (retention) line(retention, 9)
+  line('ZUGFeRD / Factur-X (eingebettete XRechnung-XML)', 9)
   const pdfBytes = await doc.save()
   const svc = new InvoiceService(silentLogger)
   const out = await svc.generate(payload as never, {
