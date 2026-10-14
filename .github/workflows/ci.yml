@@ -31,6 +31,7 @@ jobs:
           set -euo pipefail
           npm ci
           npm test
+          npm run validate:einvoice
           npm run build
           npm run build:ios
           bash scripts/check-ios-web-base.sh dist

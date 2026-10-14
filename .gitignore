@@ -52,3 +52,4 @@ AuthKey_*.p8
 **/fastlane/test_output/
 **/fastlane/Preview.html
 **/fastlane/private_keys/
+.cache/
