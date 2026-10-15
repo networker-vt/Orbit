@@ -18,7 +18,10 @@ npm run build
 echo "==> public bundle check (phones, catalog mail, removed hosts)"
 node scripts/check-public-bundle.mjs
 
-echo "==> SPA fallback 404.html (unknown paths stay HTTP 404)"
+echo "==> module gzip budget (≤50 KB per module-* chunk)"
+node scripts/check-module-budget.mjs
+
+echo "==> SPA fallback 404.html (deep links like /orbit/angebot load the SPA)"
 cp dist/index.html dist/404.html
 
 echo "==> legal URLs as directory indexes (HTTP 200)"

@@ -43,6 +43,65 @@ describe('GiroCode (EPC-QR)', () => {
 
   it('returns null for 0 € only', () => {
     const draft = { ...defaultInvoiceDraft(), kleinunternehmer: false }
-    expect(giroCodeFromInvoice(draft, 0, null)).toBeNull()
+    const profile: CompanyProfile = {
+      name: 'Demo GmbH',
+      street: 'Weg 1',
+      postCode: '50667',
+      city: 'Köln',
+      countryCode: 'DE',
+      email: 'a@example.com',
+      taxNumber: '123',
+      vatId: '',
+      iban: 'DE89370400440532013000',
+      bic: '',
+      logoDataUrl: '',
+      kleinunternehmer: false,
+      contactName: '',
+      contactPhone: '',
+    }
+    expect(giroCodeFromInvoice(draft, 0, profile)).toBeNull()
+  })
+
+  it('does not generate QR when company name is missing from profile', () => {
+    const draft = defaultInvoiceDraft()
+    const profile: CompanyProfile = {
+      name: '',
+      street: 'Weg 1',
+      postCode: '50667',
+      city: 'Köln',
+      countryCode: 'DE',
+      email: 'a@example.com',
+      taxNumber: '123',
+      vatId: '',
+      iban: 'DE89370400440532013000',
+      bic: '',
+      logoDataUrl: '',
+      kleinunternehmer: false,
+      contactName: '',
+      contactPhone: '',
+    }
+    expect(giroCodeFromInvoice(draft, 23.8, profile)).toBeNull()
+  })
+
+  it('does not generate QR when IBAN is missing from profile', () => {
+    const draft = defaultInvoiceDraft()
+    const profile: CompanyProfile = {
+      name: 'Demo GmbH',
+      street: 'Weg 1',
+      postCode: '50667',
+      city: 'Köln',
+      countryCode: 'DE',
+      email: 'a@example.com',
+      taxNumber: '123',
+      vatId: '',
+      iban: '',
+      bic: '',
+      logoDataUrl: '',
+      kleinunternehmer: false,
+      contactName: '',
+      contactPhone: '',
+    }
+    expect(giroCodeFromInvoice(draft, 23.8, profile)).toBeNull()
+    expect(giroCodeFromInvoice(draft, 23.8, null)).toBeNull()
   })
 })

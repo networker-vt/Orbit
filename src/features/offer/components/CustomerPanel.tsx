@@ -32,7 +32,13 @@ export function CustomerPanel({
   }, [])
 
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {
-    setForm((f) => ({ ...f, [key]: value }))
+    setForm((f) => {
+      const next = { ...f, [key]: value }
+      if (key === 'leitwegId' || key === 'publicBuyer') {
+        setErrors(validateLeitweg(next).map((i) => i.labelDe))
+      }
+      return next
+    })
   }
 
   const save = async () => {
@@ -99,7 +105,19 @@ export function CustomerPanel({
           type="checkbox"
           className="mt-1 size-5 accent-[var(--theme-accent,#0f766e)]"
           checked={form.publicBuyer}
-          onChange={(e) => set('publicBuyer', e.target.checked)}
+          onChange={(e) => {
+            const checked = e.target.checked
+            setForm((f) => {
+              const next = {
+                ...f,
+                publicBuyer: checked,
+                // Unchecking clears Leitweg-ID (BT-10) from the customer form.
+                leitwegId: checked ? f.leitwegId : '',
+              }
+              setErrors(validateLeitweg(next).map((i) => i.labelDe))
+              return next
+            })
+          }}
         />
         öffentlicher Auftraggeber
       </label>
@@ -112,9 +130,15 @@ export function CustomerPanel({
               className={fieldClass}
               inputMode="text"
               value={form.leitwegId}
+              aria-invalid={errors.length > 0}
               onChange={(e) => set('leitwegId', e.target.value)}
             />
           </label>
+          {errors.map((e) => (
+            <p key={e} className="text-sm text-rose-200" role="alert">
+              {e}
+            </p>
+          ))}
           <p className="text-sm text-muted">{hints.bund}</p>
           <p className="flex flex-wrap gap-3 text-sm">
             <a
@@ -140,10 +164,10 @@ export function CustomerPanel({
 
       <div aria-live="polite" className="text-sm">
         {status ? <p className="text-cyan-200">{status}</p> : null}
-        {errors.length > 0 ? (
+        {!form.publicBuyer && errors.length > 0 ? (
           <ul className="text-rose-200">
             {errors.map((e) => (
-              <li key={e}>Fehlt: {e}</li>
+              <li key={e}>{e}</li>
             ))}
           </ul>
         ) : null}

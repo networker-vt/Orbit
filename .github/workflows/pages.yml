@@ -1,0 +1,56 @@
+# Deploy production dist to gh-pages on every merge/push to main.
+# Root cause (2026-10-10 → 2026-10-15): only CI test/build ran on main; no workflow
+# pushed gh-pages. Manual `npm run deploy:pages` was last used ~2026-10-10.
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and push gh-pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install and build
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+          node scripts/check-public-bundle.mjs
+          node scripts/check-module-budget.mjs
+
+      - name: SPA 404 fallback + legal directory indexes
+        run: |
+          set -euo pipefail
+          # Deep links (e.g. /orbit/angebot) must serve the SPA shell as 404.html
+          cp dist/index.html dist/404.html
+          bash scripts/emit-pages-legal.sh dist
+
+      - name: Publish to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
+          force_orphan: true
+          user_name: networker-vt
+          user_email: networker-vt@users.noreply.github.com
+          commit_message: "deploy: GitHub Pages ${{ github.sha }}"

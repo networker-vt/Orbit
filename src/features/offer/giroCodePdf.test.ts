@@ -51,7 +51,6 @@ describe('ZUGFeRD PDF with GiroCode', () => {
     // PDF magic
     expect(String.fromCharCode(...pdf.slice(0, 4))).toBe('%PDF')
   }, 30000)
-})
 
   it('embeds GiroCode for Kleinunternehmer (amount without USt)', async () => {
     const draft = { ...defaultInvoiceDraft(), kleinunternehmer: true }
@@ -62,3 +61,11 @@ describe('ZUGFeRD PDF with GiroCode', () => {
     expect(String.fromCharCode(...pdf.slice(0, 4))).toBe('%PDF')
   }, 30000)
 
+  it('skips GiroCode when profile name or IBAN is missing', async () => {
+    const draft = defaultInvoiceDraft()
+    const noIban = { ...profile, iban: '' }
+    const pdf = await exportZugferdPdf(offer, draft, offer.lines, noIban)
+    expect(pdf.byteLength).toBeGreaterThan(500)
+    expect(String.fromCharCode(...pdf.slice(0, 4))).toBe('%PDF')
+  }, 30000)
+})

@@ -1,0 +1,4 @@
+{
+  "comment": "npm package names modules may import. Empty = relative + react only. Add entries deliberately.",
+  "packages": []
+}

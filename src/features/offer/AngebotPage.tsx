@@ -32,6 +32,7 @@ import {
   stornoAndNewInvoice,
 } from './invoiceConvert'
 import { applyProfileToInvoice } from './companyProfile'
+import { clearPublicBuyerFields, validateLeitweg } from './customers'
 import { sharePdfFile } from './sharePdf'
 import type {
   CompanyProfile,
@@ -592,7 +593,7 @@ function AngebotFlow() {
           {offer && offer.lines.length > 0 && (
             <section className="space-y-3">
               <div className="rounded-xl border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-sm font-semibold text-amber-100">
-                Beispiel, keine echte Auswertung — bitte prüfen (Art. 50 KI-VO)
+                Beispiel, keine echte Auswertung
               </div>
               <h2 className="text-lg font-semibold text-ink">{offer.title}</h2>
               <div className="grid gap-3">
@@ -668,14 +669,18 @@ function AngebotFlow() {
                 className="size-5 accent-[var(--theme-accent,#0f766e)]"
                 checked={invoice.publicBuyer}
                 disabled={readOnly}
-                onChange={(e) =>
-                  setInvoice({
-                    ...invoice,
-                    publicBuyer: e.target.checked,
-                    buyerIsPrivatePerson: e.target.checked ? false : invoice.buyerIsPrivatePerson,
-                    buyerReference: e.target.checked ? invoice.leitwegId : invoice.buyerReference,
-                  })
-                }
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setInvoice({
+                      ...invoice,
+                      publicBuyer: true,
+                      buyerIsPrivatePerson: false,
+                      buyerReference: invoice.leitwegId,
+                    })
+                  } else {
+                    setInvoice(clearPublicBuyerFields(invoice))
+                  }
+                }}
               />
               öffentlicher Auftraggeber
             </label>
@@ -686,6 +691,9 @@ function AngebotFlow() {
                   className={fieldClass}
                   value={invoice.leitwegId}
                   disabled={readOnly}
+                  aria-invalid={
+                    validateLeitweg({ publicBuyer: true, leitwegId: invoice.leitwegId }).length > 0
+                  }
                   onChange={(e) =>
                     setInvoice({
                       ...invoice,
@@ -694,6 +702,11 @@ function AngebotFlow() {
                     })
                   }
                 />
+                {validateLeitweg({ publicBuyer: true, leitwegId: invoice.leitwegId }).map((issue) => (
+                  <p key={issue.labelDe} className="mt-1 text-sm text-rose-200" role="alert">
+                    {issue.labelDe}
+                  </p>
+                ))}
               </label>
             ) : null}
             <label className="flex min-h-12 items-center gap-3 text-sm text-ink">
