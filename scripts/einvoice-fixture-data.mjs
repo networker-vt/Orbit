@@ -189,7 +189,7 @@ export function buildFixtureInvoices() {
         id: 'RE-DEMO-2026-004',
         issue: '2026-03-10',
         due: '2026-03-24',
-        buyerRef: '991-12345-67',
+        buyerRef: '991-12345-73',
         period: { 'cbc:StartDate': '2026-03-03', 'cbc:EndDate': '2026-03-04' },
         seller,
         buyer: {

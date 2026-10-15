@@ -31,12 +31,14 @@ export function giroCodeFromInvoice(
   amountEur: number,
   profile: CompanyProfile | null,
 ): string | null {
-  // IBAN from own company profile only (fallback to invoice IBAN filled from profile).
-  const iban = (profile?.iban || invoice.iban).replace(/\s/g, '')
+  // No QR when company name or IBAN is missing from the Firmenprofil.
+  const recipientName = profile?.name?.trim() ?? ''
+  const iban = (profile?.iban ?? '').replace(/\s/g, '')
+  if (!recipientName || !iban) return null
   return buildEpcPayload({
     iban,
     bic: profile?.bic || invoice.bic,
-    recipientName: profile?.name || invoice.seller.name,
+    recipientName,
     amountEur,
     purpose: invoice.invoiceNumber,
   })

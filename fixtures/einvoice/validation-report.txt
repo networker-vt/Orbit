@@ -1,4 +1,4 @@
-KoSIT validation 2026-10-14T22:32:43.094Z
+KoSIT validation 2026-10-15T00:56:37.051Z
 
 OK /workspace/fixtures/einvoice/fixture-1-event-tech.xml
   sha256: 54j/hhtpm8snrRd9b6jtCG/Z+vRxBw+I+5SDK5V+1f4=
@@ -19,7 +19,7 @@ The following scenarios are available:
 
 
 Processing of 1 objects started
-Processing of 1 objects completed in 203ms
+Processing of 1 objects completed in 172ms
 Results:
 ----------------------------------------------------------------------------------------------------------------
 |File                                                        |Schema |Schematron|Acceptance|Error/Description   |
@@ -51,7 +51,7 @@ The following scenarios are available:
 
 
 Processing of 1 objects started
-Processing of 1 objects completed in 207ms
+Processing of 1 objects completed in 189ms
 Results:
 ---------------------------------------------------------------------------------------------------------------
 |File                                                       |Schema |Schematron|Acceptance|Error/Description   |
@@ -83,12 +83,44 @@ The following scenarios are available:
 
 
 Processing of 1 objects started
-Processing of 1 objects completed in 170ms
+Processing of 1 objects completed in 191ms
 Results:
 ------------------------------------------------------------------------------------------------------------
 |File                                                    |Schema |Schematron|Acceptance|Error/Description   |
 |/workspace/fixtures/einvoice/fixture-3-stage.xml        |   Y   |    Y     |ACCEPTABLE|                    |
 ------------------------------------------------------------------------------------------------------------
+Acceptable:  1  Rejected:  0
+
+
+##############################
+#   Validation successful!   #
+##############################
+
+OK /workspace/fixtures/einvoice/fixture-4-public-leitweg.xml
+  sha256: nZOpKjIaWfY7CaDSMep/yhmlqoMyFRRPvgwbT1PvKz4=
+KoSIT Validator version 1.6.3
+Loading scenarios from  file:///workspace/.cache/kosit/xrechnung-config/scenarios.xml
+Using repository  file:///workspace/.cache/kosit/xrechnung-config/
+
+Loaded "Validator Configuration XRechnung 3.0.2" by Coordination Office for IT Standards (KoSIT) from 2024-06-20 
+The following scenarios are available:
+  * EN16931 XRechnung (UBL Invoice)
+  * EN16931 XRechnung Extension (UBL Invoice)
+  * EN16931 XRechnung (UBL CreditNote)
+  * EN16931 XRechnung (CII)
+  * EN16931 XRechnung Extension (CII)
+  * EN16931 (UBL Invoice)
+  * EN16931 (UBL CreditNote)
+  * EN16931 (CII)
+
+
+Processing of 1 objects started
+Processing of 1 objects completed in 179ms
+Results:
+----------------------------------------------------------------------------------------------------------------
+|File                                                        |Schema |Schematron|Acceptance|Error/Description   |
+|/workspace/fixtures/einvoice/fixture-4-public-leitweg.xml   |   Y   |    Y     |ACCEPTABLE|                    |
+----------------------------------------------------------------------------------------------------------------
 Acceptable:  1  Rejected:  0
 
 

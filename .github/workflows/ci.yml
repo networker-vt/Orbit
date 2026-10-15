@@ -33,5 +33,10 @@ jobs:
           npm test
           npm run validate:einvoice
           npm run build
+          node scripts/check-module-budget.mjs
+          # SPA deep-link fallback must ship with Pages builds
+          test -f dist/index.html
+          cp dist/index.html dist/404.html
+          test -f dist/404.html
           npm run build:ios
           bash scripts/check-ios-web-base.sh dist

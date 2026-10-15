@@ -256,6 +256,8 @@ export function OrbitRobot({
       <img
         src={poseSrc}
         alt=""
+        width={size === 'compact' ? 144 : 240}
+        height={size === 'compact' ? 112 : 208}
         draggable={false}
         decoding={shown === 'idle' ? 'sync' : 'async'}
         className="orbi-kind-img h-full w-full bg-transparent object-contain object-bottom"

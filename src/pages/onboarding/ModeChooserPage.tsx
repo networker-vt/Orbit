@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { Shield, Sparkles } from 'lucide-react'
-import { OrbitWordmarkHero } from '../../components/brand/OrbitWordmarkHero'
+import { BrandIcon } from '../../components/brand/BrandMark'
 import { OrbitRobot } from '../../components/home/OrbitRobot'
 import { DemoOnboardingBanner } from '../../components/onboarding/DemoOnboardingBanner'
 import { useI18n } from '../../lib/i18n'
@@ -17,7 +17,10 @@ export function ModeChooserPage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-6 py-6" data-onboarding-chooser="1">
-      <DemoOnboardingBanner />
+      {/* Fixed min-height so demo banner presence does not shift layout (CLS). */}
+      <div className="min-h-[2.75rem]" data-onboarding-demo-slot="1">
+        <DemoOnboardingBanner />
+      </div>
       <header className="text-center">
         <h1 className="text-2xl font-bold">{t('onboarding.chooser.title')}</h1>
         <p className="mt-2 text-sm text-muted">{t('onboarding.chooser.lead')}</p>
@@ -28,7 +31,9 @@ export function ModeChooserPage() {
         onClick={() => pick('orbit')}
         className="card-hover w-full rounded-2xl border-2 border-border bg-surface-2 p-5 text-left hover:border-cyan/50"
       >
-        <OrbitWordmarkHero className="mb-3" />
+        <div className="mb-3 flex h-16 w-16 items-center justify-center">
+          <BrandIcon size={64} className="h-16 w-16" />
+        </div>
         <p className="flex items-center gap-2 font-semibold text-ink">
           <Sparkles size={18} className="text-cyan" /> {t('onboarding.chooser.orbitTitle')}
         </p>
@@ -41,7 +46,7 @@ export function ModeChooserPage() {
         className="card-hover w-full rounded-2xl border-2 border-border bg-surface-2 p-5 text-left hover:border-[var(--theme-accent)]/50"
         data-onboarding-kids-card="1"
       >
-        <div className="mb-3 flex justify-center">
+        <div className="mb-3 flex h-28 w-36 justify-center">
           <OrbitRobot motion="winken" size="compact" />
         </div>
         <p className="flex items-center gap-2 font-semibold text-ink">

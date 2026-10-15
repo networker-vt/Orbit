@@ -17,6 +17,8 @@ export function BrandMark({
         <img
           src={logo}
           alt=""
+          width={32}
+          height={32}
           className="h-8 w-8 rounded-lg border border-cyan/25 object-cover"
         />
         <span className="leading-tight">
@@ -33,6 +35,8 @@ export function BrandMark({
       <img
         src={logo}
         alt={ORBIT_BRAND}
+        width={40}
+        height={40}
         className="h-9 w-9 rounded-xl border border-cyan/25 object-cover md:h-10 md:w-10"
       />
       <span className="leading-tight">

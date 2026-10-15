@@ -148,4 +148,16 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        /** One chunk per src/modules/<name> for the 50 KB gzip CI budget. */
+        manualChunks(id) {
+          const norm = id.replace(/\\/g, '/')
+          const m = norm.match(/\/src\/modules\/([^/]+)\//)
+          if (m) return `module-${m[1]}`
+        },
+      },
+    },
+  },
 })
