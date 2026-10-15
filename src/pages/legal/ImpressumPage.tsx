@@ -42,15 +42,10 @@ export function ImpressumPage() {
       <p>
         E-Mail:{' '}
         <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>
-        {!isLegalPlaceholder(LEGAL.phone) && (
-          <>
-            <br />
-            Telefon: {LEGAL.phone}
-          </>
-        )}
         <br />
         Anschrift: {LEGAL_ADDRESS_LINE}
       </p>
+      <p className="text-sm text-muted">Kontakt nur per E-Mail oder Formular (kein Telefon im Impressum).</p>
       <form onSubmit={send} className="space-y-2 rounded-xl border border-border p-3">
         <p className="text-sm font-medium">Kontaktformular</p>
         <label className="block text-sm">

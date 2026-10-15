@@ -32,19 +32,14 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Do not auto-precache every manifest icon (icon-1024 alone is ~145 KiB).
+      includeManifestIcons: false,
       includeAssets: [
         'favicon.svg',
         'icons/icon.svg',
         'icons/icon-192.png',
         'icons/icon-512.png',
-        'icons/icon-1024.png',
         'icons/apple-touch-icon.png',
-        'icons/orbit-logo.png',
-        'icons/orbit-wordmark.png',
-        'icons/loadin-logo.png',
-        'icons/loadin-wordmark.png',
-        'icons/splash-750x1334.png',
-        'icons/splash-1290x2796.png',
       ],
       manifest: {
         name: 'Allda',
@@ -110,7 +105,78 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: `${BASE}index.html`,
+        // Home + core shell only — heavy tools (e-invoice, PDF, large icons) are runtime-cached.
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,woff2}'],
+        globIgnores: [
+          // Heavy tool chunks stay runtime-cached (not in the 1.5 MB precache).
+          '**/e-invoice-eu*.js',
+          '**/einvoice-*.js',
+          '**/pdf-lib*.js',
+          // @cantoo/pdf-lib natural chunk name from Rolldown
+          '**/es-*.js',
+          '**/jszip*.js',
+          '**/jszip.min*.js',
+          '**/vendor-supabase-*.js',
+          '**/lookup-*.js',
+          '**/MatchPage-*.js',
+          // AngebotPage + store + otplib are part of the offline shell (precache).
+          '**/screenshots/**',
+          '**/icons/splash-*.png',
+          '**/icons/icon-1024.png',
+          '**/icons/loadin-*.png',
+          '**/icons/orbit-wordmark.png',
+          '**/icons/orbit-logo.png',
+          '**/WalletPage-*.js',
+          '**/ParkmerkePage-*.js',
+          '**/EinstellungPage-*.js',
+          '**/CreateListingPage-*.js',
+          '**/SocialPage-*.js',
+          '**/TravelPage-*.js',
+          '**/JobsPage-*.js',
+          '**/BookingPage-*.js',
+          '**/FirmaPage-*.js',
+          '**/InterviewPage-*.js',
+          '**/IntegrationenPage-*.js',
+          '**/LookPage-*.js',
+          '**/ProfilePage-*.js',
+          '**/MeinPage-*.js',
+          '**/KalenderPage-*.js',
+          '**/EinkaufszettelPage-*.js',
+          '**/TankenPage-*.js',
+          '**/OutfitPage-*.js',
+          '**/EmpfehlenPage-*.js',
+          '**/IdeenPage-*.js',
+          '**/PhotoJobsPage-*.js',
+          '**/CompareOffersPage-*.js',
+          '**/DashboardPage-*.js',
+          '**/CampusPage-*.js',
+          '**/KidsPage-*.js',
+          '**/EntdeckerPage-*.js',
+          '**/QuellenPage-*.js',
+          '**/ErfahrungenPage-*.js',
+          '**/ChannelsPage-*.js',
+          '**/MarketplacePage-*.js',
+          '**/ProjectPage-*.js',
+          '**/TicketPage-*.js',
+          '**/TravelCheckoutPage-*.js',
+          '**/ListingCard-*.js',
+          '**/ListingDetailPage-*.js',
+          '**/ChannelLinks-*.js',
+          '**/VerifyPanel-*.js',
+          '**/occupations.catalog-*.js',
+          '**/HonestRoutes-*.js',
+          '**/Kids*Page-*.js',
+          '**/MitentwickelnPage-*.js',
+          '**/MessagesPage-*.js',
+          '**/AuthPage-*.js',
+          '**/PrefsPage-*.js',
+          '**/EssenPage-*.js',
+          '**/DatenschutzPage-*.js',
+          '**/ImpressumPage-*.js',
+          '**/AgbPage-*.js',
+          '**/SupportPage-*.js',
+          '**/RankingPage-*.js',
+        ],
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.destination === 'document',
@@ -149,6 +215,15 @@ export default defineConfig({
     },
   },
   build: {
+    // Keep only heavy tool chunks off the entry modulepreload list (home first paint).
+    // store / otplib / AngebotPage may preload; e-invoice + pdf-lib stay deferred.
+    modulePreload: {
+      resolveDependencies(_filename, deps) {
+        return deps.filter(
+          (dep) => !/einvoice|e-invoice|pdf-lib|jszip|\/es-/i.test(dep),
+        )
+      },
+    },
     rollupOptions: {
       output: {
         /** One chunk per src/modules/<name> for the 50 KB gzip CI budget. */
@@ -156,6 +231,20 @@ export default defineConfig({
           const norm = id.replace(/\\/g, '/')
           const m = norm.match(/\/src\/modules\/([^/]+)\//)
           if (m) return `module-${m[1]}`
+          // Keep seed phones out of the index chunk (exact +49 allowlist targets store-*.js).
+          if (norm.includes('/src/data/seed') || norm.includes('/src/lib/store.ts')) return 'store'
+          if (norm.includes('/node_modules/react-dom/') || norm.includes('/node_modules/react-router')) {
+            return 'vendor-react'
+          }
+          if (norm.includes('/node_modules/react/') || norm.includes('/node_modules/scheduler/')) {
+            return 'vendor-react'
+          }
+          if (norm.includes('/node_modules/@supabase/')) return 'vendor-supabase'
+          if (norm.includes('/node_modules/otplib') || norm.includes('/node_modules/@otplib')) {
+            return 'vendor-otplib'
+          }
+          // Do NOT force-name @e-invoice-eu / pdf-lib / jszip — manualChunks linkage
+          // can statically pull them into store/index and break first paint.
         },
       },
     },

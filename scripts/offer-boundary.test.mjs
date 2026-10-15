@@ -26,6 +26,8 @@ function isAllowed(spec, filePath) {
   if (spec === 'jszip' || spec === 'qrcode') return true
   if (spec.includes('/components/ui/')) return true
   if (spec.includes('/pages/AuthPage')) return true
+  // Shared offline/chunk-load hint (single copy for export + SW warm path).
+  if (spec.includes('/lib/offlineChunk')) return true
   if (filePath.endsWith('.test.ts')) return true
   return false
 }
@@ -43,7 +45,7 @@ test('offer feature imports stay within login, storage (internal), and UI primit
         `${file} must not import ${spec} — only shared UI, AuthPage, or internal offer modules`,
       )
     }
-    assert.doesNotMatch(text, /from ['"][^'"]*\/lib\//)
+    assert.doesNotMatch(text, /from ['"][^'"]*\/lib\/(?!offlineChunk['"])/)
     assert.doesNotMatch(text, /from ['"][^'"]*\/features\/(?!offer)/)
     assert.doesNotMatch(text, /from ['"][^'"]*\/pages\/(?!AuthPage)/)
     const isDictationModule = file.endsWith('HoldToDictateButton.tsx')

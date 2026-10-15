@@ -34,9 +34,15 @@ jobs:
           npm run validate:einvoice
           npm run build
           node scripts/check-module-budget.mjs
-          # SPA deep-link fallback must ship with Pages builds
+          node scripts/check-public-bundle.mjs
+          node scripts/check-bundle-limits.mjs
+          # Deep-link directory indexes (HTTP 200); 404.html is fallback only
           test -f dist/index.html
           cp dist/index.html dist/404.html
-          test -f dist/404.html
+          bash scripts/emit-pages-legal.sh dist
+          test -f dist/willkommen/index.html
+          test -f dist/angebot/index.html
+          npx playwright install chromium --with-deps
+          npm run test:offline-spa
           npm run build:ios
           bash scripts/check-ios-web-base.sh dist

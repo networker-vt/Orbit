@@ -53,3 +53,6 @@ AuthKey_*.p8
 **/fastlane/Preview.html
 **/fastlane/private_keys/
 .cache/
+
+# Local Lighthouse / e2e artifacts (summaries go in PR body)
+artifacts/

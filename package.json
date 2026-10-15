@@ -12,10 +12,13 @@
     "lint": "oxlint",
     "test": "vitest run && node --test scripts/emit-pages-legal.test.mjs scripts/ios-testflight.test.mjs scripts/parkmerke-boundary.test.mjs scripts/offer-boundary.test.mjs scripts/module-boundary.test.mjs scripts/check-public-bundle.test.mjs && node scripts/check-public-bundle.mjs",
     "validate:einvoice": "node scripts/validate-einvoice.mjs",
+    "check:bundle-limits": "node scripts/check-bundle-limits.mjs",
     "generate:einvoice-fixtures": "node scripts/generate-einvoice-fixtures.mjs",
     "preview": "vite preview",
+    "test:offline-spa": "node scripts/offline-spa.e2e.mjs",
+    "lighthouse:deep-links": "node scripts/lighthouse-deep-links.mjs",
     "deploy:pages": "bash scripts/deploy-pages.sh",
-    "build:zip": "npm run build && node scripts/check-public-bundle.mjs && cp dist/index.html dist/404.html && bash scripts/emit-pages-legal.sh dist && cd dist && zip -r ../orbit-web.zip ."
+    "build:zip": "npm run build && node scripts/check-public-bundle.mjs && node scripts/check-bundle-limits.mjs && cp dist/index.html dist/404.html && bash scripts/emit-pages-legal.sh dist && cd dist && zip -r ../orbit-web.zip ."
   },
   "dependencies": {
     "@cantoo/pdf-lib": "^2.11.1",

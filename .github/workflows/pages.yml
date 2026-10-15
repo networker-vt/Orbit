@@ -6,6 +6,7 @@ name: Deploy GitHub Pages
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -13,8 +14,9 @@ permissions:
   pages: write
 
 concurrency:
-  group: pages-deploy
-  cancel-in-progress: true
+  group: pages-${{ github.ref }}
+  # Never cancel an in-flight main deploy; PRs may cancel superseded runs.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   deploy:
@@ -36,15 +38,26 @@ jobs:
           npm run build
           node scripts/check-public-bundle.mjs
           node scripts/check-module-budget.mjs
+          node scripts/check-bundle-limits.mjs
 
-      - name: SPA 404 fallback + legal directory indexes
+      - name: SPA deep-link indexes (HTTP 200) + 404 fallback
         run: |
           set -euo pipefail
-          # Deep links (e.g. /orbit/angebot) must serve the SPA shell as 404.html
+          # Directory indexes for willkommen/angebot/legal/werkzeuge/* → HTTP 200.
+          # 404.html remains only as a fallback for unknown paths.
           cp dist/index.html dist/404.html
           bash scripts/emit-pages-legal.sh dist
+          test -f dist/willkommen/index.html
+          test -f dist/angebot/index.html
+
+      - name: Offline SPA (Playwright)
+        run: |
+          set -euo pipefail
+          npx playwright install chromium --with-deps
+          npm run test:offline-spa
 
       - name: Publish to gh-pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

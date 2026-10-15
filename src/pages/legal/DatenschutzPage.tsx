@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { isSupabaseConfigured } from '../../lib/supabase'
-import { LEGAL, LEGAL_ADDRESS_LINE, isLegalPlaceholder } from '../../lib/legal'
+import { LEGAL, LEGAL_ADDRESS_LINE } from '../../lib/legal'
 import { LegalLayout } from './LegalLayout'
 
 /**
@@ -12,8 +12,7 @@ export function DatenschutzPage() {
     <LegalLayout title="Datenschutz / Privacy">
       <p>
         Verantwortlich: {LEGAL.operatorName}, {LEGAL_ADDRESS_LINE}, {LEGAL.country}. E-Mail:{' '}
-        <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>
-        {!isLegalPlaceholder(LEGAL.phone) ? `. Telefon: ${LEGAL.phone}.` : '.'}
+        <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>.
       </p>
       <p>
         Allda ist ein Marktplatz. Verträge über Jobs, Fahrten oder andere Leistungen kommen zwischen
@@ -127,8 +126,7 @@ export function DatenschutzPage() {
       <h2>English</h2>
       <p>
         Controller: {LEGAL.operatorName}, {LEGAL_ADDRESS_LINE}, Germany. Email:{' '}
-        <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>
-        {!isLegalPlaceholder(LEGAL.phone) ? `. Phone: ${LEGAL.phone}.` : '.'}
+        <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>.
       </p>
       <p>
         Active services: GitHub Pages (hosting the web app), storage on your device (technically

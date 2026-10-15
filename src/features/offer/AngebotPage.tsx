@@ -44,6 +44,7 @@ import type {
 } from './types'
 import { KLEINUNTERNEHMER_HINT, RETENTION_NOTE_PRIVATE_BAU } from './types'
 import { lineTotals, taxBreakdown, validateUstg14 } from './ustg14'
+import { isChunkLoadError, OFFLINE_CHUNK_HINT } from '../../lib/offlineChunk'
 
 function lineId() {
   return `ln-${Math.random().toString(36).slice(2, 10)}`
@@ -61,7 +62,10 @@ export function AngebotPage() {
 
   if (consentReady === null) {
     return (
-      <div className="mx-auto max-w-lg py-12 text-center text-sm text-muted" aria-live="polite">
+      <div
+        className="mx-auto min-h-[32rem] max-w-lg py-12 text-center text-sm text-muted"
+        aria-live="polite"
+      >
         Wird geladen…
       </div>
     )
@@ -270,7 +274,11 @@ function AngebotFlow() {
         setStatusMsg('Rechnung exportiert — nur noch lesbar (Änderungen: Storno + neue Rechnung).')
       }
     } catch (err) {
-      setExportErrors([err instanceof Error ? err.message : 'Export fehlgeschlagen'])
+      if (isChunkLoadError(err) || !navigator.onLine) {
+        setExportErrors([OFFLINE_CHUNK_HINT])
+      } else {
+        setExportErrors([err instanceof Error ? err.message : 'Export fehlgeschlagen'])
+      }
     } finally {
       setExportBusy(false)
     }

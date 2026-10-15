@@ -11,7 +11,7 @@ export function OfferBusinessGate({ onAccepted }: Props) {
   const [busy, setBusy] = useState(false)
 
   return (
-    <div className="mx-auto flex max-w-lg flex-col gap-5 pb-scroll-chrome">
+    <div className="mx-auto flex min-h-[32rem] max-w-lg flex-col gap-5 pb-scroll-chrome">
       <OfferBetaBanner step={1} />
       <header className="space-y-2">
         <h1 className="text-2xl font-bold tracking-tight text-ink">Angebot & E-Rechnung</h1>

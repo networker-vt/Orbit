@@ -11,13 +11,27 @@ import './index.css'
 applyScheme(getScheme())
 initOrbitPlusDom()
 
+/** Defer warm-cache module so Vite does not modulepreload e-invoice on first paint. */
+function scheduleWarmRuntimeCache() {
+  const run = () => {
+    void import('./lib/warmRuntimeCache').then((m) => m.warmEInvoiceRuntimeCache())
+  }
+  window.setTimeout(run, 3500)
+}
+
 if (!Capacitor.isNativePlatform()) {
   registerSW({
     immediate: true,
     onOfflineReady() {
       console.info('[Allda] Offline-Shell bereit')
+      scheduleWarmRuntimeCache()
+    },
+    onRegisteredSW() {
+      scheduleWarmRuntimeCache()
     },
   })
+} else {
+  scheduleWarmRuntimeCache()
 }
 
 void bootNativeShell()
