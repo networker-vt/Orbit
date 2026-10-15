@@ -34,6 +34,9 @@ export function blankInvoiceDraft(profile: CompanyProfile | null): InvoiceDraft 
     buyerIsPrivatePerson: false,
     bauGrundstueckLeistung: false,
     kleinunternehmer: false,
+    customerId: null,
+    publicBuyer: false,
+    leitwegId: '',
   }
   return profile ? applyProfileToInvoice(base, profile) : base
 }
@@ -88,6 +91,11 @@ export function buildStoredInvoiceFromDraft(
     totals: lineTotals(confirmed),
     taxBreakdown: taxBreakdown(confirmed),
     retentionNote: retentionNoteFor(invoice),
+    paymentStatus: 'offen',
+    reminderAt: null,
+    customerId: invoice.customerId,
+    publicBuyer: invoice.publicBuyer,
+    leitwegId: invoice.leitwegId,
   }
 }
 
@@ -115,6 +123,9 @@ export function storedInvoiceToDraft(inv: StoredInvoice): InvoiceDraft {
     buyerIsPrivatePerson: inv.buyerIsPrivatePerson,
     bauGrundstueckLeistung: inv.bauGrundstueckLeistung,
     kleinunternehmer: inv.kleinunternehmer,
+    customerId: inv.customerId ?? null,
+    publicBuyer: inv.publicBuyer ?? false,
+    leitwegId: inv.leitwegId ?? '',
   }
 }
 
@@ -147,6 +158,9 @@ export async function stornoAndNewInvoice(
   draft.buyerIsPrivatePerson = cancelled.buyerIsPrivatePerson
   draft.bauGrundstueckLeistung = cancelled.bauGrundstueckLeistung
   draft.dueDate = cancelled.dueDate
+  draft.customerId = cancelled.customerId ?? null
+  draft.publicBuyer = cancelled.publicBuyer ?? false
+  draft.leitwegId = cancelled.leitwegId ?? ''
   return {
     draft,
     offerSlice: {

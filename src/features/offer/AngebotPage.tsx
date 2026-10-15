@@ -8,6 +8,9 @@ import { OfferLineEditor } from './components/OfferLineEditor'
 import { CompanyProfileForm } from './components/CompanyProfileForm'
 import { OfferBackupPanel } from './components/OfferBackupPanel'
 import { OfferLegalFooter } from './components/OfferLegalFooter'
+import { CustomerPanel } from './components/CustomerPanel'
+import { CatalogPanel } from './components/CatalogPanel'
+import { SitePhotosPanel } from './components/SitePhotosPanel'
 import { downloadBlob, exportXRechnungXml, exportZugferdPdf } from './einvoiceExport'
 import { listenOnlineDrain, pendingAiCount, queueAiJob } from './offerAiQueue'
 import { OfferBusinessGate } from './components/OfferBusinessGate'
@@ -17,6 +20,7 @@ import {
   listInvoices,
   listOffers,
   newOfferId,
+  saveInvoice,
   saveOffer,
   setBusinessConsentAccepted,
 } from './offerDb'
@@ -28,7 +32,14 @@ import {
 } from './invoiceConvert'
 import { applyProfileToInvoice } from './companyProfile'
 import { sharePdfFile } from './sharePdf'
-import type { CompanyProfile, InvoiceDraft, OfferLineItem, StoredInvoice, StoredOffer } from './types'
+import type {
+  CompanyProfile,
+  InvoiceDraft,
+  InvoicePaymentStatus,
+  OfferLineItem,
+  StoredInvoice,
+  StoredOffer,
+} from './types'
 import { KLEINUNTERNEHMER_HINT, RETENTION_NOTE_PRIVATE_BAU } from './types'
 import { lineTotals, taxBreakdown, validateUstg14 } from './ustg14'
 
@@ -69,7 +80,9 @@ export function AngebotPage() {
 
 function AngebotFlow() {
   const [step, setStep] = useState<1 | 2>(1)
-  const [panel, setPanel] = useState<'flow' | 'profile' | 'backup' | 'invoices'>('flow')
+  const [panel, setPanel] = useState<
+    'flow' | 'profile' | 'backup' | 'invoices' | 'customers' | 'catalog' | 'photos'
+  >('flow')
   const [offer, setOffer] = useState<StoredOffer | null>(null)
   const [invoice, setInvoice] = useState<InvoiceDraft | null>(null)
   const [profile, setProfile] = useState<CompanyProfile | null>(null)
@@ -87,6 +100,18 @@ function AngebotFlow() {
     const [p, invs] = await Promise.all([getCompanyProfile(), listInvoices()])
     setProfile(p)
     setInvoices(invs)
+    const due = invs.filter(
+      (i) =>
+        i.status === 'exported' &&
+        i.paymentStatus !== 'bezahlt' &&
+        i.reminderAt != null &&
+        i.reminderAt <= Date.now(),
+    )
+    if (due.length > 0) {
+      setStatusMsg(
+        `Lokale Erinnerung: ${due.length} Rechnung(en) (${due.map((d) => d.invoiceNumber).join(', ')}).`,
+      )
+    }
   }, [])
 
   useEffect(() => {
@@ -224,7 +249,7 @@ function AngebotFlow() {
         const xml = await exportXRechnungXml(offer, draft, offer.lines)
         downloadBlob(`${draft.invoiceNumber}.xml`, new Blob([xml], { type: 'application/xml' }))
       } else {
-        const pdf = await exportZugferdPdf(offer, draft, offer.lines)
+        const pdf = await exportZugferdPdf(offer, draft, offer.lines, profile)
         if (kind === 'share') {
           await sharePdfFile(`${draft.invoiceNumber}-zugferd.pdf`, pdf)
         } else {
@@ -292,6 +317,9 @@ function AngebotFlow() {
           [
             ['flow', 'Angebot'],
             ['profile', 'Firmenprofil'],
+            ['customers', 'Kunden'],
+            ['catalog', 'Materialliste'],
+            ['photos', 'Fotos'],
             ['backup', 'Sicherung'],
             ['invoices', 'Rechnungen'],
           ] as const
@@ -330,6 +358,74 @@ function AngebotFlow() {
       )}
 
       {panel === 'backup' && <OfferBackupPanel onImported={() => void reloadMeta()} />}
+
+      {panel === 'customers' && (
+        <CustomerPanel
+          invoice={invoice}
+          onApply={(draft) => {
+            setInvoice(draft)
+            setPanel('flow')
+            setStep(2)
+          }}
+        />
+      )}
+
+      {panel === 'catalog' && (
+        <CatalogPanel
+          onAddLine={(line) => {
+            if (!offer) {
+              const id = newOfferId()
+              const next: StoredOffer = {
+                id,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                captureKind: 'dictation',
+                title: 'Angebot aus Materialliste',
+                lines: [line],
+                servicePeriodStart: new Date().toISOString().slice(0, 10),
+                servicePeriodEnd: new Date().toISOString().slice(0, 10),
+                synced: false,
+                sitePhotos: [],
+              }
+              void persist(next)
+            } else {
+              void persist({
+                ...offer,
+                lines: [...offer.lines, line],
+                updatedAt: Date.now(),
+              })
+            }
+            setPanel('flow')
+            setStep(1)
+            setStatusMsg('Position aus Materialliste übernommen.')
+          }}
+        />
+      )}
+
+      {panel === 'photos' && (
+        <SitePhotosPanel
+          photos={offer?.sitePhotos ?? []}
+          onChange={(sitePhotos) => {
+            if (!offer) {
+              const id = newOfferId()
+              void persist({
+                id,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                captureKind: 'photo',
+                title: 'Angebot mit Baustellenfotos',
+                lines: [],
+                servicePeriodStart: new Date().toISOString().slice(0, 10),
+                servicePeriodEnd: new Date().toISOString().slice(0, 10),
+                synced: false,
+                sitePhotos,
+              })
+            } else {
+              void persist({ ...offer, sitePhotos, updatedAt: Date.now() })
+            }
+          }}
+        />
+      )}
 
       {panel === 'invoices' && (
         <section className="space-y-3 rounded-2xl border border-border bg-surface-2 p-4">
@@ -376,6 +472,9 @@ function AngebotFlow() {
                           buyerIsPrivatePerson: inv.buyerIsPrivatePerson,
                           bauGrundstueckLeistung: inv.bauGrundstueckLeistung,
                           kleinunternehmer: inv.kleinunternehmer,
+                          customerId: inv.customerId ?? null,
+                          publicBuyer: inv.publicBuyer ?? false,
+                          leitwegId: inv.leitwegId ?? '',
                         })
                         setStep(2)
                         setPanel('flow')
@@ -383,6 +482,45 @@ function AngebotFlow() {
                     >
                       Anzeigen
                     </Button>
+                  ) : null}
+                  {inv.status === 'exported' ? (
+                    <div className="mt-2 space-y-2">
+                      <label className="block text-sm text-ink">
+                        Status
+                        <select
+                          className={fieldClass}
+                          value={inv.paymentStatus ?? 'offen'}
+                          onChange={(e) => {
+                            const paymentStatus = e.target.value as InvoicePaymentStatus
+                            const next = { ...inv, paymentStatus, updatedAt: Date.now() }
+                            void saveInvoice(next).then(() => reloadMeta())
+                          }}
+                        >
+                          <option value="offen">offen</option>
+                          <option value="bezahlt">bezahlt</option>
+                          <option value="ueberfaellig">überfällig</option>
+                        </select>
+                      </label>
+                      <label className="block text-sm text-ink">
+                        Lokale Erinnerung
+                        <input
+                          type="datetime-local"
+                          className={fieldClass}
+                          value={
+                            inv.reminderAt
+                              ? new Date(inv.reminderAt).toISOString().slice(0, 16)
+                              : ''
+                          }
+                          onChange={(e) => {
+                            const reminderAt = e.target.value
+                              ? new Date(e.target.value).getTime()
+                              : null
+                            const next = { ...inv, reminderAt, updatedAt: Date.now() }
+                            void saveInvoice(next).then(() => reloadMeta())
+                          }}
+                        />
+                      </label>
+                    </div>
                   ) : null}
                 </li>
               ))}
@@ -513,8 +651,42 @@ function AngebotFlow() {
               <input
                 type="checkbox"
                 className="size-5 accent-[var(--theme-accent,#0f766e)]"
-                checked={invoice.buyerIsPrivatePerson}
+                checked={invoice.publicBuyer}
                 disabled={readOnly}
+                onChange={(e) =>
+                  setInvoice({
+                    ...invoice,
+                    publicBuyer: e.target.checked,
+                    buyerIsPrivatePerson: e.target.checked ? false : invoice.buyerIsPrivatePerson,
+                    buyerReference: e.target.checked ? invoice.leitwegId : invoice.buyerReference,
+                  })
+                }
+              />
+              öffentlicher Auftraggeber
+            </label>
+            {invoice.publicBuyer ? (
+              <label className="block text-sm text-ink">
+                Leitweg-ID (XRechnung BT-10)
+                <input
+                  className={fieldClass}
+                  value={invoice.leitwegId}
+                  disabled={readOnly}
+                  onChange={(e) =>
+                    setInvoice({
+                      ...invoice,
+                      leitwegId: e.target.value,
+                      buyerReference: e.target.value,
+                    })
+                  }
+                />
+              </label>
+            ) : null}
+            <label className="flex min-h-12 items-center gap-3 text-sm text-ink">
+              <input
+                type="checkbox"
+                className="size-5 accent-[var(--theme-accent,#0f766e)]"
+                checked={invoice.buyerIsPrivatePerson}
+                disabled={readOnly || invoice.publicBuyer}
                 onChange={(e) => setInvoice({ ...invoice, buyerIsPrivatePerson: e.target.checked })}
               />
               Leistungsempfänger ist Privatperson

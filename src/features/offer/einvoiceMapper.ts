@@ -95,7 +95,11 @@ export function buildEInvoiceUbl(
       'cbc:DueDate': invoice.dueDate.trim(),
       'cbc:InvoiceTypeCode': '380',
       'cbc:DocumentCurrencyCode': 'EUR',
-      'cbc:BuyerReference': invoice.buyerReference.trim() || 'Kunde-Referenz',
+      // XRechnung BT-10: Leitweg-ID for public buyers, else buyer reference
+      'cbc:BuyerReference':
+        (invoice.publicBuyer ? invoice.leitwegId.trim() : invoice.buyerReference.trim()) ||
+        invoice.leitwegId.trim() ||
+        'Kunde-Referenz',
       'cbc:Note': documentNotes(offer, invoice),
       'cac:InvoicePeriod': {
         'cbc:StartDate': offer.servicePeriodStart,

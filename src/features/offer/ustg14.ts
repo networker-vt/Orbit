@@ -6,6 +6,7 @@ import type {
 } from './types'
 import { RETENTION_NOTE_PRIVATE_BAU } from './types'
 import { validateCompanyProfile, type ProfileValidationIssue } from './companyProfile'
+import { validateLeitweg, type LeitwegIssue } from './customers'
 import type { CompanyProfile } from './types'
 
 export type UstgFieldKey =
@@ -29,9 +30,10 @@ export type UstgFieldKey =
   | 'tax.amount'
   | 'payment.iban'
   | 'retention.note'
+  | 'customer.leitwegId'
 
 export type UstgValidationIssue = {
-  field: UstgFieldKey | ProfileValidationIssue['field']
+  field: UstgFieldKey | ProfileValidationIssue['field'] | LeitwegIssue['field']
   labelDe: string
 }
 
@@ -56,6 +58,7 @@ const FIELD_LABELS: Record<UstgFieldKey, string> = {
   'tax.amount': 'Steuerbetrag',
   'payment.iban': 'Zahlungsinformationen (IBAN)',
   'retention.note': 'Aufbewahrungshinweis (§ 14 Abs. 4 Nr. 9 UStG)',
+  'customer.leitwegId': 'Leitweg-ID (öffentlicher Auftraggeber / XRechnung BT-10)',
 }
 
 export function ustgFieldLabel(field: UstgFieldKey): string {
@@ -182,6 +185,13 @@ export function validateUstg14(
   if (needsRetentionNote(invoice) && !retentionNoteFor(invoice)) {
     issues.push({ field: 'retention.note', labelDe: FIELD_LABELS['retention.note'] })
   }
+
+  issues.push(
+    ...validateLeitweg({
+      publicBuyer: invoice.publicBuyer,
+      leitwegId: invoice.leitwegId || invoice.buyerReference,
+    }),
+  )
 
   return issues
 }

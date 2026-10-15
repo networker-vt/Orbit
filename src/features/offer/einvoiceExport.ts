@@ -1,5 +1,6 @@
 import { buildEInvoiceUbl } from './einvoiceMapper'
-import type { InvoiceDraft, OfferLineItem, StoredOffer } from './types'
+import { giroCodeFromInvoice, renderGiroCodePng } from './giroCode'
+import type { CompanyProfile, InvoiceDraft, OfferLineItem, StoredOffer } from './types'
 import { KLEINUNTERNEHMER_HINT } from './types'
 import { lineTotals, retentionNoteFor, taxBreakdown } from './ustg14'
 
@@ -21,6 +22,7 @@ export async function exportZugferdPdf(
   offer: StoredOffer,
   invoice: InvoiceDraft,
   lines: OfferLineItem[],
+  profile: CompanyProfile | null = null,
 ): Promise<Uint8Array> {
   const [{ InvoiceService }, { PDFDocument, StandardFonts }] = await Promise.all([
     import('@e-invoice-eu/core'),
@@ -48,6 +50,19 @@ export async function exportZugferdPdf(
   const retention = retentionNoteFor(invoice)
   if (retention) line(retention, 9)
   line('ZUGFeRD / Factur-X (eingebettete XRechnung-XML)', 9)
+
+  // GiroCode (EPC-QR): IBAN from own profile, amount = total, purpose = invoice number.
+  // Skipped for Kleinunternehmer or 0 €. QR lib is dynamic-import only.
+  const epc = giroCodeFromInvoice(invoice, gross, profile)
+  if (epc) {
+    const png = await renderGiroCodePng(epc, 140)
+    if (png) {
+      const qrImage = await doc.embedPng(png)
+      page.drawImage(qrImage, { x: 400, y: 620, width: 120, height: 120 })
+      page.drawText('GiroCode', { x: 420, y: 605, size: 9, font })
+    }
+  }
+
   const pdfBytes = await doc.save()
   const svc = new InvoiceService(silentLogger)
   const out = await svc.generate(payload as never, {

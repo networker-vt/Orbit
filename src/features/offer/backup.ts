@@ -6,9 +6,13 @@ import {
   getBusinessConsent,
   getCompanyProfile,
   getInvoiceCounter,
+  listCatalogItems,
+  listCustomers,
   listInvoices,
   listOffers,
   mergeInvoiceCounter,
+  replaceAllCatalogItems,
+  replaceAllCustomers,
   replaceAllInvoices,
   replaceAllOffers,
   saveCompanyProfile,
@@ -26,21 +30,26 @@ function stableStringify(value: unknown): string {
 }
 
 export async function buildBackupPayload(): Promise<OfferBackupPayload> {
-  const [offers, invoices, companyProfile, invoiceCounter, businessConsent] = await Promise.all([
-    listOffers(),
-    listInvoices(),
-    getCompanyProfile(),
-    getInvoiceCounter(),
-    getBusinessConsent(),
-  ])
+  const [offers, invoices, companyProfile, invoiceCounter, businessConsent, customers, catalogItems] =
+    await Promise.all([
+      listOffers(),
+      listInvoices(),
+      getCompanyProfile(),
+      getInvoiceCounter(),
+      getBusinessConsent(),
+      listCustomers(),
+      listCatalogItems(),
+    ])
   return {
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     offers,
     invoices,
     companyProfile,
     invoiceCounter,
     businessConsent,
+    customers,
+    catalogItems,
   }
 }
 
@@ -104,7 +113,11 @@ export async function importBackupZip(file: File): Promise<ImportBackupResult> {
     payload = JSON.parse(await jsonEntry.async('string')) as OfferBackupPayload
   }
 
-  if (payload.version !== 1 || !Array.isArray(payload.offers) || !Array.isArray(payload.invoices)) {
+  if (
+    (payload.version !== 1 && payload.version !== 2) ||
+    !Array.isArray(payload.offers) ||
+    !Array.isArray(payload.invoices)
+  ) {
     throw new Error('Ungültiges Backup-Format')
   }
 
@@ -115,6 +128,8 @@ export async function importBackupZip(file: File): Promise<ImportBackupResult> {
   if (payload.businessConsent?.accepted) {
     await setBusinessConsentAccepted(payload.businessConsent.acceptedAt)
   }
+  if (Array.isArray(payload.customers)) await replaceAllCustomers(payload.customers)
+  if (Array.isArray(payload.catalogItems)) await replaceAllCatalogItems(payload.catalogItems)
 
   const counter = await getInvoiceCounter()
   return {
@@ -131,6 +146,8 @@ export function normalizeBackupForCompare(payload: OfferBackupPayload): string {
     exportedAt: '',
     offers: [...payload.offers].sort((a, b) => a.id.localeCompare(b.id)),
     invoices: [...payload.invoices].sort((a, b) => a.id.localeCompare(b.id)),
+    customers: [...(payload.customers ?? [])].sort((a, b) => a.id.localeCompare(b.id)),
+    catalogItems: [...(payload.catalogItems ?? [])].sort((a, b) => a.id.localeCompare(b.id)),
   }
   return stableStringify(clone)
 }
