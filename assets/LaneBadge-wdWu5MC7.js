@@ -1,0 +1,1 @@
+import{t as e}from"./vendor-react-CGP0_jlh.js";import{vt as t}from"./index-D5WnnRln.js";import{t as n}from"./Badge-Dj2OpuEv.js";var r=e();function i({lane:e}){let{t:i}=t();return e===`free`?(0,r.jsx)(n,{tone:`green`,children:i(`credits.badgeFree`)}):(0,r.jsx)(n,{tone:`violet`,children:i(`credits.badgePaid`)})}export{i as t};

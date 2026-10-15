@@ -1,0 +1,1 @@
+var e=`/orbit/assets/orbi-kind-dance-DX-8ANmk.webp`;export{e as default};

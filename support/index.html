@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="de" data-scheme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./icons/icon.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <link rel="apple-touch-startup-image" href="./icons/splash-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="./icons/splash-750x1334.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#F7F6F3" />
+    <meta name="description" content="Alles für deinen Alltag" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Allda" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>Allda — Alles für deinen Alltag</title>
+    <script>
+      try {
+        var s = localStorage.getItem('orbit_scheme_v1');
+        document.documentElement.dataset.scheme = s === 'dark' ? 'dark' : 'light';
+        if (s === 'dark') {
+          var m = document.querySelector('meta[name="theme-color"]');
+          if (m) m.setAttribute('content', '#0a0a0a');
+        }
+      } catch (e) {}
+    </script>
+    <script type="module" crossorigin src="/orbit/assets/index-D5WnnRln.js"></script>
+    <link rel="modulepreload" crossorigin href="/orbit/assets/rolldown-runtime-C0FnF6B9.js">
+    <link rel="modulepreload" crossorigin href="/orbit/assets/dist-DzrIiESJ.js">
+    <link rel="modulepreload" crossorigin href="/orbit/assets/vendor-react-CGP0_jlh.js">
+    <link rel="modulepreload" crossorigin href="/orbit/assets/store-CBooqqGu.js">
+    <link rel="modulepreload" crossorigin href="/orbit/assets/definitions-Cy7BZa5q.js">
+    <link rel="modulepreload" crossorigin href="/orbit/assets/vendor-otplib-DkNDqpV4.js">
+    <link rel="modulepreload" crossorigin href="/orbit/assets/industries-Rkh24LVy.js">
+    <link rel="modulepreload" crossorigin href="/orbit/assets/prefs-CYjVRdci.js">
+    <link rel="modulepreload" crossorigin href="/orbit/assets/rewards-CzOdPtL_.js">
+    <link rel="stylesheet" crossorigin href="/orbit/assets/index-CXDj_yY2.css">
+  <link rel="manifest" href="/orbit/manifest.webmanifest"></head>
+  <body class="bg-surface text-ink antialiased">
+    <div id="root"></div>
+  </body>
+</html>

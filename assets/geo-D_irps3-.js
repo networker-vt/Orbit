@@ -1,0 +1,1 @@
+function e(e=8e3){return new Promise((t,n)=>{if(typeof navigator>`u`||!navigator.geolocation){n(Error(`unavailable`));return}navigator.geolocation.getCurrentPosition(e=>t({lat:e.coords.latitude,lon:e.coords.longitude,accuracy:e.coords.accuracy??null}),e=>n(e),{enableHighAccuracy:!1,timeout:e,maximumAge:12e4})})}export{e as t};

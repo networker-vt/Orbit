@@ -1,0 +1,1 @@
+var e=`/orbit/assets/orbi-kind-run-D3gbVl6u.webp`;export{e as default};

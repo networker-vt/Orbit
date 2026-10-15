@@ -1,0 +1,1 @@
+import{o as e}from"./rolldown-runtime-C0FnF6B9.js";import{h as t}from"./vendor-react-CGP0_jlh.js";import{i as n,r}from"./store-CBooqqGu.js";var i=e(t(),1);function a(){let[e,t]=(0,i.useState)(0);return(0,i.useEffect)(()=>n(()=>t(e=>e+1)),[]),e}function o(e={}){let t=a();return{listings:r.listListings(e),version:t}}export{a as n,o as t};

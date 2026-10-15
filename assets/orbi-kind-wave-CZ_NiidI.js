@@ -1,0 +1,1 @@
+var e=`/orbit/assets/orbi-kind-wave-D5bOdB-F.webp`;export{e as default};

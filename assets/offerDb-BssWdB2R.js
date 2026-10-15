@@ -1,0 +1,1 @@
+import{s as e}from"./AngebotPage-DXvI905Y.js";export{e as cancelInvoice};

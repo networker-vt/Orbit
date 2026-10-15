@@ -1,0 +1,1 @@
+import{a as e}from"./AngebotPage-DXvI905Y.js";export{e as preloadEInvoiceToolChunks};

@@ -1,0 +1,1 @@
+var e=`/orbit/assets/orbi-kind-work-r3h-NOxn.webp`;export{e as default};

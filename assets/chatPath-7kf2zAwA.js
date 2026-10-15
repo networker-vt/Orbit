@@ -1,0 +1,1 @@
+function e(e){return e?`/social/chat/${e}`:`/social/chat`}export{e as t};
