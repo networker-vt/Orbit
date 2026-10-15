@@ -6,7 +6,10 @@ export const LEGAL = {
   city: 'Köln',
   country: 'Deutschland',
   email: 'mirco.kuessner@gmail.com',
-  /** Second contact channel. Mirco fills a real number before go-live. */
+  /**
+   * Phone is intentionally not published — Impressum contact is email/form only.
+   * Keep placeholder so accidental fill-in stays out of the public bundle check.
+   */
   phone: '[BITTE AUSFÜLLEN]',
   /** Remove the private-operation note once the project is run for profit. */
   tradeStatus: '[BITTE AUSFÜLLEN: Gewerbe ja/nein]',

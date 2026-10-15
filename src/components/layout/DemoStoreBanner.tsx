@@ -19,8 +19,6 @@ export function DemoStoreBanner() {
     }
   })
 
-  if (!isDemoMode() || hidden) return null
-
   const dismiss = () => {
     try {
       sessionStorage.setItem(DISMISS_KEY, '1')
@@ -30,27 +28,38 @@ export function DemoStoreBanner() {
     setHidden(true)
   }
 
+  // Reserve height so first paint / dismiss does not shove the footer (CLS).
+  if (!isDemoMode()) return null
+
   return (
     <div
-      role="status"
-      data-demo-store-banner="1"
-      className="flex items-start gap-2 border-b border-amber-500/35 bg-amber-500/12 px-3 py-2 text-xs text-amber-50 sm:items-center sm:justify-center sm:text-center"
+      data-demo-store-banner-slot="1"
+      className="min-h-[2.75rem] border-b border-transparent"
+      aria-hidden={hidden}
     >
-      <p className="min-w-0 flex-1 leading-snug">
-        <span className="font-semibold text-amber-100">{t('demo.bannerTitle')}</span>
-        <span className="text-amber-100/90"> — {t('demo.bannerBody')} </span>
-        <Link to="/support" className="font-medium text-amber-50 underline underline-offset-2 hover:text-white">
-          {t('footer.support')}
-        </Link>
-      </p>
-      <button
-        type="button"
-        onClick={dismiss}
-        className="shrink-0 rounded-lg px-2 py-1 text-amber-100/80 hover:bg-amber-500/20 hover:text-amber-50"
-        aria-label={t('demo.bannerDismiss')}
-      >
-        {t('demo.bannerDismiss')}
-      </button>
+      {!hidden ? (
+        <div
+          role="status"
+          data-demo-store-banner="1"
+          className="flex items-start gap-2 border-b border-amber-500/35 bg-amber-500/12 px-3 py-2 text-xs text-amber-50 sm:items-center sm:justify-center sm:text-center"
+        >
+          <p className="min-w-0 flex-1 leading-snug">
+            <span className="font-semibold text-amber-100">{t('demo.bannerTitle')}</span>
+            <span className="text-amber-100/90"> — {t('demo.bannerBody')} </span>
+            <Link to="/support" className="font-medium text-amber-50 underline underline-offset-2 hover:text-white">
+              {t('footer.support')}
+            </Link>
+          </p>
+          <button
+            type="button"
+            onClick={dismiss}
+            className="shrink-0 rounded-lg px-2 py-1 text-amber-100/80 hover:bg-amber-500/20 hover:text-amber-50"
+            aria-label={t('demo.bannerDismiss')}
+          >
+            {t('demo.bannerDismiss')}
+          </button>
+        </div>
+      ) : null}
     </div>
   )
 }

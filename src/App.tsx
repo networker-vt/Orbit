@@ -7,40 +7,61 @@ import { I18nProvider, useI18n } from './lib/i18n'
 import { initRewards } from './lib/rewards'
 import { initStore } from './lib/store'
 import { OrbitWordmarkHero } from './components/brand/OrbitWordmarkHero'
-import { HomePage } from './pages/HomePage'
 import { ModeChooserPage } from './pages/onboarding/ModeChooserPage'
 import { KidsConsentPage } from './pages/onboarding/KidsConsentPage'
 import { OrbitRegistrationPage } from './pages/onboarding/OrbitRegistrationPage'
-import { MitentwickelnPage } from './pages/MitentwickelnPage'
-import { KidsHubPage } from './pages/kids/KidsHubPage'
-import { KidsSpielePage } from './pages/kids/KidsSpielePage'
-import { KidsLernenPage } from './pages/kids/KidsLernenPage'
-import { KidsHobbiesPage } from './pages/kids/KidsHobbiesPage'
-import { KidsNaturPage } from './pages/kids/KidsNaturPage'
-import { KidsPassungPage } from './pages/kids/KidsPassungPage'
 import { campusSurfaceEnabled, kidsSurfaceEnabled } from './lib/registrationFlags'
-import { EssenPage } from './pages/EssenPage'
-import { PrefsPage } from './pages/PrefsPage'
-import { MatchPage } from './pages/MatchPage'
-import { MehrPage } from './pages/MehrPage'
-import { AuthPage } from './pages/AuthPage'
-import { ListingDetailPage } from './pages/ListingDetailPage'
-import { MessagesPage } from './pages/MessagesPage'
-import { AgbPage } from './pages/legal/AgbPage'
-import { DatenschutzPage } from './pages/legal/DatenschutzPage'
-import { ImpressumPage } from './pages/legal/ImpressumPage'
-import { RankingPage } from './pages/legal/RankingPage'
-import { SupportPage } from './pages/legal/SupportPage'
 import { isFlagOn, type FeatureFlag } from './lib/flags'
-import {
-  InnovationPage,
-  KatalogPage,
-  NewsArchivePage,
-  NotFoundPage,
-  WissenPage,
-} from './pages/HonestRoutes'
 import { captureRefFromSearch } from './lib/referral'
 import { hydrateSafeTweaks } from './lib/ideas'
+
+const HomePage = lazy(() => import('./pages/HomePage').then((m) => ({ default: m.HomePage })))
+const MitentwickelnPage = lazy(() =>
+  import('./pages/MitentwickelnPage').then((m) => ({ default: m.MitentwickelnPage })),
+)
+const KidsHubPage = lazy(() => import('./pages/kids/KidsHubPage').then((m) => ({ default: m.KidsHubPage })))
+const KidsSpielePage = lazy(() =>
+  import('./pages/kids/KidsSpielePage').then((m) => ({ default: m.KidsSpielePage })),
+)
+const KidsLernenPage = lazy(() =>
+  import('./pages/kids/KidsLernenPage').then((m) => ({ default: m.KidsLernenPage })),
+)
+const KidsHobbiesPage = lazy(() =>
+  import('./pages/kids/KidsHobbiesPage').then((m) => ({ default: m.KidsHobbiesPage })),
+)
+const KidsNaturPage = lazy(() =>
+  import('./pages/kids/KidsNaturPage').then((m) => ({ default: m.KidsNaturPage })),
+)
+const KidsPassungPage = lazy(() =>
+  import('./pages/kids/KidsPassungPage').then((m) => ({ default: m.KidsPassungPage })),
+)
+const EssenPage = lazy(() => import('./pages/EssenPage').then((m) => ({ default: m.EssenPage })))
+const PrefsPage = lazy(() => import('./pages/PrefsPage').then((m) => ({ default: m.PrefsPage })))
+const MatchPage = lazy(() => import('./pages/MatchPage').then((m) => ({ default: m.MatchPage })))
+const MehrPage = lazy(() => import('./pages/MehrPage').then((m) => ({ default: m.MehrPage })))
+const AuthPage = lazy(() => import('./pages/AuthPage').then((m) => ({ default: m.AuthPage })))
+const ListingDetailPage = lazy(() =>
+  import('./pages/ListingDetailPage').then((m) => ({ default: m.ListingDetailPage })),
+)
+const MessagesPage = lazy(() => import('./pages/MessagesPage').then((m) => ({ default: m.MessagesPage })))
+const AgbPage = lazy(() => import('./pages/legal/AgbPage').then((m) => ({ default: m.AgbPage })))
+const DatenschutzPage = lazy(() =>
+  import('./pages/legal/DatenschutzPage').then((m) => ({ default: m.DatenschutzPage })),
+)
+const ImpressumPage = lazy(() =>
+  import('./pages/legal/ImpressumPage').then((m) => ({ default: m.ImpressumPage })),
+)
+const RankingPage = lazy(() => import('./pages/legal/RankingPage').then((m) => ({ default: m.RankingPage })))
+const SupportPage = lazy(() => import('./pages/legal/SupportPage').then((m) => ({ default: m.SupportPage })))
+const InnovationPage = lazy(() =>
+  import('./pages/HonestRoutes').then((m) => ({ default: m.InnovationPage })),
+)
+const KatalogPage = lazy(() => import('./pages/HonestRoutes').then((m) => ({ default: m.KatalogPage })))
+const NewsArchivePage = lazy(() =>
+  import('./pages/HonestRoutes').then((m) => ({ default: m.NewsArchivePage })),
+)
+const NotFoundPage = lazy(() => import('./pages/HonestRoutes').then((m) => ({ default: m.NotFoundPage })))
+const WissenPage = lazy(() => import('./pages/HonestRoutes').then((m) => ({ default: m.WissenPage })))
 
 const LookPage = lazy(() => import('./pages/LookPage').then((m) => ({ default: m.LookPage })))
 const WalletPage = lazy(() => import('./pages/WalletPage').then((m) => ({ default: m.WalletPage })))

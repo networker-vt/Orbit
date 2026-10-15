@@ -34,6 +34,8 @@ jobs:
           npm run validate:einvoice
           npm run build
           node scripts/check-module-budget.mjs
+          node scripts/check-public-bundle.mjs
+          node scripts/check-bundle-limits.mjs
           # SPA deep-link fallback must ship with Pages builds
           test -f dist/index.html
           cp dist/index.html dist/404.html
