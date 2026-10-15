@@ -1,12 +1,12 @@
 import { useLocation } from 'react-router-dom'
 import { OFFER_BETA_REPORT_EMAIL } from '../constants'
 
-export function OfferBetaBanner({ step }: { step: 1 | 2 }) {
+export function OfferBetaBanner({ step }: { step: 1 | 2 | string }) {
   const { pathname, search } = useLocation()
   const route = `${pathname}${search}`
   const subject = encodeURIComponent(`Beta-Fehler Angebot & E-Rechnung (${route}, Schritt ${step})`)
   const body = encodeURIComponent(
-    `Route: ${route}\nSchritt: ${step}\n\nBitte beschreiben Sie den Fehler:\n`,
+    `Route: ${route}\nSchritt: ${step}\nUser-Agent: ${typeof navigator !== 'undefined' ? navigator.userAgent : ''}\n\nBitte beschreiben Sie den Fehler:\n`,
   )
   const mailHref = `mailto:${OFFER_BETA_REPORT_EMAIL}?subject=${subject}&body=${body}`
 
@@ -15,8 +15,7 @@ export function OfferBetaBanner({ step }: { step: 1 | 2 }) {
       className="rounded-xl border-2 border-amber-400/50 bg-amber-500/15 px-3 py-2.5 text-sm text-amber-50"
       role="status"
     >
-      <p className="font-semibold tracking-tight">Beta – Testversion</p>
-      <p className="text-xs text-amber-100/90">Fehler sind möglich</p>
+      <p className="font-semibold tracking-tight">Beta – Testversion, Fehler möglich</p>
       <a
         href={mailHref}
         className="mt-2 inline-flex min-h-12 items-center text-sm font-medium text-cyan-200 underline underline-offset-2"

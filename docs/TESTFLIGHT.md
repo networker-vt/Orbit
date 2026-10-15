@@ -179,7 +179,8 @@ Dieselbe App lässt sich lokal archivieren. Der Actions-Weg oben ersetzt das, we
 - **General:** Display Name `Allda`. Version an `package.json` halten (aktuell 2.9.1). **Build** bei jedem Upload um 1 erhöhen. Gleicher Build darf nicht zweimal hochgeladen werden. Der Actions-Lauf setzt die Build-Nummer selbst.
 - **Product → Archive**. Im Organizer: **Distribute App → App Store Connect → Upload**.
 - [App Store Connect](https://appstoreconnect.apple.com/): App anlegen (Bundle-ID oben), dann **TestFlight → Internal Testing**. Interne Tester sind das Team; kein Beta-Review.
-- `Info.plist`: `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription` (Fotos lesen — Parkmerke und Uploads), `NSFaceIDUsageDescription`, `NSLocationWhenInUseUsageDescription`. Die App schreibt keine Fotos in die Mediathek, deshalb kein `NSPhotoLibraryAddUsageDescription`. Kein Mikrofon, kein Tracking.
+- `Info.plist`: `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription` (Fotos lesen — Parkmerke und Uploads), `NSFaceIDUsageDescription`, `NSLocationWhenInUseUsageDescription` (**„Allda nutzt deinen Standort …“**). Die App schreibt keine Fotos in die Mediathek, deshalb kein `NSPhotoLibraryAddUsageDescription`. Kein Mikrofon, kein Tracking.
+- **App Privacy (App Store Connect):** unter Data Types mindestens **Kamera** und **Standort** (Location — When In Use) neben den übrigen zutreffenden Typen auflisten; Texte entsprechen den `Info.plist`-Strings.
 - Store-Text: Marktplatz. Keine ORB-, Token- oder Krypto-Claims.
 - Kein Play Store in diesem Stand. `npm run build` bleibt der Pages-Build.
 
@@ -209,7 +210,8 @@ The same app can be archived locally. The Actions path above is the one that doe
 - **General:** display name Allda. Keep the marketing version aligned with `package.json` (currently 2.9.1). Bump **Build** by 1 on every manual upload. The Actions run picks the build number itself.
 - **Product → Archive**, then Organizer → **Distribute App → App Store Connect → Upload**.
 - In App Store Connect, create the app with that bundle id, then **TestFlight → Internal Testing**.
-- `Info.plist` has `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription` (read photos for Parkmerke and uploads), `NSFaceIDUsageDescription`, and `NSLocationWhenInUseUsageDescription`. The app does not save photos into the library, so there is no `NSPhotoLibraryAddUsageDescription`. No microphone and no tracking usage string.
+- `Info.plist` has `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription` (read photos for Parkmerke and uploads), `NSFaceIDUsageDescription`, and `NSLocationWhenInUseUsageDescription` (**“Allda nutzt deinen Standort …”**). The app does not save photos into the library, so there is no `NSPhotoLibraryAddUsageDescription`. No microphone and no tracking usage string.
+- **App Privacy (App Store Connect):** list at least **Camera** and **Location** (When In Use) next to other applicable types; copy matches the `Info.plist` strings.
 - Store copy is a marketplace. No ORB, token, or crypto claims.
 - No Play Store in this change. `npm run build` is still the GitHub Pages build.
 

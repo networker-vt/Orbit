@@ -182,5 +182,29 @@ export function buildFixtureInvoices() {
         gross: 1594.6,
       }),
     },
+    {
+      // öffentlicher Auftraggeber mit Leitweg-ID (XRechnung BT-10)
+      name: 'fixture-4-public-leitweg',
+      invoice: shell({
+        id: 'RE-DEMO-2026-004',
+        issue: '2026-03-10',
+        due: '2026-03-24',
+        buyerRef: '991-12345-67',
+        period: { 'cbc:StartDate': '2026-03-03', 'cbc:EndDate': '2026-03-04' },
+        seller,
+        buyer: {
+          name: 'Demo Stadtverwaltung Musterstadt',
+          street: 'Rathausplatz 1',
+          city: 'Musterstadt',
+          zip: '12345',
+          email: 'rechnungseingang@demo-kommune.example',
+        },
+        iban: 'DE89370400440532013000',
+        lines: [line(1, 4, 'HUR', 'Tontechnik Betreuung', 75, 19), line(2, 2, 'H87', 'Funkmikrofon', 40, 19)],
+        net: 380,
+        tax: 72.2,
+        gross: 452.2,
+      }),
+    },
   ]
 }

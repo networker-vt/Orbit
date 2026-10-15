@@ -51,8 +51,8 @@ function fixtureFiles() {
 
 async function main() {
   const files = fixtureFiles()
-  if (files.length !== 3) {
-    console.error(`Expected 3 fixture-*.xml files, found ${files.length}`)
+  if (files.length !== 4) {
+    console.error(`Expected 4 fixture-*.xml files, found ${files.length}`)
     process.exit(1)
   }
   const { jar, configDir } = await ensureTools()

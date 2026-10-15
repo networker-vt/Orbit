@@ -26,6 +26,7 @@ export const DEMO_BUYER: InvoiceDraft['buyer'] = {
   contactPhone: '+49 211 0000000',
 }
 
+/** Demo draft for tests — production UI uses Firmenprofil + allocateInvoiceNumber. */
 export function defaultInvoiceDraft(): InvoiceDraft {
   const today = new Date()
   const issue = today.toISOString().slice(0, 10)
@@ -36,7 +37,14 @@ export function defaultInvoiceDraft(): InvoiceDraft {
     dueDate: due,
     buyerReference: 'PO-DEMO-2026',
     iban: 'DE89370400440532013000',
+    bic: 'COBADEFFXXX',
     seller: { ...DEMO_SELLER },
     buyer: { ...DEMO_BUYER },
+    buyerIsPrivatePerson: false,
+    bauGrundstueckLeistung: false,
+    kleinunternehmer: false,
+    customerId: null,
+    publicBuyer: false,
+    leitwegId: '',
   }
 }

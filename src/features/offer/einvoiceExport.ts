@@ -1,6 +1,8 @@
 import { buildEInvoiceUbl } from './einvoiceMapper'
-import type { InvoiceDraft, OfferLineItem, StoredOffer } from './types'
-import { lineTotals } from './ustg14'
+import { giroCodeFromInvoice, renderGiroCodePng } from './giroCode'
+import type { CompanyProfile, InvoiceDraft, OfferLineItem, StoredOffer } from './types'
+import { KLEINUNTERNEHMER_HINT } from './types'
+import { lineTotals, retentionNoteFor, taxBreakdown } from './ustg14'
 
 const silentLogger = { log: () => {}, warn: () => {}, error: () => {} }
 
@@ -20,6 +22,7 @@ export async function exportZugferdPdf(
   offer: StoredOffer,
   invoice: InvoiceDraft,
   lines: OfferLineItem[],
+  profile: CompanyProfile | null = null,
 ): Promise<Uint8Array> {
   const [{ InvoiceService }, { PDFDocument, StandardFonts }] = await Promise.all([
     import('@e-invoice-eu/core'),
@@ -30,15 +33,36 @@ export async function exportZugferdPdf(
   const page = doc.addPage()
   const font = await doc.embedFont(StandardFonts.Helvetica)
   const { net, tax, gross } = lineTotals(lines)
-  page.drawText(`Rechnung ${invoice.invoiceNumber}`, { x: 40, y: 780, size: 16, font })
-  page.drawText(`${invoice.seller.name} → ${invoice.buyer.name}`, { x: 40, y: 760, size: 10, font })
-  page.drawText(`Netto ${net.toFixed(2)} EUR · USt ${tax.toFixed(2)} EUR · Brutto ${gross.toFixed(2)} EUR`, {
-    x: 40,
-    y: 740,
-    size: 10,
-    font,
-  })
-  page.drawText('ZUGFeRD / Factur-X ( eingebettete XRechnung-XML )', { x: 40, y: 720, size: 9, font })
+  const breakdown = taxBreakdown(lines)
+  let y = 780
+  const line = (text: string, size = 10) => {
+    page.drawText(text.slice(0, 90), { x: 40, y, size, font })
+    y -= size + 4
+  }
+  line(`Rechnung ${invoice.invoiceNumber}`, 16)
+  line(`${invoice.seller.name} → ${invoice.buyer.name}`)
+  line(`Leistungszeitraum: ${offer.servicePeriodStart} – ${offer.servicePeriodEnd}`)
+  line(`Netto ${net.toFixed(2)} EUR · USt ${tax.toFixed(2)} EUR · Brutto ${gross.toFixed(2)} EUR`)
+  for (const row of breakdown) {
+    line(`Entgelt ${row.rate}%: ${row.net.toFixed(2)} EUR · Steuer: ${row.tax.toFixed(2)} EUR`)
+  }
+  if (invoice.kleinunternehmer) line(KLEINUNTERNEHMER_HINT, 9)
+  const retention = retentionNoteFor(invoice)
+  if (retention) line(retention, 9)
+  line('ZUGFeRD / Factur-X (eingebettete XRechnung-XML)', 9)
+
+  // GiroCode (EPC-QR): IBAN from own profile, amount = invoice total, purpose = invoice number.
+  // No QR only if amount is 0 €. Kleinunternehmer get QR (amount without USt). QR lib dynamic-import only.
+  const epc = giroCodeFromInvoice(invoice, gross, profile)
+  if (epc) {
+    const png = await renderGiroCodePng(epc, 140)
+    if (png) {
+      const qrImage = await doc.embedPng(png)
+      page.drawImage(qrImage, { x: 400, y: 620, width: 120, height: 120 })
+      page.drawText('GiroCode', { x: 420, y: 605, size: 9, font })
+    }
+  }
+
   const pdfBytes = await doc.save()
   const svc = new InvoiceService(silentLogger)
   const out = await svc.generate(payload as never, {

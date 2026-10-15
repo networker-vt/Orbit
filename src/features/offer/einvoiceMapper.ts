@@ -1,5 +1,6 @@
 import type { InvoiceDraft, OfferLineItem, StoredOffer } from './types'
-import { lineTotals } from './ustg14'
+import { KLEINUNTERNEHMER_HINT, RETENTION_NOTE_PRIVATE_BAU } from './types'
+import { lineTotals, needsRetentionNote, taxBreakdown } from './ustg14'
 
 /** UBL invoice object for @e-invoice-eu/core (XRechnung / Factur-X). */
 export type EInvoiceUblPayload = {
@@ -10,8 +11,8 @@ function money(n: number): string {
   return n.toFixed(2)
 }
 
-function vatCategory(rate: number): string {
-  if (rate === 0) return 'Z'
+function vatCategory(rate: number, kleinunternehmer: boolean): string {
+  if (kleinunternehmer || rate === 0) return 'Z'
   return 'S'
 }
 
@@ -21,6 +22,13 @@ function sellerTaxScheme(invoice: InvoiceDraft) {
   return [{ 'cbc:CompanyID': id, 'cac:TaxScheme': { 'cbc:ID': 'VAT' } }]
 }
 
+function documentNotes(offer: StoredOffer, invoice: InvoiceDraft): string[] {
+  const notes = [`Angebot: ${offer.title}`]
+  if (invoice.kleinunternehmer) notes.push(KLEINUNTERNEHMER_HINT)
+  if (needsRetentionNote(invoice)) notes.push(RETENTION_NOTE_PRIVATE_BAU)
+  return notes
+}
+
 export function buildEInvoiceUbl(
   offer: StoredOffer,
   invoice: InvoiceDraft,
@@ -28,31 +36,26 @@ export function buildEInvoiceUbl(
 ): EInvoiceUblPayload {
   const active = lines.filter((l) => l.confirmed)
   const { net, tax, gross } = lineTotals(active)
+  const breakdown = taxBreakdown(active)
 
-  const taxByRate = new Map<number, { taxable: number; tax: number }>()
-  for (const line of active) {
-    const rate = line.taxRate ?? 0
-    const lineNet = line.quantity * line.unitPriceNet
-    const prev = taxByRate.get(rate) ?? { taxable: 0, tax: 0 }
-    prev.taxable += lineNet
-    prev.tax += lineNet * (rate / 100)
-    taxByRate.set(rate, prev)
-  }
-
-  const taxSubtotals = [...taxByRate.entries()].map(([rate, bucket]) => ({
-    'cbc:TaxableAmount': money(bucket.taxable),
+  const taxSubtotals = breakdown.map((bucket) => ({
+    'cbc:TaxableAmount': money(bucket.net),
     'cbc:TaxableAmount@currencyID': 'EUR',
     'cbc:TaxAmount': money(bucket.tax),
     'cbc:TaxAmount@currencyID': 'EUR',
     'cac:TaxCategory': {
-      'cbc:ID': vatCategory(rate),
-      'cbc:Percent': String(rate),
+      'cbc:ID': vatCategory(bucket.rate, invoice.kleinunternehmer),
+      'cbc:Percent': String(bucket.rate),
+      ...(invoice.kleinunternehmer
+        ? { 'cbc:TaxExemptionReason': KLEINUNTERNEHMER_HINT }
+        : {}),
       'cac:TaxScheme': { 'cbc:ID': 'VAT' },
     },
   }))
 
   const invoiceLines = active.map((line, index) => {
     const lineNet = line.quantity * line.unitPriceNet
+    const rate = line.taxRate ?? 0
     return {
       'cbc:ID': String(index + 1),
       'cbc:InvoicedQuantity': String(line.quantity),
@@ -62,8 +65,8 @@ export function buildEInvoiceUbl(
       'cac:Item': {
         'cbc:Name': line.description,
         'cac:ClassifiedTaxCategory': {
-          'cbc:ID': vatCategory(line.taxRate ?? 0),
-          'cbc:Percent': String(line.taxRate ?? 0),
+          'cbc:ID': vatCategory(rate, invoice.kleinunternehmer),
+          'cbc:Percent': String(rate),
           'cac:TaxScheme': { 'cbc:ID': 'VAT' },
         },
       },
@@ -74,6 +77,15 @@ export function buildEInvoiceUbl(
     }
   })
 
+  const paymentAccount: Record<string, unknown> = {
+    'cbc:ID': invoice.iban.replace(/\s/g, ''),
+  }
+  if (invoice.bic.trim()) {
+    paymentAccount['cac:FinancialInstitutionBranch'] = {
+      'cbc:ID': invoice.bic.replace(/\s/g, ''),
+    }
+  }
+
   return {
     'ubl:Invoice': {
       'cbc:CustomizationID': 'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0',
@@ -83,15 +95,19 @@ export function buildEInvoiceUbl(
       'cbc:DueDate': invoice.dueDate.trim(),
       'cbc:InvoiceTypeCode': '380',
       'cbc:DocumentCurrencyCode': 'EUR',
-      'cbc:BuyerReference': invoice.buyerReference.trim() || 'Kunde-Referenz',
-      'cbc:Note': [`Angebot: ${offer.title}`],
+      // XRechnung BT-10: Leitweg-ID for public buyers, else buyer reference
+      'cbc:BuyerReference':
+        (invoice.publicBuyer ? invoice.leitwegId.trim() : invoice.buyerReference.trim()) ||
+        invoice.leitwegId.trim() ||
+        'Kunde-Referenz',
+      'cbc:Note': documentNotes(offer, invoice),
       'cac:InvoicePeriod': {
         'cbc:StartDate': offer.servicePeriodStart,
         'cbc:EndDate': offer.servicePeriodEnd,
       },
       'cac:AccountingSupplierParty': {
         'cac:Party': {
-          'cbc:EndpointID': invoice.seller.email.trim(),
+          'cbc:EndpointID': invoice.seller.email.trim() || 'seller@example.invalid',
           'cbc:EndpointID@schemeID': 'EM',
           'cac:PartyName': { 'cbc:Name': invoice.seller.name.trim() },
           'cac:PostalAddress': {
@@ -105,13 +121,13 @@ export function buildEInvoiceUbl(
           'cac:Contact': {
             'cbc:Name': invoice.seller.contactName.trim() || invoice.seller.name.trim(),
             'cbc:Telephone': invoice.seller.contactPhone.trim() || '+49 000 0000000',
-            'cbc:ElectronicMail': invoice.seller.email.trim(),
+            'cbc:ElectronicMail': invoice.seller.email.trim() || 'seller@example.invalid',
           },
         },
       },
       'cac:AccountingCustomerParty': {
         'cac:Party': {
-          'cbc:EndpointID': invoice.buyer.email.trim(),
+          'cbc:EndpointID': invoice.buyer.email.trim() || 'buyer@example.invalid',
           'cbc:EndpointID@schemeID': 'EM',
           'cac:PartyName': { 'cbc:Name': invoice.buyer.name.trim() },
           'cac:PostalAddress': {
@@ -126,7 +142,7 @@ export function buildEInvoiceUbl(
       'cac:PaymentMeans': [
         {
           'cbc:PaymentMeansCode': '58',
-          'cac:PayeeFinancialAccount': { 'cbc:ID': invoice.iban.replace(/\s/g, '') },
+          'cac:PayeeFinancialAccount': paymentAccount,
         },
       ],
       'cac:TaxTotal': [
