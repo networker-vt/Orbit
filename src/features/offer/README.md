@@ -42,8 +42,12 @@ In der App: **`/angebot`** (Kachel unter **Mehr**, wenn Flag an).
 
 ## Ablauf
 
-1. **Schritt 1:** Foto oder **Angebot eintippen** → Mock-KI erzeugt Positionen → jede Position prüfen und bestätigen (Steuersatz manuell wählen). Angebote liegen in **IndexedDB**; ohne Netz wird die KI-Analyse in eine Warteschlange gelegt.
-2. **Schritt 2:** Rechnungsstammdaten (§ 14 UStG) ergänzen → Download **XRechnung-XML** oder **ZUGFeRD-PDF** (kein Versand in der Beta).
+Fortschritt oben: **Firmenprofil → Kunde → Positionen → Angebot → Rechnung** (Sie-Form).
+
+1. **Positionen & Angebot:** Foto oder **Angebot eintippen** → Mock-KI erzeugt Positionen (sichtbar als **„Beispiel, keine echte Auswertung“**) → jede Position prüfen und bestätigen (Steuersatz manuell wählen). Angebote liegen in **IndexedDB**; ohne Netz wird die KI-Analyse in eine Warteschlange gelegt.
+2. **Rechnung:** Rechnungsstammdaten (§ 14 UStG) ergänzen → Download **XRechnung-XML** oder **ZUGFeRD-PDF** (kein Versand in der Beta).
+
+ZIP/PDF/QR-Bibliotheken werden erst bei Klick dynamisch geladen.
 
 ## Import-Grenze
 

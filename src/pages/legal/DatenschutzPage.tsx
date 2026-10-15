@@ -65,6 +65,13 @@ export function DatenschutzPage() {
         der jeweiligen Seite. Allda ruft diese Seiten nicht im Hintergrund auf.
       </p>
 
+      <h2>Angebot & E-Rechnung (Beta)</h2>
+      <p>
+        Angebote, die Sie in der App erstellen, werden nur auf Ihrem Gerät gespeichert. Sie werden
+        nicht an uns oder Dritte übertragen. Wenn Sie die App löschen, werden auch diese Daten
+        gelöscht.
+      </p>
+
       <h2>Was auf dem Gerät liegt</h2>
       <ul>
         <li>Anmelde-Stub, Profil, Inserate, Nachrichten, Favoriten: bis du den Speicher leerst.</li>

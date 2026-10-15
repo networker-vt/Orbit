@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { analyzeOfferInput, getOfferAiMode } from './aiProvider'
 import { OfferBetaBanner, OfferTaxDisclaimer } from './components/OfferBetaBanner'
+import { OfferLegalFooter } from './components/OfferLegalFooter'
+import { OfferProgress } from './components/OfferProgress'
 import { OfferTextInput } from './components/OfferTextInput'
 import { OfferLineEditor } from './components/OfferLineEditor'
 import { downloadBlob, exportXRechnungXml, exportZugferdPdf } from './einvoiceExport'
@@ -187,17 +189,21 @@ function AngebotFlow() {
 
   const totals = offer ? lineTotals(offer.lines) : { net: 0, tax: 0, gross: 0 }
 
+  const progressId = step === 1 ? (offer?.lines.length ? 'lines' : 'offer') : 'invoice'
+
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-5 pb-32 pt-1">
       <OfferBetaBanner step={step} />
 
-      <header className="space-y-1">
+      <header className="space-y-3">
         <h1 className="text-2xl font-bold tracking-tight text-ink">Angebot & E-Rechnung</h1>
+        <OfferProgress current={progressId} />
         <p className="text-sm text-muted">
-          Schritt {step} von 2 · KI-Modus: {getOfferAiMode()} (Testdaten)
+          KI-Modus: {getOfferAiMode()} — Ergebnis ist ein{' '}
+          <span className="font-semibold text-amber-100">Beispiel, keine echte Auswertung</span>.
         </p>
-            {queueCount > 0 && (
-          <p className="text-sm text-amber-200">
+        {queueCount > 0 && (
+          <p className="text-sm text-amber-200" aria-live="polite">
             {queueCount} Analyse(n) warten auf Netz — die Verarbeitung setzt automatisch fort, sobald Sie wieder
             online sind.
           </p>
@@ -207,8 +213,11 @@ function AngebotFlow() {
       {step === 1 && (
         <>
           <section className="space-y-3 rounded-2xl border border-border bg-surface-2 p-4">
-            <h2 className="text-lg font-semibold">Angebot per Foto oder Text</h2>
-            <p className="text-sm text-muted">Bitte keine Personen fotografieren, nur Räume und Technik.</p>
+            <h2 className="text-lg font-semibold">Positionen & Angebot</h2>
+            <p className="text-sm text-muted">
+              Bitte erfassen Sie Ihr Angebot per Foto oder Text. Keine Personen fotografieren, nur Räume und
+              Technik.
+            </p>
             <Button
               type="button"
               variant="secondary"
@@ -242,17 +251,20 @@ function AngebotFlow() {
               <p className="text-xs text-muted">Eingabe: „{lastInputPreview.slice(0, 120)}“</p>
             )}
             {busy && (
-              <p className="flex items-center gap-2 text-sm text-muted">
+              <p className="flex items-center gap-2 text-sm text-muted" aria-live="polite">
                 <Loader2 className="animate-spin" size={16} aria-hidden />
-                KI analysiert…
+                Beispiel-Auswertung läuft…
               </p>
             )}
           </section>
 
           {offer && offer.lines.length > 0 && (
             <section className="space-y-3">
-              <div className="rounded-xl border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-sm font-semibold text-amber-100">
-                Von KI erstellt – bitte prüfen (Art. 50 KI-VO)
+              <div
+                className="rounded-xl border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-sm font-semibold text-amber-100"
+                role="status"
+              >
+                Beispiel, keine echte Auswertung — bitte prüfen (Art. 50 KI-VO)
               </div>
               <h2 className="text-lg font-semibold">{offer.title}</h2>
               <div className="grid gap-3">
@@ -336,11 +348,15 @@ function AngebotFlow() {
                 />
               </label>
             </div>
-            <label className="block text-sm">
+            <label className="block text-sm text-ink">
               IBAN (SEPA)
               <input
-                className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3 text-base"
+                className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3 text-base text-ink"
                 value={invoice.iban}
+                inputMode="text"
+                autoComplete="off"
+                spellCheck={false}
+                aria-label="IBAN"
                 onChange={(e) => setInvoice({ ...invoice, iban: e.target.value })}
               />
             </label>
@@ -349,14 +365,14 @@ function AngebotFlow() {
               {totals.gross.toFixed(2)} €
             </p>
             {ustgIssues.length > 0 && (
-              <ul className="space-y-1 text-sm text-amber-200">
+              <ul className="space-y-1 text-sm text-amber-200" aria-live="polite">
                 {ustgIssues.map((issue) => (
                   <li key={issue.field}>Fehlt: {issue.labelDe}</li>
                 ))}
               </ul>
             )}
             {exportErrors.length > 0 && (
-              <ul className="space-y-1 text-sm text-rose-200">
+              <ul className="space-y-1 text-sm text-rose-200" aria-live="assertive">
                 {exportErrors.map((e) => (
                   <li key={e}>{e}</li>
                 ))}
@@ -366,11 +382,13 @@ function AngebotFlow() {
         </>
       )}
 
+      <OfferLegalFooter />
+
       <div className="fixed inset-x-0 bottom-[calc(var(--nav-height,0px)+env(safe-area-inset-bottom))] z-40 border-t border-border bg-surface-1/95 px-4 py-3 backdrop-blur-md">
         <div className="mx-auto flex max-w-lg flex-col gap-2">
           {step === 1 ? (
             <Button type="button" size="lg" className="min-h-14 w-full" disabled={!allConfirmed} onClick={goStep2}>
-              Weiter zur E-Rechnung
+              Weiter zur Rechnung
             </Button>
           ) : (
             <>
@@ -396,7 +414,7 @@ function AngebotFlow() {
                 ZUGFeRD / Factur-X (PDF) herunterladen
               </Button>
               <Button type="button" variant="ghost" className="min-h-12 w-full" onClick={() => setStep(1)}>
-                Zurück zu Schritt 1
+                Zurück zu Positionen
               </Button>
             </>
           )}
@@ -421,30 +439,54 @@ function PartyFields({
     <fieldset className="space-y-2 rounded-xl border border-border/80 p-3">
       <legend className="px-1 text-sm font-semibold">{label}</legend>
       {(['name', 'street', 'postCode', 'city', 'email'] as const).map((key) => (
-        <label key={key} className="block text-sm capitalize">
-          {key === 'postCode' ? 'PLZ' : key === 'email' ? 'E-Mail' : key === 'name' ? 'Name' : key === 'street' ? 'Straße' : 'Ort'}
+        <label key={key} className="block text-sm text-ink">
+          {key === 'postCode'
+            ? 'PLZ'
+            : key === 'email'
+              ? 'E-Mail'
+              : key === 'name'
+                ? 'Name'
+                : key === 'street'
+                  ? 'Straße'
+                  : 'Ort'}
           <input
-            className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3 text-base"
+            className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3 text-base text-ink"
             value={party[key]}
+            type={key === 'email' ? 'email' : 'text'}
+            inputMode={key === 'postCode' ? 'numeric' : key === 'email' ? 'email' : undefined}
+            autoComplete={
+              key === 'email'
+                ? 'email'
+                : key === 'name'
+                  ? 'organization'
+                  : key === 'street'
+                    ? 'street-address'
+                    : key === 'postCode'
+                      ? 'postal-code'
+                      : 'address-level2'
+            }
             onChange={(e) => onChange({ ...party, [key]: e.target.value })}
           />
         </label>
       ))}
       {showTax && (
         <>
-          <label className="block text-sm">
+          <label className="block text-sm text-ink">
             USt-IdNr.
             <input
-              className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3"
+              className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3 text-ink"
               value={party.vatId}
+              autoComplete="off"
               onChange={(e) => onChange({ ...party, vatId: e.target.value })}
             />
           </label>
-          <label className="block text-sm">
+          <label className="block text-sm text-ink">
             Steuernummer (alternativ)
             <input
-              className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3"
+              className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-3 px-3 text-ink"
               value={party.taxNumber}
+              inputMode="numeric"
+              autoComplete="off"
               onChange={(e) => onChange({ ...party, taxNumber: e.target.value })}
             />
           </label>
