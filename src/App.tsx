@@ -99,6 +99,9 @@ const KalenderPage = lazy(() => import('./pages/KalenderPage').then((m) => ({ de
 const EinkaufszettelPage = lazy(() =>
   import('./pages/EinkaufszettelPage').then((m) => ({ default: m.EinkaufszettelPage })),
 )
+const AngebotPage = lazy(() =>
+  import('./features/offer/AngebotPage').then((m) => ({ default: m.AngebotPage })),
+)
 
 function MessagesToSocial() {
   const { threadId } = useParams()
@@ -178,6 +181,7 @@ function AppReady() {
               <Route path="auth" element={<AuthPage />} />
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="mehr" element={<MehrPage />} />
+              <Route path="angebot" element={<FlagRoute flag="offerBeta"><AngebotPage /></FlagRoute>} />
               <Route path="parkmerke" element={<ParkmerkePage />} />
               <Route path="outfit" element={<OutfitPage />} />
               <Route path="tanken" element={<TankenPage />} />

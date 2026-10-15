@@ -105,6 +105,16 @@ export const FEATURE_FLAG_DEFS = [
     default: true,
     reason: 'Veröffentlichen bleibt an, weil Inhalt melden und die Kennzeichnung Privat/Gewerblich umgesetzt sind.',
   },
+  {
+    id: 'offerBeta',
+    default: false,
+    reason: 'Angebot & E-Rechnung ist eine Beta mit Mock-KI und lokalem Export — standardmäßig aus, bis Tester freigeschaltet sind.',
+  },
+  {
+    id: 'offerDictation',
+    default: false,
+    reason: 'Diktat nutzt die Spracherkennung des Browsers (Audio beim Anbieter). Standard: aus — stattdessen Texteingabe.',
+  },
 ] as const
 
 export type FeatureFlag = (typeof FEATURE_FLAG_DEFS)[number]['id']
@@ -122,6 +132,8 @@ const FLAG_ENV: Record<FeatureFlag, string | undefined> = {
   entdecker: import.meta.env.VITE_FLAG_ENTDECKER,
   interview: import.meta.env.VITE_FLAG_INTERVIEW,
   publishListings: import.meta.env.VITE_FLAG_PUBLISH_LISTINGS,
+  offerBeta: import.meta.env.VITE_FLAG_OFFER_BETA,
+  offerDictation: import.meta.env.VITE_FLAG_OFFER_DICTATION,
 }
 
 const flagDefaults: Record<FeatureFlag, boolean> = Object.fromEntries(

@@ -35,6 +35,7 @@ export type HubTileId =
   | 'jobs'
   | 'einstellung'
   | 'chat'
+  | 'angebot'
 
 export type HubTileDef = {
   id: HubTileId
@@ -79,6 +80,16 @@ export const MEHR_DISCOVER_DEFS: HubTileDef[] = [
   ...HOME_DISCOVER_DEFS.filter((d) => d.id !== 'mehr'),
   { id: 'firma', to: '/firma', labelKey: 'firma.nav', emoji: '🏢', tone: 'slate', surface: 'discover', hide: (c) => c.kids },
   { id: 'marktplatz', to: '/marktplatz', labelKey: 'mehr.market', emoji: '🛒', tone: 'teal', surface: 'discover' },
+  {
+    id: 'angebot',
+    to: '/angebot',
+    labelKey: 'mehr.angebot',
+    emoji: '🧾',
+    tone: 'orange',
+    surface: 'discover',
+    demo: true,
+    hide: (c) => c.kids || !isFlagOn('offerBeta'),
+  },
 ]
 
 /**
