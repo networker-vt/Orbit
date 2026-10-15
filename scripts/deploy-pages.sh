@@ -21,6 +21,9 @@ node scripts/check-public-bundle.mjs
 echo "==> module gzip budget (≤50 KB per module-* chunk)"
 node scripts/check-module-budget.mjs
 
+echo "==> Billighandy bundle limits (precache ≤1.5MB, index ≤150KB gzip, no Node polyfills)"
+node scripts/check-bundle-limits.mjs
+
 echo "==> SPA fallback 404.html (deep links like /orbit/angebot load the SPA)"
 cp dist/index.html dist/404.html
 
