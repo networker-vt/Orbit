@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
-# After `vite build`, copy the SPA shell to directory indexes.
-# GitHub Pages serves `privacy/index.html` as HTTP 200.
-# Copying the same file to `404.html` still responds HTTP 404, which Apple
-# review rejects for Privacy / Support URLs.
+# After `vite build`, copy the SPA shell to directory indexes so deep links
+# return HTTP 200 on GitHub Pages. `404.html` remains only as a fallback.
 #
-# Paths match src/App.tsx: privacy, support, impressum, datenschutz, agb, ranking.
-# `npm run build` stays unchanged; deploy-pages.sh calls this script.
+# Always: willkommen, angebot, impressum, privacy, datenschutz (+ legal extras).
+# Also: every werkzeuge/* segment declared in src/App.tsx (if any).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -19,11 +17,30 @@ if [[ ! -f "$DIST/index.html" ]]; then
   exit 1
 fi
 
-PATHS=(privacy support impressum datenschutz agb ranking)
+PATHS=(willkommen angebot impressum privacy datenschutz support agb ranking)
 
+# Discover werkzeuge/* routes from App.tsx (path="werkzeuge/..." ).
+APP="$ROOT/src/App.tsx"
+if [[ -f "$APP" ]]; then
+  while IFS= read -r seg; do
+    [[ -n "$seg" ]] || continue
+    PATHS+=("$seg")
+  done < <(grep -oE 'path="werkzeuge/[^"]+"' "$APP" | sed -E 's/^path="//;s/"$//' | sort -u || true)
+fi
+
+# De-duplicate while preserving order
+declare -A SEEN=()
+UNIQUE=()
 for seg in "${PATHS[@]}"; do
+  if [[ -z "${SEEN[$seg]+x}" ]]; then
+    SEEN[$seg]=1
+    UNIQUE+=("$seg")
+  fi
+done
+
+for seg in "${UNIQUE[@]}"; do
   mkdir -p "$DIST/$seg"
   cp "$DIST/index.html" "$DIST/$seg/index.html"
 done
 
-echo "emit-pages-legal: ${PATHS[*]}"
+echo "emit-pages-legal: ${UNIQUE[*]}"

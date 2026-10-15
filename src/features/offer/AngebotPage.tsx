@@ -44,10 +44,7 @@ import type {
 } from './types'
 import { KLEINUNTERNEHMER_HINT, RETENTION_NOTE_PRIVATE_BAU } from './types'
 import { lineTotals, taxBreakdown, validateUstg14 } from './ustg14'
-
-/** Clear hint when the e-invoice chunk is not yet in the runtime cache (offline). */
-const OFFLINE_CHUNK_HINT =
-  'Dieses Modul ist noch nicht offline verfügbar. Bitte die App einmal online öffnen (WLAN), dann erneut versuchen.'
+import { isChunkLoadError, OFFLINE_CHUNK_HINT } from '../../lib/offlineChunk'
 
 function lineId() {
   return `ln-${Math.random().toString(36).slice(2, 10)}`
@@ -277,7 +274,7 @@ function AngebotFlow() {
         setStatusMsg('Rechnung exportiert — nur noch lesbar (Änderungen: Storno + neue Rechnung).')
       }
     } catch (err) {
-      if (!navigator.onLine) {
+      if (isChunkLoadError(err) || !navigator.onLine) {
         setExportErrors([OFFLINE_CHUNK_HINT])
       } else {
         setExportErrors([err instanceof Error ? err.message : 'Export fehlgeschlagen'])

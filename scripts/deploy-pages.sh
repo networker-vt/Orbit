@@ -24,10 +24,10 @@ node scripts/check-module-budget.mjs
 echo "==> Billighandy bundle limits (precache ≤1.5MB, index ≤150KB gzip, no Node polyfills)"
 node scripts/check-bundle-limits.mjs
 
-echo "==> SPA fallback 404.html (deep links like /orbit/angebot load the SPA)"
+echo "==> SPA fallback 404.html (unknown paths only)"
 cp dist/index.html dist/404.html
 
-echo "==> legal URLs as directory indexes (HTTP 200)"
+echo "==> deep-link directory indexes (HTTP 200: willkommen/angebot/legal/werkzeuge/*)"
 bash scripts/emit-pages-legal.sh dist
 
 BRANCH="gh-pages"

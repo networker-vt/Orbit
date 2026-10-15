@@ -108,6 +108,7 @@ export default defineConfig({
         // Home + core shell only — heavy tools (e-invoice, PDF, large icons) are runtime-cached.
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,woff2}'],
         globIgnores: [
+          // Heavy tool chunks stay runtime-cached (not in the 1.5 MB precache).
           '**/e-invoice-eu*.js',
           '**/einvoice-*.js',
           '**/pdf-lib*.js',
@@ -115,12 +116,10 @@ export default defineConfig({
           '**/es-*.js',
           '**/jszip*.js',
           '**/jszip.min*.js',
-          '**/AngebotPage-*.js',
           '**/vendor-supabase-*.js',
           '**/lookup-*.js',
           '**/MatchPage-*.js',
-          // seed/demo store is large — runtime-cache after first visit to a data route
-          '**/store-*.js',
+          // AngebotPage + store + otplib are part of the offline shell (precache).
           '**/screenshots/**',
           '**/icons/splash-*.png',
           '**/icons/icon-1024.png',
@@ -177,10 +176,6 @@ export default defineConfig({
           '**/AgbPage-*.js',
           '**/SupportPage-*.js',
           '**/RankingPage-*.js',
-          '**/NewsFeedEditor-*.js',
-          '**/TripOptionCards-*.js',
-          '**/useMessengerTranslate-*.js',
-          '**/vendor-otplib-*.js',
         ],
         runtimeCaching: [
           {
@@ -220,13 +215,12 @@ export default defineConfig({
     },
   },
   build: {
-    // Keep e-invoice / PDF tool chunks off the entry modulepreload list (home first paint).
+    // Keep only heavy tool chunks off the entry modulepreload list (home first paint).
+    // store / otplib / AngebotPage may preload; e-invoice + pdf-lib stay deferred.
     modulePreload: {
       resolveDependencies(_filename, deps) {
         return deps.filter(
-          (dep) =>
-            !/einvoice|e-invoice|pdf-lib|jszip|es-/i.test(dep) &&
-            !/AngebotPage|store-|lookup-|vendor-otplib|vendor-supabase/i.test(dep),
+          (dep) => !/einvoice|e-invoice|pdf-lib|jszip|\/es-/i.test(dep),
         )
       },
     },

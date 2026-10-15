@@ -161,7 +161,7 @@ function AppReady() {
           <Route element={<AppShell />}>
             <Route
               element={
-                <Suspense fallback={<BootScreen />}>
+                <Suspense fallback={<PageChunkFallback />}>
                   <Outlet />
                 </Suspense>
               }
@@ -281,6 +281,18 @@ function BootScreen() {
     <div className="flex min-h-dvh flex-col items-center justify-center gap-3 bg-surface">
       <OrbitWordmarkHero />
       <p className="text-sm text-muted">{t('brand.loading')}</p>
+    </div>
+  )
+}
+
+/** Height-stable fallback for lazy route chunks (avoids footer CLS vs full-viewport BootScreen). */
+function PageChunkFallback() {
+  return (
+    <div
+      className="mx-auto min-h-[32rem] max-w-lg py-12 text-center text-sm text-muted"
+      aria-live="polite"
+    >
+      Wird geladen…
     </div>
   )
 }

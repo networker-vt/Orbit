@@ -1,8 +1,10 @@
 /**
  * Prefetch heavy optional tool chunks into the SW runtime cache after first paint.
- * Wi‑Fi (or unknown ethernet-like) only; respects navigator.connection.saveData.
- * E-invoice (+ later PDF tools) stay out of the precache budget.
+ * Uses the same module graph as export (einvoiceExport) — no @vite-ignore, no bare
+ * package imports in this file. Skips saveData / cellular / slow-2g / 2g.
  */
+
+import { OFFLINE_CHUNK_HINT } from './offlineChunk'
 
 type NetworkInformation = {
   saveData?: boolean
@@ -11,15 +13,19 @@ type NetworkInformation = {
 }
 
 function connection(): NetworkInformation | undefined {
-  const nav = navigator as Navigator & { connection?: NetworkInformation; mozConnection?: NetworkInformation }
+  const nav = navigator as Navigator & {
+    connection?: NetworkInformation
+    mozConnection?: NetworkInformation
+  }
   return nav.connection ?? nav.mozConnection
 }
 
-/** True when background prefetch should run (not on save-Data / cellular if detectable). */
+/** True when background prefetch should run. */
 export function shouldWarmRuntimeCache(): boolean {
   if (typeof navigator === 'undefined') return false
   const c = connection()
   if (c?.saveData) return false
+  if (c?.effectiveType === 'slow-2g' || c?.effectiveType === '2g') return false
   // Prefer Wi‑Fi / ethernet; if the API is missing, still warm (desktop browsers).
   if (c?.type && c.type !== 'wifi' && c.type !== 'ethernet' && c.type !== 'other') {
     return false
@@ -30,8 +36,7 @@ export function shouldWarmRuntimeCache(): boolean {
 let warmed = false
 
 /**
- * Background-import the e-invoice core (and pdf-lib for ZUGFeRD / later tools).
- * `@vite-ignore` keeps these off the entry modulepreload list.
+ * Background-import the e-invoice export module (same dynamic chunks as Export).
  */
 export function warmEInvoiceRuntimeCache(): void {
   if (warmed) return
@@ -39,10 +44,11 @@ export function warmEInvoiceRuntimeCache(): void {
   warmed = true
 
   const run = () => {
-    void import(/* @vite-ignore */ '@e-invoice-eu/core').catch(() => {
-      // Offline or blocked — leave chunk uncached; export UI shows a clear hint.
-    })
-    void import(/* @vite-ignore */ '@cantoo/pdf-lib').catch(() => {})
+    void import('../features/offer/einvoiceExport')
+      .then((m) => m.preloadEInvoiceToolChunks())
+      .catch(() => {
+        // Offline or blocked — leave chunk uncached; export UI shows OFFLINE_CHUNK_HINT.
+      })
   }
 
   if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
@@ -52,6 +58,4 @@ export function warmEInvoiceRuntimeCache(): void {
   }
 }
 
-/** User-facing hint when an optional chunk is missing offline. */
-export const OFFLINE_CHUNK_HINT =
-  'Dieses Modul ist noch nicht offline verfügbar. Bitte die App einmal online öffnen (WLAN), dann erneut versuchen.'
+export { OFFLINE_CHUNK_HINT }

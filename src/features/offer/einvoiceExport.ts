@@ -85,3 +85,8 @@ export function downloadBlob(filename: string, blob: Blob) {
   a.click()
   URL.revokeObjectURL(url)
 }
+
+/** Same dynamic imports as export — used by warmRuntimeCache (no @vite-ignore). */
+export function preloadEInvoiceToolChunks(): Promise<unknown[]> {
+  return Promise.all([import('@e-invoice-eu/core'), import('@cantoo/pdf-lib')])
+}

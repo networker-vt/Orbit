@@ -74,6 +74,8 @@ export function AppShell() {
   const [createOpen, setCreateOpen] = useState(false)
   const [prefs, setPrefs] = useState(getPrefs)
   const [kids, setKids] = useState(isKidsMode)
+  /** Mount footer only after route content has painted (lazy chunk + async gates). */
+  const [footerReady, setFooterReady] = useState(false)
   const theme = themeForPath(location.pathname)
   const matchTo = prefs.completed ? '/match' : '/prefs'
 
@@ -84,6 +86,17 @@ export function AppShell() {
     touchResume(`${location.pathname}${location.hash}`, document.title)
     recordWidgetVisit(location.pathname)
   }, [location.pathname, location.hash, t])
+  useEffect(() => {
+    setFooterReady(false)
+    let alive = true
+    const timer = window.setTimeout(() => {
+      if (alive) setFooterReady(true)
+    }, 500)
+    return () => {
+      alive = false
+      window.clearTimeout(timer)
+    }
+  }, [location.pathname])
 
   const primaryNav = [
     { to: '/', label: t('nav.home'), icon: Home, end: true },
@@ -225,32 +238,38 @@ export function AppShell() {
       </header>
 
       <div className="flex min-w-0 flex-1 flex-col pb-app-chrome">
-        <main id="main-content" tabIndex={-1} className="flex-1 px-4 py-4 outline-none md:px-6 md:py-6 max-md:pb-2">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="min-h-[100dvh] flex-1 px-4 py-4 outline-none md:px-6 md:py-6 max-md:pb-2"
+        >
           <div key={location.pathname + location.search} className="page-enter">
             <OnboardingGate>
               <Outlet />
             </OnboardingGate>
           </div>
-          <footer className="mt-16 space-y-2 border-t border-border/80 pt-6 text-xs text-muted">
-            <nav className="flex flex-wrap gap-x-4 gap-y-2" aria-label="Legal">
-              <Link to="/impressum" className="hover:text-[var(--theme-accent)]">
-                {t('footer.impressum')}
-              </Link>
-              <Link to="/privacy" className="hover:text-[var(--theme-accent)]">
-                {t('footer.privacy')}
-              </Link>
-              <Link to="/support" className="hover:text-[var(--theme-accent)]">
-                {t('footer.support')}
-              </Link>
-              <Link to="/agb" className="hover:text-[var(--theme-accent)]">
-                {t('footer.terms')}
-              </Link>
-              <Link to="/ranking" className="hover:text-[var(--theme-accent)]">
-                Ranking
-              </Link>
-            </nav>
-            <p>{copyrightLine()}</p>
-          </footer>
+          {footerReady ? (
+            <footer className="mt-16 space-y-2 border-t border-border/80 pt-6 text-xs text-muted">
+              <nav className="flex flex-wrap gap-x-4 gap-y-2" aria-label="Legal">
+                <Link to="/impressum" className="hover:text-[var(--theme-accent)]">
+                  {t('footer.impressum')}
+                </Link>
+                <Link to="/privacy" className="hover:text-[var(--theme-accent)]">
+                  {t('footer.privacy')}
+                </Link>
+                <Link to="/support" className="hover:text-[var(--theme-accent)]">
+                  {t('footer.support')}
+                </Link>
+                <Link to="/agb" className="hover:text-[var(--theme-accent)]">
+                  {t('footer.terms')}
+                </Link>
+                <Link to="/ranking" className="hover:text-[var(--theme-accent)]">
+                  Ranking
+                </Link>
+              </nav>
+              <p>{copyrightLine()}</p>
+            </footer>
+          ) : null}
         </main>
       </div>
 
