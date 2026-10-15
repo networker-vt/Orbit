@@ -108,6 +108,11 @@ const invoice: StoredInvoice = {
   totals: { net: 10, tax: 1.9, gross: 11.9 },
   taxBreakdown: [{ rate: 19, net: 10, tax: 1.9 }],
   retentionNote: null,
+  paymentStatus: 'offen',
+  reminderAt: null,
+  customerId: null,
+  publicBuyer: false,
+  leitwegId: '',
 }
 
 describe('backup export/import', () => {

@@ -43,5 +43,8 @@ export function defaultInvoiceDraft(): InvoiceDraft {
     buyerIsPrivatePerson: false,
     bauGrundstueckLeistung: false,
     kleinunternehmer: false,
+    customerId: null,
+    publicBuyer: false,
+    leitwegId: '',
   }
 }

@@ -93,4 +93,15 @@ npm test
 npm run validate:einvoice
 ```
 
-Fixtures unter `fixtures/einvoice/`. Round-Trip: Export→Import identisch (`backup.test.ts`).
+Fixtures unter `fixtures/einvoice/` (inkl. öffentlicher Auftraggeber mit Leitweg-ID). Round-Trip: Export→Import identisch (`backup.test.ts`).
+
+## Kunden & Leitweg-ID
+
+Kunden anlegen/wiederverwenden. Checkbox **öffentlicher Auftraggeber** → Pflicht **Leitweg-ID** als XRechnung BuyerReference (BT-10); ohne ID kein Export. Hinweise mit Links zu Bund ZRE/OZG-RE bzw. Land/Kommune-Portal — **kein Upload** aus der App.
+
+## Materialliste, Status, GiroCode, Fotos
+
+- Leistungs-/Materialliste mit Festpreisen → Antippen übernimmt Positionen (Steuersatz manuell).
+- Rechnungsstatus: offen / bezahlt / überfällig + lokale Erinnerung (gerätelokal).
+- **GiroCode** (EPC-QR) auf der PDF: IBAN aus Firmenprofil, Betrag = Rechnungsbetrag, Verwendungszweck = Rechnungsnummer. Kein QR **nur bei 0 €**; Kleinunternehmer erhalten den QR normal (Betrag ohne USt). `qrcode` nur per Dynamic Import.
+- Baustellenfotos am Auftrag; erstes Foto: **„Achten Sie auf Personen und Kennzeichen im Bild.“**

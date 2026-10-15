@@ -3,16 +3,20 @@
  * Device-only: company profile, invoices, sequential invoice numbers.
  */
 import type {
+  CatalogItem,
   CompanyProfile,
   InvoiceCounterState,
+  StoredCustomer,
   StoredInvoice,
   StoredOffer,
 } from './types'
 
 const DB_NAME = 'orbit-offers'
-const DB_VERSION = 3
+const DB_VERSION = 4
 const OFFERS = 'offers'
 const INVOICES = 'invoices'
+const CUSTOMERS = 'customers'
+const CATALOG = 'catalog'
 const META = 'meta'
 
 const CONSENT_KEY = 'businessUseBgb14'
@@ -64,6 +68,12 @@ function openDb(): Promise<IDBDatabase> {
       }
       if (!db.objectStoreNames.contains(INVOICES)) {
         db.createObjectStore(INVOICES, { keyPath: 'id' })
+      }
+      if (!db.objectStoreNames.contains(CUSTOMERS)) {
+        db.createObjectStore(CUSTOMERS, { keyPath: 'id' })
+      }
+      if (!db.objectStoreNames.contains(CATALOG)) {
+        db.createObjectStore(CATALOG, { keyPath: 'id' })
       }
       if (!db.objectStoreNames.contains(META)) {
         db.createObjectStore(META)
@@ -274,4 +284,112 @@ export async function cancelInvoice(id: string): Promise<StoredInvoice | null> {
   }
   await saveInvoice(next)
   return next
+}
+
+export function newCustomerId(): string {
+  return `cus-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+export async function saveCustomer(customer: StoredCustomer): Promise<void> {
+  const db = await openDb()
+  const tx = db.transaction(CUSTOMERS, 'readwrite')
+  tx.objectStore(CUSTOMERS).put(customer)
+  await txDone(tx)
+  db.close()
+}
+
+export async function listCustomers(): Promise<StoredCustomer[]> {
+  const db = await openDb()
+  const tx = db.transaction(CUSTOMERS, 'readonly')
+  const rows = await requestDone(tx.objectStore(CUSTOMERS).getAll())
+  await txDone(tx)
+  db.close()
+  return rows.sort((a, b) => a.name.localeCompare(b.name, 'de'))
+}
+
+export async function getCustomer(id: string): Promise<StoredCustomer | null> {
+  const db = await openDb()
+  const tx = db.transaction(CUSTOMERS, 'readonly')
+  const row = await requestDone(tx.objectStore(CUSTOMERS).get(id))
+  await txDone(tx)
+  db.close()
+  return row ?? null
+}
+
+export async function replaceAllCustomers(customers: StoredCustomer[]): Promise<void> {
+  const db = await openDb()
+  const tx = db.transaction(CUSTOMERS, 'readwrite')
+  const store = tx.objectStore(CUSTOMERS)
+  store.clear()
+  for (const c of customers) store.put(c)
+  await txDone(tx)
+  db.close()
+}
+
+export async function saveCatalogItem(item: CatalogItem): Promise<void> {
+  const db = await openDb()
+  const tx = db.transaction(CATALOG, 'readwrite')
+  tx.objectStore(CATALOG).put(item)
+  await txDone(tx)
+  db.close()
+}
+
+export async function listCatalogItems(): Promise<CatalogItem[]> {
+  const db = await openDb()
+  const tx = db.transaction(CATALOG, 'readonly')
+  const rows = await requestDone(tx.objectStore(CATALOG).getAll())
+  await txDone(tx)
+  db.close()
+  return rows.sort((a, b) => a.label.localeCompare(b.label, 'de'))
+}
+
+export async function replaceAllCatalogItems(items: CatalogItem[]): Promise<void> {
+  const db = await openDb()
+  const tx = db.transaction(CATALOG, 'readwrite')
+  const store = tx.objectStore(CATALOG)
+  store.clear()
+  for (const item of items) store.put(item)
+  await txDone(tx)
+  db.close()
+}
+
+export async function ensureDefaultCatalog(): Promise<CatalogItem[]> {
+  const existing = await listCatalogItems()
+  if (existing.length > 0) return existing
+  const defaults: CatalogItem[] = [
+    {
+      id: 'cat-led-par',
+      label: 'LED-PAR Scheinwerfer',
+      unit: 'Stück',
+      unitCode: 'H87',
+      unitPriceNet: 18.5,
+      defaultTaxRate: null,
+    },
+    {
+      id: 'cat-montage',
+      label: 'Montage Traversen',
+      unit: 'Std',
+      unitCode: 'HUR',
+      unitPriceNet: 65,
+      defaultTaxRate: null,
+    },
+    {
+      id: 'cat-kabel',
+      label: 'DMX-Kabel 10 m',
+      unit: 'Stück',
+      unitCode: 'H87',
+      unitPriceNet: 12,
+      defaultTaxRate: null,
+    },
+    {
+      id: 'cat-podest',
+      label: 'Bühnenpodest-Paket',
+      unit: 'Pauschale',
+      unitCode: 'C62',
+      unitPriceNet: 890,
+      defaultTaxRate: null,
+    },
+  ]
+  for (const item of defaults) await saveCatalogItem(item)
+  return defaults
 }
